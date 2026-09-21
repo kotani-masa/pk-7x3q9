@@ -150,10 +150,10 @@ function openLog(){const o=$('#ov'),z=document.createElement('div'),b=document.c
 let ACTN=0;function act(fn,re){ACTN++;HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();render();re&&re()}
 const draw1=p=>{if(p.deck.length){p.hand.push(p.deck.shift());return 1}};
 function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:c.img,t:c.t})));
- p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
+ p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.revEv=undefined;G.revN=0;REVSEEN=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
 function find(p,u){for(const k of['hand','deck','side','trash']){const i=p[k].findIndex(c=>c.u===u);if(i>=0)return p[k].splice(i,1)[0]}
  for(const k in p.piles){const i=p.piles[k].findIndex(c=>c.u===u);if(i>=0)return p.piles[k].splice(i,1)[0]}}
-function mv(u,d){const p=me(),c=find(p,u);if(!c)return;
+function mv(u,d){const p=me(),wd=d==='hand'&&p.deck.some(x=>x.u===u),c=find(p,u);if(!c)return;if(wd)onSearch(P.indexOf(p),c);
  if(['hand','deckB','deckT','trash','stadium'].includes(d)){c.dm=0;c.sh=0;c.na=0;c.nr=0;c.cf=0}
  if(d==='hand')p.hand.push(c);else if(d==='deckB')p.deck.push(c);else if(d==='deckT')p.deck.unshift(c);else if(d==='trash')p.trash.push(c);
  else if(d==='stadium'){P.forEach(x=>x.trash.push(...x.piles.stadium.splice(0)));p.piles.stadium.push(c)}
@@ -592,7 +592,7 @@ function finishSetup(){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){cur=
  const fi=(G.fp!==undefined&&P[G.fp]&&P[G.fp].phase==='wait')?G.fp:P.findIndex(x=>x.phase==='wait');if(fi<0)return;
  if(P[0].phase==='wait'&&P[1].phase==='wait'){const a=P[0].mull||0,b=P[1].mull||0,n=Math.abs(a-b);
   if(n){const w=a<b?0:1;for(let i=0;i<n;i++)draw1(P[w]);log(`P${w+1}は、相手のマリガン差${n}回ぶん、${n}枚引きました`)}}
- P.forEach(x=>{if(x.phase==='wait')x.phase='play'});log('バトル場・ベンチのポケモンを一斉に表にしました');G.turn=1;G.act=fi;cur=fi;draw1(P[fi]);log(`バトルスタート！先攻P${fi+1}：1枚引きました`);banner('バトルスタート！')}
+ P.forEach(x=>{if(x.phase==='wait')x.phase='play'});NOFLY=1;log('バトル場・ベンチのポケモンを一斉に表にしました');G.turn=1;G.act=fi;cur=fi;draw1(P[fi]);log(`バトルスタート！先攻P${fi+1}：1枚引きました`);banner('バトルスタート！')}
 /* ---------- モーション ---------- */
 let HOLD=0;const holdList=()=>{$('#ov').className='';$('#hold').style.display='block';HOLD=1};
 $('#hold').onclick=()=>{$('#ov').className='on';$('#hold').style.display='none';HOLD=0};
@@ -616,19 +616,20 @@ function dnum(r,t,h,el){const g=document.createElement('div');g.className='dn'+(
   const f=document.createElement('div');f.style.cssText='position:absolute;inset:0;background:#f00;opacity:.55;z-index:9;pointer-events:none';el.append(f);A(f,[{opacity:.6},{opacity:0}],{duration:500},()=>f.remove())}}
 function banner(t){const b=document.createElement('div');b.className='bn';b.textContent=t;document.body.append(b);
  A(b,[{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.05)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.75},{opacity:0,transform:'translate(-50%,-70%) scale(1)'}],{duration:1500,easing:'ease-out'},()=>b.remove())}
-function animate(pv,hc,sd){const CI={},LOC={};
+function animate(pv,hc,sd){if(NOFLY){NOFLY=0;return}const CI={},LOC={};
  P.forEach((p,i)=>{[...p.hand,...p.trash.slice(-1),...Object.values(p.piles).map(lastOf)].forEach(c=>c&&(CI[c.u]=c));for(const k in p.piles)p.piles[k].slice(0,-1).forEach(c=>{CI[c.u]=c;LOC[c.u]=[i,k]})});
  const nw=snapDom().m;let d=0;
  for(const u in nw){const n=nw[u],c=CI[u],el=document.querySelector(`#mat [data-u="${u}"]`);if(!c||!el)continue;let o=pv.m[u];
   if(DROPR&&DROPR.u===u)o={...(o||{a:'hand'}),r:DROPR.r};
   if(o){if(n.dm>o.dm)dnum(n.r,'-'+(n.dm-o.dm),0,el);else if(n.dm<o.dm&&o.a==='pile'&&n.a==='pile')dnum(n.r,'+'+(o.dm-n.dm),1);
    if(o.a==='hand'&&n.a==='hand')continue;if(Math.abs(o.r.left-n.r.left)+Math.abs(o.r.top-n.r.top)<6)continue;hideFly(el,cardH(c),o.r,n.r,d++)}
-  else if(n.a==='hand'&&pv.z[n.p]){let src=pv.z[n.p];if(sd[n.p]>0&&pv.s[n.p]){sd[n.p]--;src=pv.s[n.p]}hideFly(el,back(),src,n.r,d++)}}
+  else if(n.a==='hand'&&pv.z[n.p]){let src=pv.z[n.p];if(sd[n.p]>0&&pv.s[n.p]){sd[n.p]--;src=pv.s[n.p]}hideFly(el,back(),src,n.r,d++)}
+  else if(MP()&&+n.p===1-VW()&&n.a!=='hand'&&oppFly(el,c,n,pv,hc,d))d++}
  for(const u in pv.m){if(nw[u]||pv.m[u].a!=='hand'||!LOC[u])continue;const[i,k]=LOC[u],s=document.querySelector(`#mat [data-a="pile"][data-p="${i}"][data-k="${k}"]`);if(s)fly(cardH(CI[u]),pv.m[u].r,s.getBoundingClientRect(),{fade:1,delay:d++*90})}
- const t=1-VW(),oh=document.querySelector('#mat .oh');for(let j=0;j<Math.min(3,hc[t]-LASTHC[t]);j++)if(oh&&pv.z[t]){const b=oh.getBoundingClientRect(),src=(sd[t]>0&&pv.s[t])?(sd[t]--,pv.s[t]):pv.z[t];fly(back(),src,{left:b.left+b.width/2-20,top:b.top,width:40,height:56},{delay:j*110,fade:1})}
- DROPR=null}
+ const t=1-VW(),oh=document.querySelector('#mat .oh');for(let j=0;j<Math.min(3,hc[t]-LASTHC[t]);j++)if(oh&&pv.z[t]&&!revPending(t)){const b=oh.getBoundingClientRect(),src=(sd[t]>0&&pv.s[t])?(sd[t]--,pv.s[t]):pv.z[t];fly(back(),src,{left:b.left+b.width/2-20,top:b.top,width:40,height:56},{delay:j*110,fade:1})}
+ oppAttachFly(pv,hc,d);DROPR=null}
 function render(){const hs=$('.hand'),sc=hs?hs.scrollLeft:0,pv=snapDom(),c0=VW();render0();const h2=$('.hand');if(h2)h2.scrollLeft=sc;
- const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;netSend()}
+ const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;LS=snapLoc();revPlay();netSend()}
 async function turnSwitch(){if(G.over)return;act(()=>{const a0=G.act===undefined?cur:G.act,nx=P[1-a0].phase==='play'?1-a0:a0;G.act=nx;G.turn++;G.drawn=1;cur=nx});
  const lb=G.turn%2?'先攻'+(G.turn+1)/2:'後攻'+G.turn/2;banner(`${lb}ターン ｜ P${cur+1}の番`);await sleep(1100);
  act(()=>{if(!draw1(me())){me().dko=1;log(`P${cur+1}は山札が0枚で引けません`)}else log(`${lb}ターン：P${cur+1}が1枚引きました`)});judge()}
@@ -642,7 +643,7 @@ addEventListener('resize',()=>{LASTCUR=-1;render()});
    ・未対応デッキは ai/legacy_cpu.js（旧アルゴリズム）にフォールバック */
 const isBas=c=>c.t==='pke'&&(!mi(c)||stageOf(c)==='たね');
 const AIR=()=>(typeof window!=='undefined'&&window.CPUAI)||null;
-const CPUX={ctl:[null,null],type:['',''],opt:[{},{}],err:'',sh:[null,null],sent:[null,null]};   // sent: AIに送信済みのカードデータ(差分だけ送る)
+const CPUX={ctl:[null,null],type:['',''],opt:[{},{}],err:'',sh:[null,null],sent:[null,null],kn:[[],[]],rvn:0};   // kn: 各プレイヤーが山札から手札に加えた(＝相手に公開された)カードのu   // sent: AIに送信済みのカードデータ(差分だけ送る)
 const cj=o=>{const r=AIR();return r&&r.__marshal?o:JSON.parse(JSON.stringify(o))};   // 橋渡し側でJSON化する環境(ヘッドレス)では二重に複製しない
 const NKC={},mkey=c=>{const k=NKC[c.name]||(NKC[c.name]=nk(c.name));return VARS[k]?k+'#'+VMAP[c.id]:k},PUBC={};
 const unitsL=pl=>ens(pl).flatMap(c=>unitsOf(c,lastOf(pl)));
@@ -661,7 +662,7 @@ function cpuView(i,mode){const p=P[i],o=P[1-i],T=G.turn,cd={};
   stadium:stadName()?{name:stadName(),own:P[i].piles.stadium.length?i:1-i}:null,
   fl:{sup:G.sup===T,eat:G.eat===T,stp:G.stp===T,atk:G.atk===T,noGoods:G.noGoods===T,plus30:G.plus30===T,
    abU:[...p.hand,...OWN(p).map(k=>lastOf(p.piles[k]))].filter(c=>G.ab[c.u]===T).map(c=>c.u),nm:Object.keys(G.nm).filter(k=>G.nm[k]===T)}};
- if(mode!=='setup'){v.opp={handN:o.hand.length,deckN:o.deck.length,prizeN:o.side.length,stage:o.piles.staging.map(cc),trash:o.trash.map(cc),board:bd(o),bm:benchMax(1-i),koTurn:o.koTurn,mull:o.mull||0};
+ if(mode!=='setup'){v.opp={handN:o.hand.length,deckN:o.deck.length,prizeN:o.side.length,stage:o.piles.staging.map(cc),known:o.hand.filter(c=>CPUX.kn[1-i].includes(c.u)).map(c=>c.name),trash:o.trash.map(cc),board:bd(o),bm:benchMax(1-i),koTurn:o.koTurn,mull:o.mull||0};
   const sh=CPUX.sh[i];v.pz=[];if(sh){v.pz=p.hand.filter(c=>sh.has(c.u)).map(c=>c.name);CPUX.sh[i]=new Set(p.side.map(c=>c.u))}}
  if(mode==='turn'){const at=lastOf(p.piles.battle),M=at&&mi(at),ks=OWN(p),bk=ks.filter(k=>k!=='battle'),lg={evo:[],bench:[],att:{},stad:[],abil:[],habs:[],sup:T!==1&&G.sup!==T,goods:G.noGoods!==T,retreat:null,atk:[],room:room(p)};
   for(const c of p.hand){const m=mi(c);
@@ -708,7 +709,7 @@ async function cpuTurn(i){const c=CPUX.ctl[i];cur=i;
   const a=c.decide(cj(cpuView(i,'turn')));if(!a||a.t==='end')break;
   if(a.t==='attack'){const m=mi(lastOf(p.piles.battle)),at=m&&m.at&&m.at.find(x=>x.n===a.n);if(at){await sleep(CPU.d*.6);await useAttack(at);if(G.over||G.act!==i)return}break}
   const b4=ACTN;CPUX.err='';try{await cpuDo(i,a)}catch(e){console.error(e);log('CPUでエラー：'+e.message)}
-  await sleep(0);c.result&&c.result(a,ACTN>b4,CPUX.err);await sleep(CPU.d*.8)}
+  await sleep(0);c.result&&c.result(a,ACTN>b4,CPUX.err);await sleep(CPU.d*.8);if(G.revEv&&G.revEv.n!==CPUX.rvn){CPUX.rvn=G.revEv.n;await sleep(CPU.d*.9)}}
  if(!G.over&&G.act===i){await sleep(CPU.d*.5);await turnSwitch()}}
 async function cpuSetup(i){const p=P[i],c=CPUX.ctl[i];cur=i;if(!c&&typeof legacySetup==='function')return legacySetup(i);await sleep(CPU.d);
  for(let g=0;g<12;g++){const bs=p.hand.filter(isBas);let r=bs.length?(c?c.setup(cj(cpuView(i,'setup'))):{}):{mull:true};
@@ -716,7 +717,7 @@ async function cpuSetup(i){const p=P[i],c=CPUX.ctl[i];cur=i;if(!c&&typeof legacy
   const av=bs.find(x=>x.u===(r&&r.active))||bs[0];act(()=>mv(av.u,'battle'));await sleep(CPU.d*.6);
   for(const u of((r&&r.bench)||[]).slice(0,5)){const x=p.hand.find(y=>y.u===u&&isBas(y));if(x&&freeBench(p)){act(()=>mv(x.u,freeBench(p)));await sleep(CPU.d*.4)}}break}
  act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';CPUX.sh[i]=new Set(p.side.map(x=>x.u));log(`P${i+1}（CPU）がサイドをセットしました`);finishSetup()})}
-function cpuBind(){const R=AIR();[0,1].forEach(i=>{CPUX.type[i]='';CPUX.ctl[i]=null;CPUX.sh[i]=null;CPUX.sent[i]=null;if(R&&P[i].cards.length)CPUX.type[i]=R.detect(P[i].cards.map(c=>({name:c.name,t:c.t,n:c.n})))||''});
+function cpuBind(){const R=AIR();[0,1].forEach(i=>{CPUX.type[i]='';CPUX.ctl[i]=null;CPUX.sh[i]=null;CPUX.sent[i]=null;CPUX.kn=[[],[]];if(R&&P[i].cards.length)CPUX.type[i]=R.detect(P[i].cards.map(c=>({name:c.name,t:c.t,n:c.n})))||''});
  [0,1].forEach(i=>{if(!isCpu(i))return;const o=CPUX.opt[i]||{},ty=CPUX.type[i];if(R&&ty&&!o.legacy)CPUX.ctl[i]=R.create(ty,{me:i,opp:CPUX.type[1-i]||'unknown',...o})})}
 function cpuCheck(){if(!CPU.on||CPU.busy||G.over||TE||NET.on||HOLD||SEL)return;const w=CTRL();if(!isCpu(w))return;const ph=P[w].phase;if(ph!=='setup'&&!(ph==='play'&&G.act===w))return;CPU.busy=1;cur=w;cpuStep(w)}
 async function cpuStep(w){try{if(P[w].phase==='setup')await cpuSetup(w);else await cpuTurn(w)}catch(e){console.error(e);log('CPUでエラー：'+e.message);try{if(G.act===w&&!G.over&&P[w].phase==='play')await turnSwitch()}catch(_){}}finally{CPU.busy=0;render()}}
@@ -767,6 +768,34 @@ function cpuSpdToggle(){CPULV=(CPULV+1)%CPUSPD.length;try{localStorage.cpulv=CPU
    ひとり回し（視点が手番に反転する）／自分の番：ターン終了ボタンの下。CPU・オンライン戦で相手の番：ボタンは出さず、相手盤面寄りの上側に置く */
 const stgSlot=()=>{const i=P.findIndex(x=>x.piles.staging&&x.piles.staging.length);if(i<0)return'';const z=lastOf(P[i].piles.staging),opp=MP()&&i!==VW();
  return`<div class="slot f" style="${at(669,opp?640:868,150,false)};border:0;background:none;outline:0;${opp?'z-index:4':''}" data-a="stg" data-p="${i}" data-u="${z.u}">${cardH(z)}</div>`};
+
+/* ---------- サーチの公開／相手の動作モーション ----------
+   ・デッキからサーチして手札に加えたカードは相手に見せる（公開情報。AIにも view.opp.known として渡す）
+   ・相手（CPU/オンライン）が手札から出したカード・付けたエネルギーは、手札の位置から飛んでいくモーションで見せる */
+let REVSEEN=0,NOFLY=0,LS={loc:{},tr:new Set()};
+const revPending=t=>!!(G.revEv&&G.revEv.n!==REVSEEN&&G.revEv.p===t);
+function onSearch(i,c){CPUX.kn[i].push(c.u);if(!MP()||i===VW())return;const o={name:c.name,t:c.t,img:c.img},e=G.revEv;
+ if(e&&e.n!==REVSEEN&&e.p===i){if(e.cs.length<6)e.cs.push(o)}else G.revEv={n:(G.revN=(G.revN||0)+1),p:i,cs:[o]}}
+function snapLoc(){const loc={},tr=new Set();P.forEach((p,i)=>{for(const k of['battle',...BN])p.piles[k].slice(0,-1).forEach(c=>{loc[i+':'+c.u]=k});p.trash.forEach(c=>tr.add(i+':'+c.u))});return{loc,tr}}
+function revPlay(){const e=G.revEv;if(!e||e.n===REVSEEN)return;REVSEEN=e.n;if(!MP()||e.p===VW()||!CPU.d)return;
+ const mat=$('#mat').getBoundingClientRect(),dk=document.querySelector(`#mat [data-a=deck][data-p="${e.p}"]`),oh=document.querySelector('#mat .oh'),n=e.cs.length,
+  w=Math.min(mat.width*.28,140),h=w*88/63,gap=8,x0=mat.left+(mat.width-(n*w+(n-1)*gap))/2,y0=mat.top+mat.height*.30,dur=Math.max(2000,CPU.d*1.4);
+ const sr=dk?dk.getBoundingClientRect():{left:mat.left+mat.width*.8,top:mat.top+mat.height*.1,width:w*.5},dr=oh?oh.getBoundingClientRect():{left:mat.left+mat.width/2,top:mat.top,width:20};
+ const cap=document.createElement('div');cap.className='bn';cap.style.cssText='font-size:min(3.6vw,18px);padding:6px 14px;top:'+((y0-mat.top)/mat.height*100-6)+'%;z-index:76';cap.textContent=`P${e.p+1}が山札から手札に加えました：${e.cs.map(c=>c.name).join('、')}`;document.body.append(cap);
+ A(cap,[{opacity:0},{opacity:1,offset:.15},{opacity:1,offset:.8},{opacity:0}],{duration:dur},()=>cap.remove());
+ e.cs.forEach((c,j)=>{const x=x0+j*(w+gap),g=document.createElement('div');g.className='fl';g.style.cssText=`left:${x}px;top:${y0}px;width:${w}px;height:${h}px;z-index:75;box-shadow:0 0 12px #000`;g.innerHTML=cardH(c);document.body.append(g);
+  A(g,[{transform:`translate(${sr.left-x}px,${sr.top-y0}px) scale(${(sr.width||w*.5)/w})`,opacity:.9},{transform:'translate(0,0) scale(1)',opacity:1,offset:.22},{transform:'translate(0,0) scale(1)',opacity:1,offset:.78},
+   {transform:`translate(${dr.left+dr.width/2-w*.15-x}px,${dr.top-y0}px) scale(.3)`,opacity:.25}],{duration:dur,delay:j*150,easing:'ease-in-out',fill:'both'},()=>g.remove())})}
+function oppFly(el,c,n,pv,hc,d){const i=+n.p,oh=document.querySelector('#mat .oh');if(!oh)return 0;const r=n.r,ohr=oh.getBoundingClientRect();let src;
+ if(LS.tr.has(i+':'+c.u)){const z=document.querySelector(`#mat [data-a=trash][data-p="${i}"]`);src=z&&z.getBoundingClientRect()}   // トラッシュから出たカード
+ else if(hc[i]<LASTHC[i])src={left:ohr.left+ohr.width/2-r.width/2,top:ohr.top,width:r.width,height:r.height};                       // 手札から出たカード
+ else src=pv.z[i];                                                                                                                    // 山札から出たカード（なかよしポフィン等）
+ if(!src||!src.width)return 0;hideFly(el,cardH(c),src,r,d);return 1}
+function oppAttachFly(pv,hc,d){if(!MP())return;const i=1-VW(),oh=document.querySelector('#mat .oh');if(!oh||!pv.z[i])return;const ohr=oh.getBoundingClientRect();
+ for(const k of['battle',...BN])P[i].piles[k].slice(0,-1).forEach(c=>{if(c.t==='pke'||(i+':'+c.u) in LS.loc)return;
+  const s=document.querySelector(`#mat [data-a=pile][data-p="${i}"][data-k="${k}"]`);if(!s)return;const b=s.getBoundingClientRect(),w=b.width*.8,h=w*88/63;if(!b.width)return;
+  const src=hc[i]<LASTHC[i]?{left:ohr.left+ohr.width/2-w/2,top:ohr.top,width:w,height:h}:pv.z[i];
+  fly(cardH(c),src,{left:b.left+b.width*.1,top:b.top+b.height*.35,width:w,height:h},{fade:1,delay:d++*90})})}
 function surrender(){if(G.over)return;if(!confirm('投了しますか？'))return;const m=MYS();G.over=1;G.win=1-m;log(`P${m+1}が投了。P${2-m}の勝利！`);banner(`P${2-m}の勝利！`);if(NET.on)sendMsg({t:'sur',i:m});render()}
 /* ---------- events ---------- */
 $('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;
