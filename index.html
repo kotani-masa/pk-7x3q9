@@ -108,8 +108,24 @@ html,body{overscroll-behavior:none;overflow:hidden}
 .abx{border-left-width:calc(1.9*var(--u));border-right-width:calc(1.9*var(--u));border-bottom-width:calc(3.2*var(--u))}
 .lbtn{position:absolute;z-index:6;display:flex;flex-direction:column;gap:calc(1.2*var(--u))}
 .lbtn button{height:calc(7.2*var(--u));font-size:calc(2.6*var(--u));padding:0 .2em;white-space:nowrap}
+#ovd{display:none;position:fixed;inset:0;background:#000a;z-index:40;align-items:flex-end;justify-content:center}
+#edsh{height:94vh}
+.er{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #ffffff18}
+.er .eth{flex:0 0 38px;aspect-ratio:63/88}.er .en{flex:1;min-width:0;font-size:14px}.er .en small{display:block;opacity:.75;font-size:11px}
+.er button{flex:0 0 44px;height:40px;padding:0;font-size:20px}.er .ec{flex:0 0 26px;text-align:center;font-weight:700;font-size:16px}
+.er.gone{opacity:.7}
 </style></head><body>
-<div id="mat"></div><div id="ovn"><div class="sheet">
+<div id="mat"></div><div id="ovd"><div class="sheet" id="edsh">
+<div class="bar"><b style="flex:1">デッキ調整（カードの抜き差し）</b><button id="edx" class="big">閉じる</button></div>
+<div class="bar"><input id="edn" placeholder="デッキ名" style="flex:1;min-width:0"><b id="edt" style="font-size:18px"></b></div>
+<div class="bar"><button id="edsv" class="pri">保存</button><button id="edp1">保存してP1に読込</button><button id="edp2">保存してP2に読込</button><button id="edrs" class="sm">元に戻す</button></div>
+<div id="edm" style="font-size:12px;color:#ffd23f;min-height:1.3em"></div>
+<div id="edl"></div>
+<div style="margin:12px 0 4px;font-weight:700">カードを追加（調整用カード＋保存済みデッキのカード）</div>
+<input id="edq" placeholder="カード名で絞り込み" style="width:100%;margin-bottom:6px">
+<div id="edp"></div>
+</div></div>
+<div id="ovn"><div class="sheet">
 <div class="bar"><b style="flex:1">オンライン対戦</b><button id="ncl" class="sm">閉じる</button></div>
 <div id="nst" style="font-size:13px;color:#ffd23f;margin-bottom:6px">未接続。部屋を作る（先攻P1）か、参加する（後攻P2）を選んでください。</div>
 <div id="n0" class="bar"><button id="nhost" class="pri" style="flex:1">部屋を作る（先攻 P1）</button><button id="njoin" style="flex:1">参加する（後攻 P2）</button></div>
@@ -149,11 +165,11 @@ function openLog(){const o=$('#ov'),z=document.createElement('div'),b=document.c
  z.append(b,d);o.append(z);o.className='on';o.onclick=ev=>{if(ev.target===o)closeAll()};setTimeout(()=>{z.scrollTop=z.scrollHeight},0)}
 let ACTN=0;function act(fn,re){ACTN++;HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();render();re&&re()}
 const draw1=p=>{if(p.deck.length){p.hand.push(p.deck.shift());return 1}};
-function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:c.img,t:c.t})));
- p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.revEv=undefined;G.revN=0;REVSEEN=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
+function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:c.img,t:c.t,half:/^伝説の溶岩洞/.test(c.name)?(i%2?'R':'L'):undefined})));
+ p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.b8=0;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.revEv=undefined;G.revN=0;REVSEEN=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
 function find(p,u){for(const k of['hand','deck','side','trash']){const i=p[k].findIndex(c=>c.u===u);if(i>=0)return p[k].splice(i,1)[0]}
  for(const k in p.piles){const i=p.piles[k].findIndex(c=>c.u===u);if(i>=0)return p.piles[k].splice(i,1)[0]}}
-function mv(u,d){const p=me(),wd=d==='hand'&&p.deck.some(x=>x.u===u),c=find(p,u);if(!c)return;if(wd)onSearch(P.indexOf(p),c);
+function mv(u,d,nr){const p=me(),wd=d==='hand'&&p.deck.some(x=>x.u===u),c=find(p,u);if(!c)return;if(wd&&!nr)onSearch(P.indexOf(p),c);   // nr=1：効果文に「相手に見せて」が無いサーチは公開しない
  if(['hand','deckB','deckT','trash','stadium'].includes(d)){c.dm=0;c.sh=0;c.na=0;c.nr=0;c.cf=0}
  if(d==='hand')p.hand.push(c);else if(d==='deckB')p.deck.push(c);else if(d==='deckT')p.deck.unshift(c);else if(d==='trash')p.trash.push(c);
  else if(d==='stadium'){P.forEach(x=>x.trash.push(...x.piles.stadium.splice(0)));p.piles.stadium.push(c)}
@@ -174,17 +190,17 @@ const at=(x,y,w,f)=>{const k=(1/RT())/(2048/922),SC=Math.min(1,k),h=w*88/63/Math
 const PX={battle:[355,855,215],b0:[200,1170,165],b1:[378,1170,165],b2:[556,1170,165],b3:[289,1415,165],b4:[467,1415,165]};
 const PX8={battle:[355,855,215],b0:[146,1170,150],b1:[306,1170,150],b2:[466,1170,150],b3:[626,1170,150],b4:[146,1389,150],b5:[306,1389,150],b6:[466,1389,150],b7:[626,1389,150]};
 /* 特性が今使えない理由（使用済み・同名特性を使用済み・発動条件を満たさない）。使えるなら空文字 */
-function abWhy(t,k,p){const A=(mi(t)||{}).ab;if(!A)return'';if(G.ab[t.u]===G.turn)return'used';if(A.key&&G.nm[A.key]===G.turn)return'key';const b=A.ok&&A.ok({p,o:P[1-P.indexOf(p)],c:t,k});return b||''}
+function abWhy(t,k,p){const A=(mi(t)||{}).ab;if(!A)return'';if(noAb(t))return'noab';if(G.ab[t.u]===G.turn)return'used';if(A.key&&G.nm[A.key]===G.turn)return'key';const b=A.ok&&A.ok({p,o:P[1-P.indexOf(p)],c:t,k});return b||''}
 const abB=(t,i,k)=>{const M=mi(t),A=M&&M.ab;if(i!==VW()||!A||A.passive||A.onBench||P[i].phase!=='play')return'';const w=abWhy(t,k,P[i]);if(w==='used')return'<span class="abx u"></span>';return w?'':'<span class="abx"></span>'};
 const hpOf=pl=>{const h=(mi(lastOf(pl))||{}).hp;return h?h+(stadName()==='ジャミングタワー'?0:100)*pl.slice(0,-1).filter(x=>x.t==='tool'&&/^ヒーローマント/.test(x.name)).length:0};
 const dmB=(t,pl)=>{const h=hpOf(pl),d=t.dm||0;if(!h)return d?`<span class="dm">-${d}</span>`:'';const r=Math.max(0,h-d),pc=Math.max(0,Math.min(100,r/h*100)),c=pc>=50?'g':pc>=20?'y':'r';
  return`<div class="hpb"><i class="${c}" style="width:${pc}%"></i></div><span class="dm ${c}">${r}/${h}</span>`+(t.cf?'<span class="st">混乱</span>':'')};
 function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>x.phase==='setup'||x.phase==='wait'),cn=n=>`<span class="cnt">${n}</span>`;
  const sl=(x,y,w,a,inn)=>o.push(`<div class="slot ${inn?'f':''}" style="${at(x,y,w,f)}" ${a}>${inn}</div>`);
- const L=benchMax(i)===8?PX8:PX;for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
- sl(8,1300,150,`data-a="sidez" data-p="${i}"`,p.side.length?back()+cn(p.side.length):'');
- sl(762,1170,150,`data-a="deck" data-p="${i}"`,p.deck.length?back()+cn(p.deck.length):'');
- sl(775,1465,130,`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
+ const w8=benchMax(i)===8||p.b8,L=w8?PX8:PX;for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
+ sl(w8?-6:8,1300,w8?140:150,`data-a="sidez" data-p="${i}"`,p.side.length?back()+cn(p.side.length):'');
+ sl(w8?782:762,1170,w8?140:150,`data-a="deck" data-p="${i}"`,p.deck.length?back()+cn(p.deck.length):'');
+ sl(w8?792:775,1465,w8?128:130,`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
  o.push(f?`<div class="oh">${p.hand.map(()=>back()).join('')}</div>`:`<div class="hand">${p.hand.map(c=>`<div class="hc" data-a="hand" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div>`);
  o.push(`<div class="hcnt" style="${f?'left:2%;top:.6%':'left:2%;top:81.4%'}">P${i+1} 手札 ${p.hand.length}枚</div>`);if(!f)o.push(`<div class="hbtn" style="left:2%;top:74.4%"><button data-a="hsort">整理</button><button data-a="hall">全手札</button><button class="au${AS?' pri':''}" data-a="hauto">自動整理：${AS?'ON':'OFF'}</button></div>`);return o.join('')}
 function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x.phase==='setup'),tl=G.turn%2?`先攻${(G.turn+1)/2}ターン`:`後攻${G.turn/2}ターン`;
@@ -203,7 +219,7 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  if(NET.on&&P[V].cards.length&&!P[1-V].cards.length&&p.phase==='none')h+=`<div>相手のデッキ待ち</div>`;
  
  return`<div id="hud">${h}<div id="err">${e(ERR)}</div></div><div id="log" data-a="logs" style="position:absolute;z-index:3;color:#111;${at(6,945,340,false)}">${lgH()}</div>`}
-function render0(){applyRatio();const V=VW();if(AS)P.forEach((q,z)=>{if((!MP()||z===MYS())&&q.cards.length&&q.hand.length>1)q.hand=dl(q,q.hand)});if(G.mode==='play'&&!MP()){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0)cur=pd}const si=P[V].piles.stadium.length?V:1-V,st=lastOf(P[si].piles.stadium);
+function render0(){applyRatio();P.forEach((q,z)=>{if(q.phase!=='none'&&benchMax(z)===8)q.b8=1});const V=VW();if(AS)P.forEach((q,z)=>{if((!MP()||z===MYS())&&q.cards.length&&q.hand.length>1)q.hand=dl(q,q.hand)});if(G.mode==='play'&&!MP()){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0)cur=pd}const si=P[V].piles.stadium.length?V:1-V,st=lastOf(P[si].piles.stadium);
  $('#mat').innerHTML=board(1-V,true)+board(V,false)+
  `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`+(CPU.on?`<button data-a="cpuspd">速度：${CPUSPD[CPULV][0]}</button><button data-a="cpusrch">先読み：${CPU.srch?'ON':'OFF'}</button>`:'')):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+stgSlot()+hud();setTimeout(fixBench,0)}
 /* ---------- overlays ---------- */
@@ -253,7 +269,7 @@ function stadMenu(i){const q=P[i],c=lastOf(q.piles.stadium);if(!c)return;
 const BN=['b0','b1','b2','b3','b4','b5','b6','b7'],nk=n=>String(n).replace(/[\s　]/g,''),MON={},mon=(n,o)=>MON[nk(n)]=o,mi=c=>{if(!c)return;const k=nk(c.name);return VARS[k]?MON[k+'#'+VMAP[c.id]]:MON[k]},stageOf=c=>(mi(c)||{}).st||'たね';
 const VARS={'ノコッチ':['HP70｜いれかわる／ぶつかる20','HP60｜かじる10／あなをほる30']};
 let VMAP={};try{VMAP=JSON.parse(localStorage.dvar||'{}')}catch(_){}
-const KSTA=['ゼロの大空洞','ジャミングタワー','危ない廃墟'],TG={pke:'ポケモン',tr:'グッズ',sup:'サポート',sta:'スタジアム',tool:'どうぐ',ene:'エネルギー'};
+const KSTA=['ゼロの大空洞','ジャミングタワー','危ない廃墟','活力の森','伝説の溶岩洞'],TG={pke:'ポケモン',tr:'グッズ',sup:'サポート',sta:'スタジアム',tool:'どうぐ',ene:'エネルギー'};
 function unimpl(c){const n=c.name.replace(/\(ACE SPEC\)$/,'');
  if(c.t==='pke')return!mi(c);if(c.t==='tr'||c.t==='sup')return!(FX[c.name]||FX[n]);if(c.t==='sta')return!KSTA.includes(n);
  if(c.t==='tool')return!/^ヒーローマント/.test(c.name);if(c.t==='ene')return!(/^基本.エネルギー/.test(c.name)||/^ネオアッパー/.test(c.name));return false}
@@ -266,7 +282,8 @@ async function askVars(){for(const p of P)for(const c of p.cards){const v=VARS[n
   VMAP[c.id]=r;try{localStorage.dvar=JSON.stringify(VMAP)}catch(_){}}render()}
 const ens=pl=>pl.filter(x=>x.t==='ene'),etype=c=>{const m=c.name.match(/基本(.)エネルギー/);return m?m[1]:'無'};
 const OWN=p=>['battle',...BN].filter(k=>p.piles[k].length),isBE=x=>x.t==='ene'&&/^基本/.test(x.name),isEx=x=>x.t==='pke'&&/ex$/.test(x.name);
-const unitsOf=(c,top)=>/^ネオアッパーエネルギー/.test(c.name)?(stageOf(top)==='2進化'?['*','*']:['無']):[etype(c)];
+const ownerOf=top=>P.find(x=>Object.values(x.piles).some(q=>q.includes(top))),hasMega=p=>!!p&&['battle',...BN].some(k=>p.piles[k].length&&nk(lastOf(p.piles[k]).name)==='メガニウム'&&!noAb(lastOf(p.piles[k])));
+const unitsOf=(c,top)=>/^ネオアッパーエネルギー/.test(c.name)?(stageOf(top)==='2進化'?['*','*']:['無']):(/^基本草エネルギー/.test(c.name)&&hasMega(ownerOf(top))?['草','草']:[etype(c)]);
 const eunits=pl=>ens(pl).reduce((a,c)=>a+unitsOf(c,lastOf(pl)).length,0);
 const canPay=(cost,pl)=>{const top=lastOf(pl),es=ens(pl).flatMap(c=>unitsOf(c,top));for(const t of cost.filter(x=>x!=='無')){let i=es.indexOf(t);if(i<0)i=es.indexOf('*');if(i<0)return 0;es.splice(i,1)}return es.length>=cost.filter(x=>x==='無').length};
 const isTera=c=>!!(mi(c)||{}).tera,hasTera=p=>['battle',...BN].some(k=>p.piles[k].length&&isTera(lastOf(p.piles[k])));
@@ -375,6 +392,8 @@ function playCard(c,own,inB){const p=me();
   act(()=>{mv(c.u,own);if(c.t==='ene')G.eat=G.turn});if(ATTACHHOOK)ATTACHHOOK(cur,c,own);log(`P${cur+1}が${c.name}を${lastOf(p.piles[own]).name}につけました`)}
  else if(c.t==='sta'){if(!(inB&&!own))return err('盤面にドラッグしてスタジアムを出します');
   if(G.stp===G.turn)return err('スタジアムは自分の番に1枚しか出せません');if(stadName()===c.name)return err('同じ名前のスタジアムは場に出せません');
+  if(c.name==='伝説の溶岩洞'){const oth=p.hand.find(y=>y!==c&&y.name==='伝説の溶岩洞'&&y.half&&y.half!==c.half);if(!oth)return err('伝説の溶岩洞は、左と右の2枚が手札にそろっているときだけ出せます');
+   act(()=>{G.stp=G.turn;P.forEach(x=>x.trash.push(...x.piles.stadium.splice(0)));const a=find(p,oth.u),b=find(p,c.u);p.piles.stadium.push(a,b)});log('伝説の溶岩洞（左・右）をスタジアムに出しました');return (async()=>{await koScan(P[0]);await koScan(P[1])})()}
   act(()=>{G.stp=G.turn;mv(c.u,'stadium')});return (async()=>{await koScan(P[0]);await koScan(P[1])})()}
  else if(inB&&!own){if(c.t==='tr'&&G.noGoods===G.turn)return err('スボミーの効果で、この番はグッズを使えません');if(c.t==='sup'&&G.turn===1)return err('先攻の最初の番はサポートを使えません');if(c.t==='sup'&&G.sup===G.turn)return err('サポートは自分の番に1枚しか使えません');if(FX[c.name])return runFX(c);else{act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn});log(c.name+'を使用（効果は手動で処理してください）')}}
  else err('盤面にドラッグして使います')}
@@ -395,7 +414,7 @@ mon('テラパゴスex',{hp:230,type:'無',rc:2,weak:'闘',tera:1,
   {n:'クラウンオパール',dt:'180',cost:[...'草水雷'],run:async x=>{hit(x,'battle',180);x.c.sh=G.turn+1}}]});
 mon('ファイアローex',{hp:280,type:'無',rc:0,weak:'雷',res:'闘',st:'2進化',
  hab:{n:'エキサイトダイブ',ok:x=>!OWN(x.p).some(k=>{const t=lastOf(x.p.piles[k]);return /^メガ.*ex$/.test(t.name)&&(mi(t)||{}).type==='無'})?'場に無色タイプのメガシンカexがいません':(freeBench(x.p)?null:'ベンチに空きがありません'),run:x=>{mv(x.c.u,freeBench(x.p))}},
- at:[{n:'かぎづめハント',dt:'150',cost:[...'無無'],run:async x=>{hit(x,'battle',150);if(await yn('のぞむなら：山札から好きなカードを2枚まで選び、手札に加えますか？')){const t=await pk('好きなカードを2枚まで選ぶ',x.p.deck,2,0);if(t){t.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck)}}}}]});
+ at:[{n:'かぎづめハント',dt:'150',cost:[...'無無'],run:async x=>{hit(x,'battle',150);if(await yn('のぞむなら：山札から好きなカードを2枚まで選び、手札に加えますか？')){const t=await pk('好きなカードを2枚まで選ぶ',x.p.deck,2,0);if(t){t.forEach(y=>mv(y.u,'hand',1));shuffle(x.p.deck)}}}}]});
 mon('ヒビキのホウオウex',{hp:230,type:'炎',rc:2,weak:'水',
  ab:{n:'こんじきのほのお',ok:x=>!x.p.hand.some(isFireB)?'手札に基本炎エネルギーがありません':(hibiki(x.p).length?null:'ベンチにヒビキのポケモンがいません'),
   run:async x=>{const s=await pk('手札の基本炎エネルギーを2枚まで選ぶ',x.p.hand.filter(isFireB),2,1);if(!s||!s.length)return false;
@@ -422,15 +441,16 @@ mon('パオジアン',{hp:120,type:'水',rc:1,weak:'鋼',
  at:[{n:'アイシクルループ',dt:'120',cost:[...'水無無'],run:async x=>{hit(x,'battle',120);const en=ens(x.p.piles.battle);if(en.length){const s=await pk('手札にもどすエネルギーを1個選択',en,1);if(s&&s[0])mv(s[0].u,'hand')}}}]});
 /* ---- ドラパルト・ヨノワール系ほか ---- */
 const room=p=>BN.slice(0,benchMax(P.indexOf(p))).filter(k=>!p.piles[k].length).length;
-const EVO={'ドロンチ':'ドラメシヤ','ドラパルトex':'ドロンチ','サマヨール':'ヨマワル','ヨノワール':'サマヨール'};
+const EVO={'ドロンチ':'ドラメシヤ','ドラパルトex':'ドロンチ','サマヨール':'ヨマワル','ヨノワール':'サマヨール','カミッチュ':'カジッチュ','カミツオロチex':'カミッチュ','ベイリーフ':'チコリータ','メガニウム':'ベイリーフ'};
 function evoCheck(p,c,k,was){if(!mi(c))return'';const stg=stageOf(c);
  if(was)return stg!=='たね'?'進化ポケモンは、進化元のポケモンに重ねてください':'';
  const t=lastOf(p.piles[k]);if(stg==='たね')return'たねポケモンは、空いている場所に出してください';
  if(p.phase!=='play'||G.turn<=2)return'最初の番には進化できません';
- if(t.pt===G.turn)return'出したばかりのポケモンは進化できません';if(t.ev===G.turn)return'このターンに進化したポケモンは、もう進化できません';
+ const fv=stadName()==='活力の森'&&(mi(t)||{}).type==='草'&&(mi(c)||{}).type==='草'; /* 活力の森：草ポケモン同士なら、出した番・進化した番でも進化できる */
+ if(!fv){if(t.pt===G.turn)return'出したばかりのポケモンは進化できません';if(t.ev===G.turn)return'このターンに進化したポケモンは、もう進化できません'}
  const f=EVO[nk(c.name)];if(f&&nk(t.name)!==f)return`${c.name}は${f}から進化します`;return''}
 const hazard=c=>{if(stadName()==='危ない廃墟'&&stageOf(c)==='たね'&&(mi(c)||{}).type!=='悪')c.dm=(c.dm||0)+20};
-const isRule=y=>/(ex|V|VSTAR|VMAX|GX)$/.test(y.name),BASE2={'ドラパルトex':'ドラメシヤ','ヨノワール':'ヨマワル'};
+const isRule=y=>/(ex|V|VSTAR|VMAX|GX)$/.test(y.name),BASE2={'ドラパルトex':'ドラメシヤ','ヨノワール':'ヨマワル','カミツオロチex':'カジッチュ','メガニウム':'チコリータ'};
 async function spread(x,n){const ks=BN.filter(k=>x.o.piles[k].length);if(!ks.length)return;
  for(let i=0;i<n;i++){const k=await ask(null,ks,x.o,`ダメカンをのせる相手のベンチポケモンを選択（残り${n-i}個）`,1);act(()=>{const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10});await sleep(250)}
  x.msg.push(`ダメカン${n}個を相手のベンチにのせた`)}
@@ -441,7 +461,7 @@ mon('ドラパルトex',{hp:320,type:'龍',rc:1,st:'2進化',tera:1,bnc:1,
   {n:'ファントムダイブ',dt:'200',cost:[...'炎超'],run:async x=>{hit(x,'battle',200);await spread(x,6)}}]});
 mon('ドロンチ',{hp:90,type:'龍',rc:1,st:'1進化',
  ab:{n:'ていさつしれい',run:async x=>{const t2=x.p.deck.slice(0,2);if(!t2.length)return false;const s=await pk('山札の上2枚：手札に加える1枚を選ぶ（残りは山札の下）',t2,1);if(!s||!s.length)return false;
-  mv(s[0].u,'hand');t2.filter(y=>y!==s[0]).forEach(y=>{find(x.p,y.u);x.p.deck.push(y)})}},
+  mv(s[0].u,'hand',1);t2.filter(y=>y!==s[0]).forEach(y=>{find(x.p,y.u);x.p.deck.push(y)})}},
  at:[{n:'リューズヘッド',dt:'70',cost:[...'炎超'],run:async x=>{hit(x,'battle',70)}}]});
 mon('ドラメシヤ',{hp:70,type:'龍',rc:1,
  at:[{n:'ちょっとうらむ',dt:'10',cost:['超'],run:async x=>{hit(x,'battle',10)}},{n:'かみつく',dt:'40',cost:[...'炎超'],run:async x=>{hit(x,'battle',40)}}]});
@@ -514,6 +534,66 @@ Object.assign(FX,{
   const ks=OWN(p).filter(k=>stageOf(lastOf(p.piles[k]))==='2進化'),pool=p.trash.filter(isBE);if(!ks.length)return err('場に2進化ポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
   const k=await ask(null,ks,p,'エネルギーをつける2進化ポケモンを選択');if(!k)return;const t=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,2,0);if(!t)return;
   fin(c,()=>t.forEach(y=>mv(y.u,k)));log(`メイのはげまし：${t.length}枚を${lastOf(p.piles[k]).name}につけました`)}});
+/* ---- 草デッキ（オーガポン みどりのめんex／カミツオロチex／メガニウムほか） ---- */
+const isGrassE=y=>y.t==='ene'&&/^基本草エネルギー/.test(y.name),isGrassP=y=>y.t==='pke'&&(mi(y)||{}).type==='草',eSum=p=>OWN(p).reduce((a,k)=>a+eunits(p.piles[k]),0);
+mon('オーガポン みどりのめんex',{hp:210,type:'草',rc:1,weak:'炎',tera:1,
+ ab:{n:'みどりのまい',ok:x=>x.p.hand.some(isGrassE)?null:'手札に基本草エネルギーがありません',
+  run:async x=>{const s=await pk('手札の基本草エネルギーを1枚選ぶ',x.p.hand.filter(isGrassE),1);if(!s||!s[0])return false;mv(s[0].u,x.k);draw1(x.p)}},
+ at:[{n:'まんようしぐれ',dt:'30＋',cost:[...'草草草'],run:async x=>{const n=eunits(x.p.piles.battle)+eunits(x.o.piles.battle);x.msg.push(`おたがいのバトルポケモンのエネルギー${n}個`);hit(x,'battle',30+30*n)}}]});
+mon('カミツオロチex',{hp:330,type:'草',rc:3,weak:'炎',st:'2進化',
+ ab:{n:'じゅくせいチャージ',ok:x=>x.p.hand.some(isGrassE)?null:'手札に基本草エネルギーがありません',
+  run:async x=>{const s=await pk('手札の基本草エネルギーを1枚選ぶ',x.p.hand.filter(isGrassE),1);if(!s||!s[0])return false;
+   const k=await ask(null,OWN(x.p),x.p,'基本草エネルギーをつける自分のポケモンを選択');if(!k)return false;
+   mv(s[0].u,k);const t=lastOf(x.p.piles[k]);t.dm=Math.max(0,(t.dm||0)-30);x.msg&&x.msg.push('HPを30回復')}},
+ at:[{n:'みつあめストーム',dt:'30＋',cost:[...'無無'],run:async x=>{const n=eSum(x.p);x.msg.push(`自分のポケモン全員のエネルギー${n}個`);hit(x,'battle',30+30*n)}}]});
+mon('カミッチュ',{hp:80,type:'草',rc:2,weak:'炎',st:'1進化',
+ ab:{n:'おまつりおんど',passive:1,tx:'場に「お祭り会場」が出ているなら、ワザを2回連続で使える（お祭り会場のカードが未実装のため、この効果は動きません）'},
+ at:[{n:'ともだちのわ',dt:'20×',cost:['草'],run:async x=>{const n=BN.filter(k=>x.p.piles[k].length).length;x.msg.push(`ベンチ${n}匹`);hit(x,'battle',20*n)}}]});
+mon('カジッチュ',{hp:40,type:'草',rc:1,weak:'炎',at:[{n:'しるをとばす',dt:'20',cost:['草'],run:async x=>{hit(x,'battle',20)}}]});
+mon('メガニウム',{hp:160,type:'草',rc:2,weak:'炎',st:'2進化',
+ ab:{n:'おいしげる',passive:1,tx:'このポケモンがいるかぎり、自分のポケモン全員についている基本草エネルギーは、エネルギー2個ぶんとしてはたらく（常時）'},
+ at:[{n:'ソーラービーム',dt:'140',cost:[...'草草無無'],run:async x=>{hit(x,'battle',140)}}]});
+mon('ベイリーフ',{hp:110,type:'草',rc:2,weak:'炎',st:'1進化',
+ at:[{n:'つきとばす',dt:'50',cost:[...'草無'],run:async x=>{hit(x,'battle',50);const q=x.o,d=q.piles.battle,ks=BN.filter(k=>q.piles[k].length),t=lastOf(d);
+  if(t&&ks.length&&(hpOf(d)-(t.dm||0))>0){const k=await ask(null,ks,q,'バトル場に出すベンチポケモンを選択（つきとばす）',1,undefined,P.indexOf(q));
+   if(k){const r=q.piles;[r.battle,r[k]]=[r[k],r.battle];r[k].forEach(y=>{y.cf=0});x.msg.push('相手のバトルポケモンをベンチと入れ替えた')}}}}]});
+mon('チコリータ',{hp:70,type:'草',rc:1,weak:'炎',at:[{n:'はっぱカッター',dt:'20',cost:['草'],run:async x=>{hit(x,'battle',20)}}]});
+mon('セレビィ',{hp:80,type:'草',rc:1,weak:'炎',
+ at:[{n:'ときをめぐる',dt:'',cost:['草'],run:async x=>{const t=await pk('山札から草ポケモンとスタジアムを合計3枚まで選ぶ（相手に見せます）',x.p.deck,3,0,y=>isGrassP(y)||y.t==='sta');if(!t)return false;
+   t.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck);x.msg.push(t.map(y=>y.name).join('、')||'なし')}},
+  {n:'ソーラーカッター',dt:'30',cost:['草'],run:async x=>{hit(x,'battle',30)}}]});
+Object.assign(FX,{
+ 'むしとりセット':async c=>{const p=me(),top=p.deck.slice(0,7);if(!top.length)return err('山札がありません');
+  const t=await pk('山札の上7枚から、草ポケモンと基本草エネルギーを合計2枚まで選ぶ（相手に見せます）',top,2,0,y=>isGrassP(y)||isGrassE(y));if(!t)return;
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('むしとりセット：'+(t.map(y=>y.name).join('、')||'なし')+'を手札に')},
+ 'スイレンのお世話':async c=>{const p=me(),pool=p.trash.filter(y=>(y.t==='pke'&&!isRule(y))||isBE(y));if(!pool.length)return err('トラッシュに対象がありません');
+  const t=await pk('トラッシュからポケモン（ルールを持つポケモンを除く）と基本エネルギーを合計3枚まで選ぶ（相手に見せます）',pool,3,0);if(!t)return;
+  fin(c,()=>t.forEach(y=>mv(y.u,'hand')));log('スイレンのお世話：'+(t.map(y=>y.name).join('、')||'なし')+'を手札に')}});
+Object.assign(FX,{
+ 'ポケモン回収サイクロン':async c=>{const p=me(),ks=OWN(p);if(ks.length<2)return err('場のポケモンが1匹だけのときは使えません（場が空になってしまうため）');
+  const k=await ask(c,ks,p,'手札にもどす自分のポケモンを選択');if(!k)return;const nm=lastOf(p.piles[k]).name,n=p.piles[k].length;
+  fin(c,()=>{p.piles[k].slice().forEach(y=>mv(y.u,'hand'))});log(`ポケモン回収サイクロン：${nm}と、ついているカードすべて（${n}枚）を手札にもどしました`);
+  if(k==='battle')await promote(P.indexOf(p))}});
+FX['ポケモン回収サイクロン(ACE SPEC)']=FX['ポケモン回収サイクロン'];
+/* ---- 特性の無効化（テツノイバラexのイニシャライズ／伝説の溶岩洞）。手札から使う特性は対象外 ---- */
+const initOn=()=>P.some(q=>q.piles.battle.length&&nk(lastOf(q.piles.battle).name)==='テツノイバラex');
+const noAb=t=>{if(!t||t.t!=='pke')return false;const M=mi(t)||{};if(initOn()&&isRule(t)&&!M.fut)return true;if(stadName()==='伝説の溶岩洞'&&['1進化','2進化'].includes(stageOf(t)))return true;return false};
+mon('テツノイバラex',{hp:230,type:'雷',rc:4,weak:'闘',fut:1,
+ ab:{n:'イニシャライズ',passive:1,tx:'このポケモンがバトル場にいるかぎり、おたがいの場の「ルールを持つポケモン」（「未来」のポケモンをのぞく）の特性はすべてなくなる（常時）'},
+ at:[{n:'ボルトサイクロン',dt:'140',cost:[...'雷無無'],run:async x=>{hit(x,'battle',140);const en=x.p.piles.battle.filter(y=>y.t==='ene'),ks=BN.filter(k=>x.p.piles[k].length);
+  if(en.length&&ks.length){const s=await pk('つけ替えるエネルギーを1個選ぶ',en,1),k=await ask(null,ks,x.p,'エネルギーをつけ替えるベンチポケモンを選択',1);if(s&&s[0]&&k){mv(s[0].u,k);x.msg.push('エネルギーを1個つけ替えた')}}}}]});
+Object.assign(FX,{
+ 'ダークボール':async c=>{const p=me(),bot=p.deck.slice(-7);if(!bot.length)return err('山札がありません');
+  const t=await pk('山札の下から7枚から、ポケモンを1枚選ぶ（相手に見せます）',bot,1,0,y=>y.t==='pke');if(!t)return;
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('ダークボール：'+(t[0]?t[0].name:'なし')+'を手札に')},
+ 'エネルギー回収':async c=>{const p=me(),pool=p.trash.filter(isBE);if(!pool.length)return err('トラッシュに基本エネルギーがありません');
+  const t=await pk('トラッシュから基本エネルギーを2枚まで選ぶ（相手に見せます）',pool,2,0);if(!t)return;fin(c,()=>t.forEach(y=>mv(y.u,'hand')));log('エネルギー回収：'+t.length+'枚を手札に')},
+ '探検家の先導':async c=>{const p=me(),top=p.deck.slice(0,6);if(!top.length)return err('山札がありません');
+  const t=await pk('山札の上6枚から、カードを2枚選んで手札に加える（残りはトラッシュ）',top,Math.min(2,top.length));if(!t)return;
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand',1));top.filter(y=>!t.includes(y)).forEach(y=>{const z=find(p,y.u);if(z)p.trash.push(z)})});log(`探検家の先導：${t.length}枚を手札に、残り${top.length-t.length}枚をトラッシュ`)},
+ 'AZの安らぎ':async c=>{const p=me(),ks=BN.filter(k=>p.piles[k].length);if(!ks.length||!p.piles.battle.length)return err('ベンチにポケモンがいません');
+  const old=lastOf(p.piles.battle),k=await ask(c,ks,p,'バトル場と入れ替えるベンチポケモンを選択');if(!k)return;const ex=/ex$/.test(old.name);
+  fin(c,()=>{swap(k);if(ex)old.dm=Math.max(0,(old.dm||0)-80)});log('AZの安らぎ：バトルポケモンをベンチと入れ替えました'+(ex?`（${old.name}のHPを80回復）`:''))}});
 /* ---- ダメージ計算・きぜつ ---- */
 function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
  if(k!=='battle'&&(tm.tera||tm.bnc))return 0;
@@ -534,7 +614,7 @@ async function doKO(i,k,np){const q=P[i],t=lastOf(q.piles[k]);if(!t)return;const
   act(()=>{q.trash.push(...q.piles[k].splice(0));q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n))});
   log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）`);
   if(judge()||G.over)return;
-  if(k==='battle'&&!np)await promote(i)}
+  if(k==='battle'&&!np){if(!fixing){fixing=1;try{if(await trimBench(i))render()}finally{fixing=0}}await promote(i)}}
 async function promote(i){const q=P[i],ks=OWN(q).filter(k=>k!=='battle');
  if(G.over)return;
  if(!ks.length){log(`P${i+1}の場にポケモンがいません`);judge();return}
@@ -558,6 +638,7 @@ async function useAttack(a){const p=me(),o=P[1-cur],c=lastOf(p.piles.battle);if(
  G.atk=G.turn;if(x.self)await promote(cur);render();log(`${c.name}の${a.n}！ ${x.msg.join('、')}`);
  TE=1;try{await sleep(900);await koScan(o);await sleep(300);await turnSwitch()}finally{TE=0}}
 async function runAb(c,k){const p=me(),a=mi(c).ab,x={p,o:P[1-cur],c,k};
+ if(noAb(c))return err('特性がなくなっているため使えません（イニシャライズ／伝説の溶岩洞の効果）');
  if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');
  if(a.key&&G.nm[a.key]===G.turn)return err(`この番はすでに「${a.key}」を使っているため使えません`);
  const bad=a.ok&&a.ok(x);if(bad)return err(bad);
@@ -567,12 +648,13 @@ async function runHab(c){const p=me(),a=mi(c).hab,x={p,o:P[1-cur],c};
  if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');const bad=a.ok(x);if(bad)return err(bad);
  HS.push(JSON.stringify([P,G,cur]));const r=await a.run(x);if(r===false){HS.pop();return}G.ab[c.u]=G.turn;render();log(`${c.name}の特性「${a.n}」を使用`)}
 function afterBench(k,c){const a=(mi(c)||{}).ab;if(!a||!a.onBench)return;
+ if(noAb(c)){log(`${c.name}の特性「${a.n}」は、なくなっているため発動しません`);return}
  return menu(c,[[`特性「${a.n}」を使う`,()=>runAb(c,k)],['使わない',()=>{}]],`${c.name}をベンチに出しました`,1)}
 function playPile(k){const p=me(),t=lastOf(p.piles[k]);if(!t)return;const m=mi(t),it=[];
  if(m&&m.ab&&!m.ab.passive&&!m.ab.onBench)it.push([`特性「${m.ab.n}」を使う`,()=>runAb(t,k),abWhy(t,k,p)?'ab used':'ab']);
  if(k==='battle')it.push([m&&m.at?'わざを使う…':'わざを使う（データ未登録）',()=>m&&m.at?atkMenu(t):err('このポケモンのデータは未登録です'),m&&m.at&&m.at.some(a=>canPay(a.cost,p.piles.battle))?'atk':'atk no'],['にげる',retreat]);
  menu(t,it)}
-const retreatCost=(p,c)=>{let r=(mi(c)||{}).rc??1;if(stageOf(c)==='たね'&&OWN(p).some(k=>nk(lastOf(p.piles[k]).name)==='ラティアスex'))r=0;return r};
+const retreatCost=(p,c)=>{let r=(mi(c)||{}).rc??1;if(stageOf(c)==='たね'&&OWN(p).some(k=>nk(lastOf(p.piles[k]).name)==='ラティアスex'&&!noAb(lastOf(p.piles[k]))))r=0;return r};
 async function retreat(){const p=me(),c=lastOf(p.piles.battle),rc=retreatCost(p,c),en=ens(p.piles.battle);
  if(c.nr===G.turn)return err('このポケモンは次の番までにげられません');
  if(eunits(p.piles.battle)<rc)return err(`エネルギーが足りません（にげるには${rc}個必要）`);
@@ -582,11 +664,13 @@ async function retreat(){const p=me(),c=lastOf(p.piles.battle),rc=retreatCost(p,
  act(()=>{pay.forEach(x=>mv(x.u,'trash'));swap(k)});log(rc?'にげました':'にげました（エネルギー不要）')}
 /* ゼロの大空洞：テラスタルがいなくなる／スタジアムがなくなるとベンチは5匹に */
 let fixing=0;
+async function trimBench(i){const q=P[i];if(!q||q.phase==='none')return 0;let ch=0;
+ while(benchMax(i)===5&&BN.filter(k=>q.piles[k].length).length>5){const k=await ask(null,BN.filter(k=>q.piles[k].length),q,`P${i+1}：ベンチが5匹になるまでトラッシュするポケモンを選んでください`,1,undefined,i);act(()=>{q.trash.push(...q.piles[k].splice(0))});log('ベンチが5匹を超えたためトラッシュしました')}
+ if(benchMax(i)===5){for(const k of BN.slice(5))if(q.piles[k].length){const z=BN.slice(0,5).find(y=>!q.piles[y].length);if(z){[q.piles[z],q.piles[k]]=[q.piles[k],q.piles[z]];ch=1}}
+  if(q.b8){q.b8=0;ch=1}}   /* 5匹に減らし終えてから、ベンチ表示を5匹用に戻す */
+ return ch}
 async function fixBench(){if(fixing||(MP()&&!canAct()))return;fixing=1;let ch=0;
- try{for(const i of[cur,1-cur]){const q=P[i];if(q.phase==='none')continue;
-  while(benchMax(i)===5&&BN.filter(k=>q.piles[k].length).length>5){const k=await ask(null,BN.filter(k=>q.piles[k].length),q,`P${i+1}：ベンチが5匹になるまでトラッシュするポケモンを選んでください`,1,undefined,i);act(()=>{q.trash.push(...q.piles[k].splice(0))});log('ベンチが5匹を超えたためトラッシュしました')}
-  if(benchMax(i)===5)for(const k of BN.slice(5))if(q.piles[k].length){const z=BN.slice(0,5).find(y=>!q.piles[y].length);if(z){[q.piles[z],q.piles[k]]=[q.piles[k],q.piles[z]];ch=1}}}
- }finally{fixing=0}if(ch)render()}
+ try{for(const i of[cur,1-cur])ch|=await trimBench(i)}finally{fixing=0}if(ch)render()}
 /* 開始手順：P1バトル場→サイド→P2バトル場→サイド→マリガン差ぶん引く→P1の番 */
 function finishSetup(){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){cur=pd;log(`P${pd+1}：バトル場にたねポケモンを出して、サイドをセットしてください`);return}
  const fi=(G.fp!==undefined&&P[G.fp]&&P[G.fp].phase==='wait')?G.fp:P.findIndex(x=>x.phase==='wait');if(fi<0)return;
@@ -726,14 +810,14 @@ async function coinToss(){log('先攻・後攻をコインで決めます（オ�
  if(h)first=await new Promise(r=>menu(null,[['先攻にする',()=>r(0)],['後攻にする',()=>r(1)]],'コインはオモテ！先攻・後攻を選んでください',1));
  else{first=cpuOrder(1)?1:0;log(`コインはウラ：CPUは${first?'先攻':'後攻'}を選びました`)}
  G.fp=first;log(`先攻：P${first+1}${first?'（CPU）':'（あなた）'}`)}
-async function cpuBegin(code){cur=0;if(code){let d=null;try{d=JSON.parse(localStorage['dk2_'+code])}catch(_){}if(!d)return err('そのデッキのデータがありません');P[1].cards=d;P[1].code=code}
+async function cpuBegin(code){cur=0;if(code){let d=getDeck(code);if(!d)return err('そのデッキのデータがありません');P[1].cards=d;P[1].code=code}
  if(!P[1].cards.length)return err('CPUのデッキがありません');CPU.on=1;CPU.who=[0,1];cpuSpd();NET.on=0;G.mode='play';HS=[];await askVars();
  [0,1].forEach(z=>{cur=z;start()});cur=0;cpuBind();G.mode='play';render();await showMissing([1]);
  if(!AIR())log('注意：ai/ フォルダのAIファイルが読み込まれていません（CPUは最低限の動きになります）');
  else log(`CPUのデッキタイプ：${CPUX.type[1]||'未対応（旧アルゴリズム）'} ／ あなたのデッキ：${CPUX.type[0]||'未判定'}`);
  await coinToss();clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
 function cpuStart(){if(!P[0].cards.length)return err('先に、あなた（P1）のデッキを読み込んでください');
- const items=hist().filter(x=>{try{return!!localStorage['dk2_'+x.c]}catch(_){return false}}).map(x=>[x.n,()=>cpuBegin(x.c)]);
+ const items=hist().filter(x=>!!getDeck(x.c)).map(x=>[x.n,()=>cpuBegin(x.c)]);
  if(P[1].cards.length)items.unshift(['P2に読み込み済みのデッキを使う',()=>cpuBegin(null)]);
  if(!items.length)return err('CPUのデッキがありません（デッキ読込でP2に読み込むか、保存済みのデッキを用意してください）');
  menu(null,items,'CPUのデッキを選択（保存済みのものが表示されます）')}
@@ -913,22 +997,62 @@ function parse(h){const img={},nm={},H0='https://www.pokemon-card.com';
 async function fetchDeck(code){const ps=[`https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/`,`https://www.pokemon-card.com/deck/deckView.php/deckID/${code}`];
  const ws=[u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
  for(const w of ws)for(const u of ps){try{const r=await fetch(w(u));if(!r.ok)continue;const c=parse(await r.text());if(c.length)return c}catch(_){}}return null}
-const HK='dkl',DEF=[{n:'メガレックウザ',c:'kvwbdF-zcJSFF-VVVFFk'},{n:'AGドラパ',c:'M3Sypp-6vqqSt-yMMRSX'},{n:'クラハンドラパ',c:'69ngnL-P4hfGh-Ngg6QQ'}];
-const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv(h)}DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)){h.push({...d});hsv(h)}});return h},hsv=h=>{try{localStorage[HK]=JSON.stringify(h)}catch(_){}};
-function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forEach((x,i)=>{let ca=false;try{ca=!!localStorage['dk2_'+x.c]}catch(_){}
+const HK='dkl',DEF=[{n:'メガレックウザ',c:'kvwbdF-zcJSFF-VVVFFk'},{n:'AGドラパ',c:'M3Sypp-6vqqSt-yMMRSX'},{n:'クラハンドラパ',c:'pyM2pS-qYkBSM-Rypp3y'},{n:'メガレックウザ（テツノイバラ型）',c:'pyRp3M-j9Hi4H-ypyy3p'},{n:'カミツオロチexデッキ',c:'6LNNnn-BgpA6l-nn9gLQ'}];
+const HMEM={};
+const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){h=HMEM.h||null}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv(h)}h.forEach(x=>{if(x.c==='69ngnL-P4hfGh-Ngg6QQ'){x.c='pyM2pS-qYkBSM-Rypp3y';hsv(h)}});DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)){h.push({...d});hsv(h)}});return h},hsv=h=>{HMEM.h=h;try{localStorage[HK]=JSON.stringify(h)}catch(_){}};
+function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forEach((x,i)=>{const ca=!!getDeck(x.c);
  const r=document.createElement('div');r.className='hr';const bt=document.createElement('button');bt.className='hn';bt.innerHTML=`${e(x.n)}${ca?' ✓':''}<small>${e(x.c)}${ca?'':'（初回はソース貼り付けが必要）'}</small>`;
  bt.onclick=()=>{$('#code').value=x.c;$('#go').click()};
- const ed=document.createElement('button');ed.className='hs';ed.textContent='✎';ed.onclick=()=>{const n=prompt('デッキの名前',x.n);if(n===null)return;const c=prompt('デッキコード',x.c);if(c===null)return;const m=c.match(RX);if(!m){lm('コードの形式が違います（例: kvwbdF-zcJSFF-VVVFFk）');return}const h=hist();h[i].n=n||x.n;h[i].c=m[0];hsv(h);renderHist()};
+ const ed=document.createElement('button');ed.className='hs';ed.textContent='✎';ed.onclick=()=>{const n=prompt('デッキの名前',x.n);if(n===null)return;const c=prompt('デッキコード',x.c);if(c===null)return;const m=codeOf(c);if(!m){lm('コードの形式が違います（例: kvwbdF-zcJSFF-VVVFFk）');return}const h=hist();h[i].n=n||x.n;h[i].c=m;hsv(h);renderHist()};
  const dl=document.createElement('button');dl.className='hs';dl.textContent='✕';dl.onclick=()=>{if(confirm(`「${x.n}」を一覧から削除しますか？`)){const h=hist();h.splice(i,1);hsv(h);renderHist()}};
  const a1=document.createElement('button'),a2=document.createElement('button');a1.className=a2.className='hs';a1.textContent='→1';a2.textContent='→2';a1.onclick=()=>{$('#c1').value=x.c};a2.onclick=()=>{$('#c2').value=x.c};
- r.append(bt,a1,a2,ed,dl);b.append(r)})}
-const save=(code,c)=>{if(!code)return;try{localStorage['dk2_'+code]=JSON.stringify(c)}catch(_){}const h=hist();if(!h.some(x=>x.c===code)){h.push({n:code,c:code});hsv(h)}};
+ const tn=document.createElement('button');tn.className='hs';tn.textContent='調整';tn.onclick=()=>openEditor(x);
+ r.append(bt,a1,a2,tn,ed,dl);b.append(r)})}
+const save=(code,c)=>{if(!code)return;MEM[code]=c;try{localStorage['dk2_'+code]=JSON.stringify(c)}catch(_){}const h=hist();if(!h.some(x=>x.c===code)){h.push({n:code,c:code});hsv(h)}};
+
+/* ---------- デッキ調整ツール ---------- */
+const MEM={},BUILTIN={"pyM2pS-qYkBSM-Rypp3y": [{"id": "45772", "name": "ドラパルトex", "n": 3, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045772_P_DORAPARUTOEX.jpg", "full": "ドラパルトex(SV6 081/101)"}, {"id": "45771", "name": "ドロンチ", "n": 4, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045771_P_DORONCHI.jpg", "full": "ドロンチ(SV6 080/101)"}, {"id": "45770", "name": "ドラメシヤ", "n": 4, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045770_P_DORAMESHIYA.jpg", "full": "ドラメシヤ(SV6 079/101)"}, {"id": "49956", "name": "スボミー", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M2a/049956_P_SUBOMI.jpg", "full": "スボミー(M2a 196/193)"}, {"id": "47240", "name": "ノココッチex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV9/047240_P_NOKOKOTCHIEX.jpg", "full": "ノココッチex(SV9 120/100)"}, {"id": "48483", "name": "ノココッチ", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M-P/048483_P_NOKOKOTCHI.jpg", "full": "ノココッチ(M-P 048/M-P)"}, {"id": "49290", "name": "ノコッチ", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049290_P_NOKOTCHI.jpg", "full": "ノコッチ(MC 574/742)"}, {"id": "45746", "name": "マシマシラ", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045746_P_MASHIMASHIRA.jpg", "full": "マシマシラ(SV6 055/101)"}, {"id": "50067", "name": "ニャースex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M3/050067_P_NIXYASUEX.jpg", "full": "ニャースex(M3 100/080)"}, {"id": "45913", "name": "キチキギスex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6a/045913_P_KICHIKIGISUEX.jpg", "full": "キチキギスex(SV6a 038/064)"}, {"id": "48354", "name": "ファイヤー", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M2/048354_P_FUAIYA.jpg", "full": "ファイヤー(M2 014/080)"}, {"id": "45209", "name": "なかよしポフィン", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5K/045209_T_NAKAYOSHIPOFUIN.jpg", "full": ""}, {"id": "49378", "name": "ポケパッド", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049378_T_POKEPADDO.jpg", "full": ""}, {"id": "42694", "name": "ハイパーボール", "n": 3, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV1V/042694_T_HAIPABORU.jpg", "full": ""}, {"id": "49386", "name": "夜のタンカ", "n": 2, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049386_T_YORUNOTANKA.jpg", "full": ""}, {"id": "50324", "name": "クラッシュハンマー", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M5/050324_T_KURASSHIXYUHANMA.jpg", "full": ""}, {"id": "50156", "name": "スペシャルレッドカード", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M4/050156_T_SUPESHIXYARUREDDOKADO.jpg", "full": ""}, {"id": "45640", "name": "アンフェアスタンプ(ACE SPEC)", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5a/045640_T_ANFUEASUTANPU.jpg", "full": ""}, {"id": "47795", "name": "リーリエの決心", "n": 4, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1L/047795_T_RIRIENOKESSHIN.jpg", "full": ""}, {"id": "46036", "name": "アカマツ", "n": 2, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV7/046036_T_AKAMATSU.jpg", "full": ""}, {"id": "49708", "name": "メイのはげまし", "n": 1, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M3/049708_T_MEINOHAGEMASHI.jpg", "full": ""}, {"id": "50449", "name": "ボスの指令", "n": 3, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MEZ/050449_T_BOSUNOSHIREI.jpg", "full": ""}, {"id": "47796", "name": "危ない廃墟", "n": 2, "t": "sta", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1L/047796_T_ABUNAIHAIKIXYO.jpg", "full": ""}, {"id": "42783", "name": "基本超エネルギー", "n": 3, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/ENE/042783_E_KIHONCHIXYOUENERUGI.jpg", "full": ""}, {"id": "42780", "name": "基本炎エネルギー", "n": 3, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/ENE/042780_E_KIHONHONOOENERUGI.jpg", "full": ""}, {"id": "40888", "name": "基本悪エネルギー", "n": 2, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SI/040888_E_KIHONAKUENERUGI.jpg", "full": ""}]};
+BUILTIN['pyRp3M-j9Hi4H-ypyy3p']=[{"id": "47847", "name": "メガガルーラex", "n": 4, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1S/047847_P_MGARURAEX.jpg", "full": "メガガルーラex(M1S 051/063)"}, {"id": "50396", "name": "メガレックウザex", "n": 3, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6/050396_P_MREKKUUZAIEKKUSU.jpg", "full": "メガレックウザex(M6 058/076)"}, {"id": "50400", "name": "ファイアローex", "n": 3, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6/050400_P_FUAIAROIEKKUSU.jpg", "full": "ファイアローex(M6 062/076)"}, {"id": "47315", "name": "ヒビキのホウオウex", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV9a/047315_P_HIBIKINOHOUOUEX.jpg", "full": "ヒビキのホウオウex(SV9a 020/063)"}, {"id": "46248", "name": "ラティアスex", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV7a/046248_P_RATEIASUEX.jpg", "full": "ラティアスex(SV7a 019/064)"}, {"id": "49694", "name": "ニャースex", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M3/049694_P_NIXYASUEX.jpg", "full": "ニャースex(M3 061/080)"}, {"id": "46066", "name": "キチキギスex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6a/046066_P_KICHIKIGISUEX.jpg", "full": "キチキギスex(SV6a 089/064)"}, {"id": "45609", "name": "テツノイバラex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5a/045609_P_TETSUNOIBARAEX.jpg", "full": "テツノイバラex(SV5a 033/066)"}, {"id": "46283", "name": "ダークボール", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV7a/046283_T_DAKUBORU.jpg", "full": ""}, {"id": "50742", "name": "ハイパーボール", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6a/050742_T_HAIPABORU.jpg", "full": ""}, {"id": "42714", "name": "エネルギーつけかえ", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SVAM/042714_T_ENERUGITSUKEKAE.jpg", "full": ""}, {"id": "42763", "name": "エネルギー回収", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SVAW/042763_T_ENERUGIKAISHIXYUU.jpg", "full": ""}, {"id": "45640", "name": "アンフェアスタンプ(ACE SPEC)", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5a/045640_T_ANFUEASUTANPU.jpg", "full": ""}, {"id": "45533", "name": "探検家の先導", "n": 4, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5K/045533_T_TANKENKANOSENDOU.jpg", "full": ""}, {"id": "47795", "name": "リーリエの決心", "n": 2, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1L/047795_T_RIRIENOKESSHIN.jpg", "full": ""}, {"id": "46036", "name": "アカマツ", "n": 1, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV7/046036_T_AKAMATSU.jpg", "full": ""}, {"id": "42722", "name": "ジャッジマン", "n": 1, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SVAM/042722_T_JIXYAJJIMAN.jpg", "full": ""}, {"id": "43034", "name": "ボスの指令", "n": 2, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV1a/043034_T_BOSUNOSHIREIGECHISU.jpg", "full": ""}, {"id": "50159", "name": "AZの安らぎ", "n": 2, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M4/050159_T_AZNOYASURAGI.jpg", "full": ""}, {"id": "50411", "name": "伝説の溶岩洞", "n": 4, "t": "sta", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6/050411_T_DENSETSUNOYOUGANDOU.jpg", "full": ""}, {"id": "50746", "name": "基本炎エネルギー", "n": 8, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6a/050746_E_KIHONHONOOENERUGI.jpg", "full": ""}, {"id": "50748", "name": "基本雷エネルギー", "n": 4, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M6a/050748_E_KIHONKAMINARIENERUGI.jpg", "full": ""}];
+const getDeck=code=>{if(MEM[code])return MEM[code];try{const d=JSON.parse(localStorage['dk2_'+code]);if(d)return d}catch(_){}return BUILTIN[code]||null};
+const codeOf=v=>{v=String(v||'').trim();return /^my:\S+$/.test(v)?v:(v.match(RX)||[])[0]};
+const ORD={pke:0,tr:1,sup:2,tool:3,sta:4,ene:5},TGN={pke:'ポケモン',tr:'グッズ',sup:'サポート',tool:'どうぐ',sta:'スタジアム',ene:'エネルギー'};
+const POOL=[{id:'42722',name:'ジャッジマン',t:'sup',img:'https://www.pokemon-card.com/assets/images/card_images/large/SVAM/042722_T_JIXYAJJIMAN.jpg'},
+ {id:'pool:ヒカリ',name:'ヒカリ',t:'sup'},{id:'pool:トウコ',name:'トウコ',t:'sup'},{id:'pool:ふしぎなアメ',name:'ふしぎなアメ',t:'tr'},
+ {id:'pool:ヨノワール',name:'ヨノワール',t:'pke'},{id:'pool:サマヨール',name:'サマヨール',t:'pke'},{id:'pool:ヨマワル',name:'ヨマワル',t:'pke'},{id:'pool:ジャミングタワー',name:'ジャミングタワー',t:'sta'}];
+let ED=null;
+const bnm=n=>n.replace(/\(ACE SPEC\)$/,''),isAce=n=>/\(ACE SPEC\)$/.test(n),isBasicE=n=>/^基本.エネルギー/.test(n),jclone=o=>JSON.parse(JSON.stringify(o)),edMsg=t=>{$('#edm').textContent=t};
+function edTotals(){const by={};let ace=0,tot=0;ED.cards.forEach(c=>{const b=bnm(c.name);by[b]=(by[b]||0)+c.n;tot+=c.n;if(isAce(c.name))ace+=c.n});return{by,ace,tot}}
+function openEditor(x){const base=getDeck(x.c)||[],mine=/^my:/.test(x.c);ED={code:mine?x.c:null,base:jclone(base),cards:jclone(base)};$('#edn').value=mine?x.n:x.n+'（調整）';edMsg('');renderEditor();$('#edq').value='';$('#ovd').className='on'}
+function edAdd(c,d){const T=edTotals(),b=bnm(c.name),ex=ED.cards.find(z=>z.id===c.id);
+ if(d>0){if(!isBasicE(b)&&(T.by[b]||0)>=4)return edMsg(`「${b}」は4枚までです`);if(isAce(c.name)&&T.ace>=1)return edMsg('ACE SPECのカードは、デッキに1枚しか入れられません')}
+ if(ex){ex.n+=d;if(ex.n<=0)ED.cards=ED.cards.filter(z=>z!==ex)}else if(d>0)ED.cards.push({id:c.id,name:c.name,t:c.t,img:c.img||'',full:c.full||'',n:1});
+ edMsg('');renderEditor()}
+const eRow=(c,mid,btn)=>`<div class="er"><div class="eth">${cardH(c)}</div><div class="en">${e(c.name)}<small>${mid}</small></div>${btn}</div>`;
+function renderEditor(){const T=edTotals(),t=$('#edt');t.textContent=`${T.tot}/60枚`;t.style.color=T.tot===60?'#7fe08a':'#ff8a8a';
+ const bm={};ED.base.forEach(c=>{bm[c.id]=c.n});
+ const rows=ED.cards.slice().sort((a,b)=>(ORD[a.t]-ORD[b.t])||a.name.localeCompare(b.name,'ja')).map(c=>{const d=c.n-(bm[c.id]||0);
+  return eRow(c,`${TGN[c.t]||c.t}${d?` <b style="color:${d>0?'#7fe08a':'#ff8a8a'}">${d>0?'+':''}${d}</b>`:''}`,`<button data-id="${e(c.id)}" data-d="-1">−</button><span class="ec">${c.n}</span><button data-id="${e(c.id)}" data-d="1">＋</button>`)}).join('');
+ const gone=ED.base.filter(b=>!ED.cards.some(c=>c.id===b.id)).map(b=>eRow(b,`抜いたカード <b style="color:#ff8a8a">-${b.n}</b>`,`<button data-id="${e(b.id)}" data-d="1" style="flex-basis:60px;font-size:13px">戻す</button>`).replace('class="er"','class="er gone"')).join('');
+ $('#edl').innerHTML=rows+(gone?'<div style="margin:8px 0 2px;font-size:12px;opacity:.8">抜いたカード</div>'+gone:'');renderPool()}
+function poolCards(){const seen=new Set(POOL.map(p=>p.id)),out=POOL.map(p=>({...p,pool:1}));hist().forEach(h=>{(getDeck(h.c)||[]).forEach(c=>{if(!seen.has(c.id)){seen.add(c.id);out.push({...c})}})});return out}
+function renderPool(){const q=($('#edq').value||'').trim();
+ $('#edp').innerHTML=poolCards().filter(c=>!q||c.name.includes(q)).map(c=>{const inn=(ED.cards.find(z=>z.id===c.id)||{}).n||0;
+  return eRow(c,`${c.pool?'調整用カード｜':''}${TGN[c.t]||c.t}${inn?`｜デッキに${inn}枚`:''}`,`<button data-id="${e(c.id)}">＋</button>`)}).join('')||'該当なし'}
+function edSave(){const nm=$('#edn').value.trim()||'調整デッキ',cards=ED.cards.filter(c=>c.n>0).map(c=>({...c})),code=ED.code||('my:'+Date.now().toString(36));
+ save(code,cards);const h=hist(),i=h.findIndex(x=>x.c===code);if(i>=0)h[i].n=nm;else h.push({n:nm,c:code});hsv(h);ED.code=code;ED.base=jclone(cards);renderHist();renderEditor();return{code,cards}}
+$('#edl').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const c=ED.cards.find(z=>z.id===b.dataset.id)||ED.base.find(z=>z.id===b.dataset.id);if(c)edAdd(c,+b.dataset.d)};
+$('#edp').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const c=poolCards().find(z=>z.id===b.dataset.id);if(c)edAdd(c,1)};
+$('#edq').oninput=renderPool;$('#edx').onclick=()=>{$('#ovd').className=''};$('#edrs').onclick=()=>{ED.cards=jclone(ED.base);edMsg('');renderEditor()};
+$('#edsv').onclick=()=>{edSave();edMsg('保存しました（デッキ一覧に登録されました）')};
+const edLoad=z=>{const r=edSave();$('#lt').value=String(z);$('#ovd').className='';$('#ov3').className='';ok(r.cards,r.code)};
+$('#edp1').onclick=()=>edLoad(0);$('#edp2').onclick=()=>edLoad(1);
+
 function okBoth(cs,codes){if(NET.on)return err('オンライン中は使えません');CPU.on=0;[0,1].forEach(i=>{P[i].cards=cs[i];P[i].code=codes[i]});HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));closeAll();render();log('P1・P2のデッキを読み込みました');askVars().then(()=>showMissing())}
-$('#gob').onclick=async()=>{const cd=[$('#c1').value,$('#c2').value].map(v=>(v.match(RX)||[])[0]);if(!cd[0]||!cd[1])return lm('P1・P2それぞれのデッキコードを入力してください');lm('読込中…');const cs=[];
- for(const c of cd){let d=null;try{d=JSON.parse(localStorage['dk2_'+c])}catch(_){}if(!d)d=await fetchDeck(c);if(!d)return lm(`${c} を取得できませんでした。先にそのデッキを1つずつ「読込」→ソース貼り付けで読み込んでください。`);cs.push(d)}
+$('#gob').onclick=async()=>{const cd=[$('#c1').value,$('#c2').value].map(codeOf);if(!cd[0]||!cd[1])return lm('P1・P2それぞれのデッキコードを入力してください');lm('読込中…');const cs=[];
+ for(const c of cd){let d=getDeck(c);if(!d)d=await fetchDeck(c);if(!d)return lm(`${c} を取得できませんでした。先にそのデッキを1つずつ「読込」→ソース貼り付けで読み込んでください。`);cs.push(d)}
  cd.forEach((c,i)=>save(c,cs[i]));okBoth(cs,cd)};
-$('#go').onclick=async()=>{const code=($('#code').value.match(RX)||[])[0];if(!code)return lm('コードの形式が違います');
- let c=null;try{c=JSON.parse(localStorage['dk2_'+code])}catch(_){}
+$('#go').onclick=async()=>{const code=codeOf($('#code').value);if(!code)return lm('コードの形式が違います');
+ let c=getDeck(code);
  if(!c){lm('読込中…');c=await fetchDeck(code)}
  if(c){save(code,c);ok(c,code)}
  else lm(`自動取得に失敗しました（公式サイトが外部からの取得を許可していません）。<a style="color:#9df" target="_blank" href="https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/">このページ</a>を開いてソースを全コピー→下に貼り付けてください。`)};
