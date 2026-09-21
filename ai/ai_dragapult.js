@@ -14,7 +14,7 @@
     sRetreat: 64, rEnergy: 15, rMargin: 40, sBoss: 96, sJudge: 55, judgeMine: 2, judgeOpp: 5, sLillie: 92, lillieHand: 12, sHyper: 66, sRed: 82, cyanoMin: 20,
     pReady: 1, pRisk: 60, pHp: 20, sPoffin: 82, sPad: 58, sEvoDk: 90, sEvoDp: 95, sEvoSm: 58, sEvoYn: 62, sEvoNn: 48, sBenchDr: 78, dreepyTarget: 3, sBenchDusk: 66, duskTarget: 2,
     sBenchBudew: 60, sBenchMuni: 52, sDrakloak: 92, sCurse: 90, curseNet: 150, curseLoss: 100, sAdren: 45, sDudu: 52, sHammer: 52, sStamp: 86, sAka: 76, sCandy: 96, sTanka: 46,
-    sLock: 110, spreadW: 1, sJam: 60, sRuins: 12, setupBudew: 60, sHikari: 70, sMay: 82, budewSpare: 0,
+    sLock: 110, spreadW: 1, sJam: 60, sRuins: 12, setupBudew: 60, sHikari: 70, sMay: 82, budewSpare: 0, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
   };
   /* 探索空間（optimize.js が使う）：[下限, 上限] */
   const space = {
@@ -118,11 +118,10 @@
     },
     attachScore(cx, c, k, base) {
       const p = cx.myB[k], n = nrm(p.name);
-      if (n === BU || n === NK || n === NN || n === FZ || n === MW) return base * 0.3;
-      if (n === MU) return p.en.length === 0 ? base + 22 : base * 0.4;
-      if (n === YM || n === SM || n === YN) return base * 0.5;
-      // 炎と超を両方そろえる：足りない方を優先
-      const t = (c.name.match(U.BE) || [, ''])[1], have = ty => p.eu.filter(x => x === ty).length; if (t && (n === DR || n === DK || n === DP)) { if (have(t) >= 1) base -= 12; }
+      if (n === MU && p.en.length === 0) return Math.max(base, 24) + 10;   // アドレナブレインは「エネルギーが1個ついている」ことが条件
+      if (base <= 0) return base;                                        // 役に立たない付け先には付けない（用途判定は ai_core の attachUse）
+      if (n === BU || n === NK || n === NN || n === FZ || n === MW) return base * 0.5;
+      if (n === YM || n === SM || n === YN) return base * 0.6;
       return base;
     },
     attackScore(cx, a, x) {

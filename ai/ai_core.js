@@ -11,6 +11,7 @@
   R.strategies = {}; R.tuned = R.tuned || {};
   R.register = (name, def) => { def.name = name; R.strategies[name] = def; };
   R.detect = cards => { for (const n in R.strategies) { const s = R.strategies[n]; if (s.detect && s.detect(cards)) return n; } return null; };
+  R.ref = name => (R.refs && R.refs[name]) || null;   // デッキタイプの標準リスト（相手の隠れた手札を先読みで仮定するときの母集団）
   R.create = (name, o) => { const st = R.strategies[name]; return st ? new Controller(st, o || {}) : null; };
 
   /* ---------- 小道具 ---------- */
@@ -25,12 +26,13 @@
   const cnt = (a, f) => a.reduce((s, x) => s + (f(x) ? 1 : 0), 0);
   const best = (a, f) => { let b = null, bs = -1e9; for (const x of a) { const s = f(x); if (s > bs) { bs = s; b = x; } } return b; };
   /* 技ごとの基本ダメージ（数値で表せない技の計算式。カード効果＝公開情報） */
+  const SCALE = new Set(['ストームエメラルダ']), NOM = { 'マシンガンコンボ': 250, 'ストームエメラルダ': 250, 'ユニオンビート': 120, 'ぎゃっきょうテール': 120, 'きあいタックル': 120, 'とうしのつばさ': 60 };   // 数値で表せない技の目安ダメージ   // ダメージが盤面のエネルギー総数に比例する技
   const FORM = {
     'マシンガンコンボ': () => 250, 'ストームエメラルダ': (cx, sb) => 50 * (sumEu(sb) + cx._xe),
     'ユニオンビート': (cx, sb) => 30 * (Object.keys(sb).length - 1), 'ぎゃっきょうテール': (cx, sb, db) => 60 * cnt(Object.values(db), p => isEx(p.name)),
     'きあいタックル': (cx, sb, db, dk) => 90 + (cx.stage(db[dk]) === '1進化' ? 90 : 0), 'とうしのつばさ': (cx, sb, db, dk) => 20 + (isEx(db[dk].name) ? 90 : 0),
   };
-  R.util = { nrm, isEx, prizeOf, BE, payable, short, rng, sumEu, cnt, best, FORM };
+  R.util = { SCALE, nrm, isEx, prizeOf, BE, payable, short, rng, sumEu, cnt, best, FORM };
 
   /* ---------- 判断用コンテキスト（1回の判断ごとに作る） ---------- */
   class Cx {
@@ -88,6 +90,34 @@
         if (sh === 0) s = Math.max(s, 100 + d / 3); else if (sh === 1) s = Math.max(s, 55 + d / 6); else s = Math.max(s, 25 - sh * 4); }
       return s;
     }
+    /* --- エネルギーの用途判定（無駄付け防止）：この付け先で、そのエネルギーが何かの役に立つか --- */
+    byName(nm) { const m = this.C._bn || (this.C._bn = {}); if (!(nm in m)) { m[nm] = null; for (const k in this.C.cd) if (this.C.cd[k] && k.split('#')[0] === nm) { m[nm] = this.C.cd[k]; break; } } return m[nm]; }
+    lineNames(p) { // p の進化先（デッキリストにあり、手札か山札・サイドに残っているもの）
+      const out = [], seen = new Set(), kids = nm => { for (const d of this.C.deck) { const dd = this.C.cd[d.mk]; const dn = nrm(d.name).replace(/[\s　]/g, '');
+        if (dd && dd.ev === nm && !seen.has(dn) && (this.n(nrm(d.name)) > 0 || (this.C.unacc[nrm(d.name)] || 0) > 0)) { seen.add(dn); out.push(dn); kids(dn); } } };
+      kids(nrm(p.name).replace(/[\s　]/g, '')); return out;
+    }
+    scaling() { if (this._sc !== undefined) return this._sc; let r = false;
+      for (const d of this.C.deck) { const dd = this.C.cd[d.mk]; if (dd && dd.at && dd.at.some(a => SCALE.has(a.n)) && (this.inPlay(nrm(d.name)).length || this.n(nrm(d.name)) || (this.C.unacc[nrm(d.name)] || 0) > 0)) r = true; }
+      return (this._sc = r); }
+    /* この系統（今の姿＋進化先）で「目標にする技」＝ダメージが最大の技の半分以上のもの。弱い技（無色1個で打てる等）は目標にしない */
+    goals(p) {
+      const P = this.P, all = [], nom = a => NOM[a.n] || (parseInt(String(a.dt).replace(/[^\d]/g, '')) || 0);
+      for (const a of this.atks(p)) all.push({ a, cur: true, d: nom(a) });
+      for (const nm of this.lineNames(p)) { const dd = this.byName(nm); if (dd && dd.at) for (const a of dd.at) all.push({ a, cur: false, d: nom(a) }); }
+      const mx = Math.max(1, ...all.map(g => g.d)); return all.filter(g => g.d >= mx * (P.aGoal === undefined ? 0.5 : P.aGoal));
+    }
+    attachUse(k, units) {
+      const p = this.myB[k], P = this.P, r = { en: 0, prog: 0, line: 0, scale: 0, ret: 0, over: 0 }, canNow = k === 'battle' && this.canAtkNow('battle') && this.T !== 1, eu1 = p.eu.concat(units);
+      let bv = -1;
+      for (const g of this.goals(p)) { const s0 = short(g.a.cost, p.eu), s1 = short(g.a.cost, eu1); if (s1 >= s0) continue; const used = s0 - s1, over = units.length - used;
+        let v; if (g.cur && s1 === 0) { const d = Math.min(300, this.dmg(this.myB, k, g.a, this.opB, 'battle', {}) || 0); v = (canNow ? P.aEnableNow : P.aEnableSoon) + d / 12; r.en = Math.max(r.en, v); }
+        else if (g.cur) { v = used * P.aProg; r.prog = Math.max(r.prog, v); } else { v = P.aLine; r.line = Math.max(r.line, v); }
+        if (v > bv) { bv = v; r.over = over; } }
+      if (this.scaling()) r.scale = P.aScale;                                                                                                        // 盤面のエネルギー数に比例する技がある
+      const d0 = this.D(p); if (k === 'battle' && d0 && p.eu.length < d0.rc && this.bench().some(b => this.myBest(b).d > 0) && !this.myBest('battle').d) r.ret = P.aRetreat; // にげるのに必要
+      return r;
+    }
     /* ボスの指令：相手ベンチのどれを呼ぶと今のバトルポケモンで倒せるか */
     gust() {
       const me = this.myB.battle; if (!me || this.T === 1) return null; let r = null;
@@ -95,6 +125,22 @@
         for (const a of this.atks(me)) if (payable(a.cost, me.eu) && !me.na) bd = Math.max(bd, this.dmg(this.myB, 'battle', a, tmp, 'battle', { lo: 1, plus30: this.fl.plus30 }) || 0);
         const ko = bd >= this.rem(d), sc = (ko ? 1000 + this.pz(d) * 300 + (this.me.prizeN <= this.pz(d) ? 5000 : 0) : 0) + this.pz(d) * 30 - this.rem(d) / 10; if (!r || sc > r.sc) r = { k: dk, ko, sc, d: bd, pz: this.pz(d) }; }
       return r;
+    }
+    /* --- 価値関数の入力：「自分の番の終わり」の局面を、公開情報＋自分の情報だけで数値化する --- */
+    features() {
+      const me = this.me, op = this.op, mb = this.myB, ob = this.opB, ma = mb.battle, oa = ob.battle, T = this.T, f = [];
+      const sum = (b, g) => Object.values(b).reduce((s, p) => s + g(p), 0), n1 = x => Math.min(1, x);
+      const rd = this.keys().map(k => this.readiness(k)).sort((a, b) => b - a), th = this.threat('battle', 1);
+      let expo = 0; for (const k of this.bench()) { const p = mb[k], t = this.threat(k, 1); if (t.any >= this.rem(p)) expo = Math.max(expo, this.pz(p)); }
+      const koRisk = ma && th.act >= this.rem(ma) ? 1 : 0, myKo = ma && oa && T !== 1 ? (this.myBest('battle', null, 1).d >= this.rem(oa) ? 1 : 0) : 0;
+      f.push((op.prizeN - me.prizeN) / 6, me.prizeN / 6, op.prizeN / 6, me.prizeN <= 2 ? 1 : 0, op.prizeN <= 2 ? 1 : 0,
+        Object.keys(mb).length / 5, Object.keys(ob).length / 5, ma ? (ma.hp ? this.rem(ma) / ma.hp : 1) : 0, ma ? this.pz(ma) / 3 : 0, oa ? (oa.hp ? this.rem(oa) / oa.hp : 1) : 0, oa ? this.pz(oa) / 3 : 0,
+        sum(mb, p => p.dm) / 300, sum(ob, p => p.dm) / 300, sum(mb, p => p.eu.length) / 8, sum(ob, p => p.eu.length) / 8, ma ? ma.eu.length / 4 : 0, oa ? oa.eu.length / 4 : 0,
+        (rd[0] || 0) / 150, (rd[1] || 0) / 150, cnt(this.keys(), k => this.readiness(k) >= 100) / 3, th.act / 300, koRisk, koRisk * (ma ? this.pz(ma) : 0) / 3, expo / 3, myKo, myKo * (oa ? this.pz(oa) : 0) / 3,
+        me.hand.length / 10, op.handN / 10, me.deckN <= 5 ? 1 : 0, me.deckN / 40, T / 20, this.first() ? 1 : 0,
+        this.bench().reduce((s, k) => s + this.pz(mb[k]), 0) / 6, Object.keys(ob).filter(k => k !== 'battle').reduce((s, k) => s + this.pz(ob[k]), 0) / 6,
+        this.v.oppType === 'rayquaza' ? 1 : 0, this.v.oppType === 'dragapult' ? 1 : 0);
+      return f;
     }
     /* 今の技で相手バトルポケモンを倒せるか */
     canKoActive() { const me = this.myB.battle, d = this.opB.battle; if (!me || !d || this.T === 1 || me.na === this.T) return 0; const b = this.myBest('battle', null, 1); return b.d >= this.rem(d) ? this.pz(d) : 0; }
@@ -135,6 +181,21 @@
       const at = pickAttack(cx); return at ? { t: 'attack', n: at.n } : { t: 'end' };
     }
     result() { return null; }
+    /* 先読み用：行動候補（ヒューリスティックの上位K個＋各攻撃）。[0]が通常のAIの選択 */
+    candidates(v, K) {
+      const cx = this.ctx(v), C = []; cx.wide = true; gen(cx, C); C.sort((a, b) => b.s - a.s);
+      const low = cx.me.deckN <= (this.prm.deckMin === undefined ? 3 : this.prm.deckMin), out = [], ok = c => c.s > 0 && !this.tried.has(c.key) && !(low && drawy(cx, c.a)), mk = c => ({ key: c.key, s: c.s, a: Object.assign({}, c.a, { _key: c.key }) });
+      for (const c of C) if (ok(c) && !/^en/.test(c.key)) { out.push(mk(c)); if (out.length >= K) break; }
+      let ne = 0; for (const c of C) if (ok(c) && /^en/.test(c.key) && ne < 4) { out.push(mk(c)); ne++; }     // エネルギーの付け先（上位4）
+      const atks = attackList(cx); atks.forEach(x => out.push({ key: 'atk' + x.n, s: -1e3 + x.s, a: { t: 'attack', n: x.n }, atk: 1 }));
+      if (atks.length) out.push({ key: 'endturn', s: -2e3, a: { t: 'end' }, atk: 1 });                        // 「攻撃しない」で番を終える選択
+      if (!out.length) out.push({ key: 'end', s: 0, a: { t: 'end' } });
+      const top = out.find(x => !x.atk) || out[0]; return [top, ...out.filter(x => x !== top)];
+    }
+    commit(a) { if (a && a._key) this.tried.add(a._key); }
+    features(v) { return this.ctx(v).features(); }
+    hasValue() { return !!(R.value && R.value[this.st.name]); }
+    value(v) { const m = R.value && R.value[this.st.name]; if (!m) return 0.5; let f = this.ctx(v).features(); if (m.ex) { const B = m.ex, o = f.slice(); for (let i = 0; i < B.length; i++) for (let j = i; j < B.length; j++) o.push(f[B[i]] * f[B[j]]); f = o; } let z = m.b; for (let i = 0; i < f.length; i++) z += m.w[i] * (f[i] - m.mu[i]) / m.sd[i]; return 1 / (1 + Math.exp(-z)); }
     pk(v, q) {
       const cx = this.ctx(v, q);
       if (q.kind === 'deck') { // 山札を全確認した瞬間：山札の内訳が確定し、サイドの内訳も確定する
@@ -170,29 +231,30 @@
     for (const u of lg.habs) { const c = cx.card(u), s = st.habScore ? st.habScore(cx, c) : 60; push('hab' + u, s, { t: 'hab', u }); }
     const seen = new Set();
     // エネルギー：最も良い（カード×つける先）を1つだけ候補にする
-    let be = null;
+    let be = null; const ents = [];
     for (const c of cx.hand) if (c.t === 'ene' && lg.att[c.u] && lg.att[c.u].length && !seen.has(nrm(c.name))) { seen.add(nrm(c.name));
-      for (const k of lg.att[c.u]) { let s = attachBase(cx, c, k); if (st.attachScore) { const t = st.attachScore(cx, c, k, s); if (t !== undefined) s = t; } if (!be || s > be.s) be = { s, u: c.u, k }; } }
+      for (const k of lg.att[c.u]) { let s = attachBase(cx, c, k); if (st.attachScore) { const t = st.attachScore(cx, c, k, s); if (t !== undefined) s = t; } ents.push({ s, u: c.u, k }); if (!be || s > be.s) be = { s, u: c.u, k }; } }
+    if (cx.wide) for (const e of ents.sort((a, b) => b.s - a.s).slice(0, 5)) push('en' + e.u + e.k, Math.max(e.s, P.aFloor === undefined ? 4 : P.aFloor), { t: 'play', u: e.u, k: e.k });   // 先読み用：エネルギーは布石なので、付け先を全て候補にする
     cx.attachBest = be;
     for (const c of cx.hand) {
       if (c.t === 'sup' && !lg.sup) continue; if (c.t === 'tr' && !lg.goods) continue;
       if (c.t === 'sup' || c.t === 'tr') { let s = st.trainerScore ? st.trainerScore(cx, c) : undefined; if (s === undefined) s = coreTrainer(cx, c); push('tr' + c.u, s || 0, { t: 'play', u: c.u }); }
       else if (c.t === 'sta' && lg.stad.includes(c.u)) { const s = st.stadiumScore ? st.stadiumScore(cx, c) : 0; push('st' + c.u, s || 0, { t: 'play', u: c.u }); }
     }
-    if (be) push('en' + be.u, be.s, { t: 'play', u: be.u, k: be.k });
+    if (be && !cx.wide) push('en' + be.u, be.s, { t: 'play', u: be.u, k: be.k });
     for (const c of cx.hand) if (c.t === 'tool' && lg.att[c.u]) { let bt = null; for (const k of lg.att[c.u]) { const s = st.toolScore ? st.toolScore(cx, c, k) : 0; if (!bt || s > bt.s) bt = { s, k }; } if (bt) push('tl' + c.u, bt.s, { t: 'play', u: c.u, k: bt.k }); }
     if (lg.retreat) { const s = retreatScore(cx); push('retreat', s, { t: 'retreat' }); }
     if (st.extra) st.extra(cx, C, push);
   }
   /* エネルギーを付ける基本評価：その技が打てるようになるか、あと何個か */
+  /* エネルギーを付ける基本評価。「その付け先の技／進化先の技／にげる／総数比例技」のどれにも役立たないなら付けない
+     （例：ドラメシヤ〜ドラパルトは 炎・超 で足りるので、悪エネルギーを付けても点は0）。手札に残しておく方が有利。 */
   function attachBase(cx, c, k) {
     const p = cx.myB[k], P = cx.P, units = /^ネオアッパー/.test(c.name) ? (cx.stage(p) === '2進化' ? ['*', '*'] : ['無']) : [(c.name.match(BE) || [, '無'])[1]];
-    let s = P.aBase; if (!cx.atks(p).length) return s * 0.3;
-    let en = 0, prog = 0;
-    for (const a of cx.atks(p)) { const b0 = payable(a.cost, p.eu), b1 = payable(a.cost, p.eu.concat(units)); const d = Math.min(300, cx.dmg(cx.myB, k, a, cx.opB, 'battle', {}) || 0);
-      if (!b0 && b1) en = Math.max(en, (k === 'battle' && cx.canAtkNow('battle') && cx.T !== 1 ? P.aEnableNow : P.aEnableSoon) + d / 12);
-      else if (!b1) prog = Math.max(prog, (short(a.cost, p.eu) - short(a.cost, p.eu.concat(units))) * P.aProg); }
-    s += Math.max(en, prog); if (k === 'battle') s += P.aBattle;
+    const u = cx.attachUse(k, units); let s;
+    if (u.en > 0) s = P.aBase + u.en; else if (u.prog > 0) s = P.aBase + u.prog; else if (u.line > 0 || u.scale > 0 || u.ret > 0) s = Math.max(u.line, u.scale, u.ret); else return P.aWaste || 0;
+    s -= (P.aOver === undefined ? 10 : P.aOver) * Math.max(0, u.over);   // 必要数を超えて付けるぶん（ネオアッパー等）
+    if (k === 'battle') s += P.aBattle;
     const th = cx.threat(k); if (th.act >= cx.rem(p) && k === 'battle' && !cx.myBest('battle').d) s -= P.aDoomed;
     return s;
   }
@@ -214,6 +276,16 @@
       case 'スタジアム': return 0;
       default: return 0;
     }
+  }
+  function attackList(cx) {
+    const lg = cx.lg, me = cx.myB.battle, d = cx.opB.battle, r = []; if (!me || !lg.atk.length) return r;
+    for (const a of lg.atk) { if (!a.ok) continue; const at = cx.atks(me).find(x => x.n === a.n); if (!at) continue;
+      const dm = d ? cx.dmg(cx.myB, 'battle', at, cx.opB, 'battle', { plus30: cx.fl.plus30 }) : 0, lo = d ? cx.dmg(cx.myB, 'battle', at, cx.opB, 'battle', { lo: 1, plus30: cx.fl.plus30 }) : 0;
+      const ko = d && lo >= cx.rem(d), koP = d && dm >= cx.rem(d); let s = dm + (ko ? 1000 + cx.pz(d) * 300 : koP ? 500 + cx.pz(d) * 150 : 0);
+      if (ko && (cx.me.prizeN <= cx.pz(d) || Object.keys(cx.opB).length === 1)) s += 1e5;
+      if (cx.st.attackScore) { const t = cx.st.attackScore(cx, at, { dm, lo, ko, koP }); if (t !== undefined) s = t + (ko && (cx.me.prizeN <= cx.pz(d) || Object.keys(cx.opB).length === 1) ? 1e5 : 0); }
+      r.push({ n: a.n, s }); }
+    return r.sort((x, y) => y.s - x.s);
   }
   function pickAttack(cx) {
     const lg = cx.lg, me = cx.myB.battle, d = cx.opB.battle; if (!me || !lg.atk.length) return null;
@@ -271,7 +343,8 @@
     moveSrc: (cx, q) => best(q.ks, k => k === 'battle' ? -1 : cx.myB[k].en.length),
     moveDst: (cx, q) => best(q.ks, k => cx.readiness(k) + (k === 'battle' ? 20 : 0)),
     hammerTgt: (cx, q) => best(q.ks, k => { const p = cx.opB[k]; return p.en.length * 10 + (k === 'battle' ? 15 : 0) + cx.pz(p) * 3; }),
-    trim: (cx, q) => best(q.ks, k => -(cx.pz(cx.myB[k]) * 10 + cx.readiness(k))),
+    trim: (cx, q) => best(q.ks, k => { const p = cx.myB[k], hp = p.hp || 1, th = cx.threat(k, 1);   // 残す価値が最も低いものを捨てる。ダメージを負った高賞金・狙われるポケモンは、相手に賞金を渡さないよう優先して捨てる
+      const keep = cx.pz(p) * 8 + cx.readiness(k) + p.eu.length * 6, deny = cx.pz(p) * (25 * (p.dm / hp) * 3) + (th.any >= cx.rem(p) ? cx.pz(p) * 30 : 0); return -(keep - deny); }),
     snipe: (cx, q) => { const amt = /120/.test(q.title) ? 120 : 100; return best(q.ks, k => { const p = cx.opB[k]; return (cx.rem(p) <= amt ? 1000 + cx.pz(p) * 100 : 0) + cx.pz(p) * 20 - cx.rem(p) / 10; }); },
     trumpetTgt: (cx, q) => best(q.ks, k => cx.readiness(k) + (cx.myB[k].en.length < 3 ? 10 : 0)),
     hoohTgt: (cx, q) => best(q.ks, k => cx.readiness(k)),
@@ -284,5 +357,5 @@
     if (L.length === 2 && L[0] === 'はい') return 0;
     const i = L.findIndex(x => !/使わない|ここまで|キャンセル|この中にない/.test(x)); return i < 0 ? 0 : i;
   }
-  R.core = { PKH, ASKH, route, PKR, ASKR, topBy, pool, promoteScore, coreTrainer, attachBase, Cx };
+  R.core = { attackList, PKH, ASKH, route, PKR, ASKR, topBy, pool, promoteScore, coreTrainer, attachBase, Cx };
 })(typeof window !== 'undefined' ? window : globalThis);

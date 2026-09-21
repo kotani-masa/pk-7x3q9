@@ -5,7 +5,7 @@
 (function (root) {
   'use strict';
   const R = root.CPUAI, U = R.util, nrm = U.nrm, payable = U.payable, C = R.core;
-  const RQ = 'メガレックウザex', KG = 'メガガルーラex', TF = 'ファイアローex', TP = 'テラパゴスex', HO = 'ヒビキのホウオウex', MW = 'ニャースex', LT = 'ラティアスex', FZ = 'キチキギスex';
+  const PC = 'パオジアン', RQ = 'メガレックウザex', KG = 'メガガルーラex', TF = 'ファイアローex', TP = 'テラパゴスex', HO = 'ヒビキのホウオウex', MW = 'ニャースex', LT = 'ラティアスex', FZ = 'キチキギスex';
   const ip = (cx, n) => cx.inPlayN(n), ih = (cx, n) => cx.n(n), have = (cx, n) => ip(cx, n) + ih(cx, n);
   const etype = n => (String(n).match(U.BE) || [, ''])[1];
   const eneCount = (cx, ty) => cx.hand.filter(h => etype(h.name) === ty).length + cx.keys().reduce((s, k) => s + cx.myB[k].eu.filter(x => x === ty).length, 0);
@@ -16,7 +16,7 @@
     first: 1, sEvo: 88, sBench: 65, benchCap: 5, sAbil: 70, aBase: 45, aEnableNow: 45, aEnableSoon: 25, aProg: 9, aBattle: 6, aDoomed: 30, aLillie: 60,
     sRetreat: 64, rEnergy: 20, rMargin: 40, sBoss: 96, sJudge: 55, judgeMine: 2, judgeOpp: 5, sLillie: 90, lillieHand: 12, sHyper: 60, sRed: 82, cyanoMin: 30,
     pReady: 1, pRisk: 70, pHp: 20, sCyano: 84, cyanoMaxHand: 6, sLantern: 68, sSwitch: 90, sTrumpet: 78, sAka: 78, sRQBench: 92, sMWBench: 85, sHOBench: 84, sTPBench: 75, sKGBench: 60, sLTBench: 55,
-    sTF: 78, sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2,
+    sPC: 88, sTF: 78, sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
   };
   const space = {
     first: [0, 1], sBench: [40, 85], benchCap: [3, 5], sAbil: [50, 90], aBase: [25, 70], aEnableNow: [20, 75], aEnableSoon: [5, 50], aBattle: [0, 25], sRetreat: [40, 90], rMargin: [10, 120], sBoss: [80, 110],
@@ -35,6 +35,20 @@
           if (s === 'battle' && sc && cx.myBest('battle').d > 0) sc = 0; // 今の攻撃手段を壊さない
           if (sc > (best ? best.sc : 0)) best = { s, d, en, sc }; } } }
     return best;
+  }
+  /* パオジアン：ベンチに出すこと自体は強くない。特性「ゆきにしずめる」でスタジアムを消す価値があるときだけ出す。
+     ・ゼロの大空洞でベンチが6匹以上→消すと5匹に縮む。自分が捨てる側なら、ダメージを負った高賞金のポケモン(メガex等)を先にトラッシュして賞金を渡さない
+     ・相手がベンチ6匹以上（大空洞＋テラスタル）→ 相手に捨てさせる
+     ・相手のジャミングタワーで自分のどうぐが無効になっている */
+  function pcPlan(cx, add) {
+    const s = cx.v.stadium; if (!s) return 0; const mine = cx.bench().length + (add || 0), opn = cx.opBench().length;
+    if (s.name === 'ゼロの大空洞') {
+      const over = mine - 5, dmg = cx.bench().filter(k => cx.myB[k].dm > 0 && cx.pz(cx.myB[k]) >= 2 && nrm(cx.myB[k].name) !== PC);
+      if (over > 0 && dmg.length) return 100;            // 自分のダメージを負った高賞金ポケモンを賞金にさせず処理できる
+      if (opn > 5) return 60;                            // 相手に捨てさせる
+    }
+    if (s.name === 'ジャミングタワー' && cx.keys().some(k => cx.myB[k].tl.length)) return 45;
+    return 0;
   }
   function needPiece(cx) { // メガレックウザ/供給役が盤面・手札にあるか
     if (!have(cx, RQ)) return 1; if (!have(cx, TF) && megaOnBoard(cx)) return 0.8; if (!ip(cx, HO) && !have(cx, HO)) return 0.7; return 0.4;
@@ -58,6 +72,7 @@
         case TP: return ip(cx, TP) ? 10 : P.sTPBench;
         case KG: return ip(cx, KG) ? 0 : P.sKGBench;
         case LT: return ip(cx, LT) ? 0 : P.sLTBench;
+        case PC: return pcPlan(cx, 1) > 0 ? P.sPC : 0;      // 特性を使う場面があるときだけ
         case FZ: return cx.me.koTurn === cx.T - 1 && cx.me.deckN > 10 ? P.sFezBench : 0;
         default: return P.sBench;
       }
@@ -101,7 +116,7 @@
       const np = needPiece(cx);
       switch (n) {
         case RQ: return have(cx, RQ) ? 55 : 100; case KG: return have(cx, KG) ? 45 : 72; case TF: return megaOnBoard(cx) && !have(cx, TF) ? 82 : 45; case TP: return have(cx, TP) ? 40 : 66;
-        case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx, LT) ? 15 : 46; case FZ: return 25;
+        case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx, LT) ? 15 : 46; case FZ: return 25;
         case 'シアノ': return cx.fl.sup ? 40 : 88; case 'ボスの指令': return 74 + (cx.gust() && cx.gust().ko ? 20 : 0); case 'アカマツ': return 58; case 'ジャッジマン': return 45;
         case 'エネルギーつけかえ': return 62; case 'ガラスのラッパ': return tera(cx) ? 60 : 30; case 'ぼうけんのランタン': return 50; case 'ゼロの大空洞': return tera(cx) ? 58 : 25;
         case 'スペシャルレッドカード': return 36; case 'ハイパーボール': return 44; case 'ヒーローマント': return 30;
@@ -111,7 +126,7 @@
     junk(cx, c) {
       const n = nrm(c.name);
       if (c.t === 'ene') return cx.eneHand.length > 3 ? 8 : 30; if (n === RQ) return 96 - ih(cx, RQ) * 15; if (n === TF) return 74; if (n === HO) return 66; if (n === TP) return 60; if (n === KG) return 62;
-      if (n === 'シアノ') return 58; if (n === 'ボスの指令') return 62; if (c.t === 'sta') return 14; if (n === LT || n === FZ || n === MW) return 20; if (n === 'ジャッジマン') return 28;
+      if (n === 'シアノ') return 58; if (n === 'ボスの指令') return 62; if (c.t === 'sta') return 14; if (n === LT || n === FZ || n === MW || n === PC) return 20; if (n === 'ジャッジマン') return 28;
       return 26;
     },
     pkH: {
@@ -123,6 +138,6 @@
       moveSrc: (cx, q) => { const w = cx.C.note.sw; return w && q.ks.includes(w.s) ? w.s : q.ks[0]; },
       moveDst: (cx, q) => { const w = cx.C.note.sw; return w && q.ks.includes(w.d) ? w.d : q.ks[0]; },
     },
-    menuH: {},
+    menuH: { any: (cx, q) => /パオジアン.*ベンチに出しました/.test(q.title) ? (pcPlan(cx, 0) > 0 ? 0 : 1) : undefined },
   });
 })(typeof window !== 'undefined' ? window : globalThis);

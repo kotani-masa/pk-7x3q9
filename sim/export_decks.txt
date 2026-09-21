@@ -1,0 +1,7 @@
+【実際のデッキで再調整するための手順】
+1. エミュレータ(index.html)をブラウザで開き、開発者ツールのコンソール(F12)に次の1行を貼って実行
+   → デッキ内容がクリップボードにコピーされます
+copy(JSON.stringify({decks:Object.keys(localStorage).filter(k=>k.startsWith('dk2_')).map(k=>({code:k.slice(4),cards:JSON.parse(localStorage[k])})),dvar:JSON.parse(localStorage.dvar||'{}')}))
+2. sim/my_decks.json というファイルに貼り付けて保存
+3. node sim/import_decks.js sim/my_decks.json   （デッキタイプを自動判定して sim/decks/*.json を上書き）
+4. node sim/optimize.js --rounds 2 --gens 10 --pop 14 --games 36   （再調整。ai/params_*.js が更新されます）
