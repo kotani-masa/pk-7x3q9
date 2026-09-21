@@ -136,21 +136,21 @@ html,body{overscroll-behavior:none;overflow:hidden}
 const $=s=>document.querySelector(s),e=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
 const EI={"NEO": "data:image/webp;base64,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", "草": "data:image/webp;base64,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", "炎": "data:image/webp;base64,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", "水": "data:image/webp;base64,UklGRroFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggEAUAAPAVAJ0BKkAAQAA+XSSQRSOiIZcKT4w4BcS2AE6ZUt3n3vzXqr/U91XL72yaAPRB4pHS6/TP1O+dn6MPQP6Tz0Ruls/bfCK7QfPdnww7MyL/s+Wj6k9gv9ZfSz9ffok/rMpudRvdMt2C7ZWllWcVl0IUT0Gh0zBeep5AU3zNUQQXmXQf4AXQ030TxEA+OvJ5Ah2U50te07Vz6144yD7cY4EN7dAxewyG7lBx9tkXAl/0CtlBIq6PF8AA/cwP6AIxbAyTRR86/dAD8Q4SPuxKoysKE5hXEsAEKXD7vTS1/V//QIEo/KpVQnIK/+4px/SwUi5bCb58YCLfXVf/v3vN9AHr9WYJ+BL3cn+RaEI3Pc/qlJ64Dbjj0Y7JRsQzn2gz9Yftu4iUNvfnBMD4uH3gdVlvV2UoG/fURYuwsE7VRf9GdfEm+FtuLSs9iXILBR97BMSUtHVEw24qwjPZQ67mF1ZAMskqePfL+0o1HE7+2Robw2HDYwMVrWFk2zyj/fsWZdFOccRmdTRTB//H9/NAPV/hFg+pFDpBI2BY2LdoWdnbGE6sn/iXwbZax7H6eLHatUCZ9605fwEkNECK937adVEaLaE5xKRSjG8sBfF0M2JEK/lQnRdT2LQcFEE21YDHuIily/zN/6ojqYfqqZfUbMPwoSqUHNCi8nqCwPNLkKdfgEl9bjfOEnLBQ4JUR/muR6jCaahK4gn8NX56Y+r/xbZTZfb63rb5gxcDJ7gd3gB/bvJJBbx7Hi8BKUULTLvDLv4rk+q1dxE/wGV7Uk65bLB4PyPi9P9+Kdmwjf9yjd4h+97KO/Q7TQZeK79YP6AgY96SszL7T5/Me/25KcVZBWZ89JiFLmL0b1F+5TH7ezuSa9fX94BeXCzIjAmBV0ZbopnCg+mnK2F55EW7R6DfS2f1zp8hbQhbGm+A59HcjpG/o0mOTjFszUU1exMx7ADeZ/Q2fabwjcAgt5D5yf/3wKCZ61HTAMyDSHcst9i5+VT3rfr8LSeH5MP1zlVFvP96a95CG1kLmXEkMUCi1M8Tyd7E59OgwkN3f8dS3++vBd+FQwuP1LVrdH509wes9VS8aV6TXmX7nPOrMSOHKwrkCZseXgJwM5W3vwBjzZBXc0WjhxkFsNZa0kfhpnKYoFHyYYLY7JRfZFtqgCS3im6kk5fgp8HNVQ5cbUF6aUWR+JPp/MElNahhJxntCR7OeznBjMi//jn/i42qg7LyYx5HKwWTeTM+v+YYzrbcRKtq7awBBtfxxfJ5c3nG0fOQ+zL9p9YoU3uqtFwkxpjR8V3pN6ub5fmlaq4XuvvaPZIw0Ee+NkoZAROfuBtNM45C0vs6/NXZpidTxVO8/kL9uvK6p1LfwoG0FQqZ5ac/8JcrM5PxwSVn82JX/ygOmatPbnYSNECuNWT0efllcTRippcSTqfjXSt2h53rYXIcN3Xom4ZDFH2RLeYe59OxiRhS0GtDvx5xw5IyGB6wlJV8KjTJAeCnOJWnQsnRc7+RIdNjmV26l9s/3SxK6e/6bMMEyvPHs7v3KPm/NeyQ6AfVeVgHaVQZlyLXyraygcYOFAx5AjcBgxi+yraY6pLrcju6qqrbeywQ42Bk+p3bS7aUA69ETX2hpqn6KMQsz2z/OxQvxlmOHFAn20GJOucK9SelcFTftRrO5KmAVvWyQIIA/L1+jTZetFqt/hq7x5VCSeyMa5TG0GJF8XRFrh32HjrT4wAAAA==", "雷": "data:image/webp;base64,UklGRnwFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDgg0gQAAJAXAJ0BKkAAQAA+YSqSRqQiIaEqEzrogAwJbACdMqp9V715idO/pP4S3WgtHafOH8wD9Semn5i/2k9Xb0k+gX+wHW8eh55af7X/C7+3PpDZpfmR2QRgXe6N5DMwrne+lvRT6yf7brXikg3UAckh7qb0KcWFwysaXtjdT5Sl3cdQp3R1uCIhobqwoq3PDlcYMNefWk1VsJoOZW7dNjCtjkz+sVMA9F3haNyBimCVKcSjbvP8wzzvJUEqgWcfhKG/TB+/7l+AAP76R8/QR1yPEc9Yx1DIBTMp2tGpQZY3xDu33R//kQHnv1K+OgzQoRfziII6sf/AI7k3t+g0OsN1bOn10cPsky6FIZiSC7BdFm9fI4TebjOYWC1ZbLceJk5qv1LkaNdH8sGoQuQEl8Am/8EWOpBxRM4//oq7KklTpOeEO5jrWuxdSKOygLRaSBYzoXNDRaj6FWczW1oJozhIXNfKA/X3zfu+26SbGGuLfXB1VZZo6aPx5+0wSrRB3d7vltAz4auI6aqKFhX05d/7jV4dyktg0ezl/WafoqI2q/jJxEUW6Ko9UVGAa24pe+KfJUYCby6CBO4goknJd8m8LFbzpE0DHJdzRmXtsmGIFB3gZpeRU8DPvJQyFudg46u+F+P+DxSVZ0GwJgrYuobTasHcHlvvPlDFmN37wHrpTx9VNVVhQNuT3jVpcUN1KlGoC/MkFY9Mp3aXnCndcSEzZKlNfXLchg/6gfOsZA9qGWif//2hF74RHGI2LOu3tA2gLJ+Y0SBGT0XdTVjjr+VVLxyITZx3zfef7+cobiS7XJG/6HXzyzfkI0KCkdsNhkZ3thB+vfbH+kce3W1XAoAQfMssLhJVaBGz5D/mcw+VUEuBypZDiJytJ6i0KuccAtWEMUF0TaiFNphuUOUXiNRGtUFTvfZnDA9JBLGwm76fz1GNDG+C8cO0gKrunfyuJnYzxpvkyA+wJL7nwTacOvdT75eYLiSwl3quPsHEBXiyFZc9fQ/xwD4x0Q1aaVcTaHiDxt/ezNQ0BmBcmr5O+SF6FaGCTVbHHbtUm0F6QtqFXJwtNnAQlDwRKhPr+DCafn5nLjEqDuctf+Of0lMSC1/rCGATqqwF7C1S4wryaQaOqE4reU1bHbU/hVG1xvYCKiLvmsWo2PxKmog/aGyPL0bMzBWpAzF142TEG7x6Mirrlz1Ylr/2geGof4rna2R53Nh9quoKfP2VHkihuevgJwWnt2tAJ+mBD9S5gR3cN1PgQc11Z4wYrfn93i1MGDwr3XR9DXWzwSo0QSRybPziMgizbWR7DvHO5C6hCu1qvHprEZcd/UHQ++6iq1sGVl174iJwP5LosUhcLInviAimhzfhjIkLfP/m+e3N+kZastiaKetIVsr38IGHqF1kFQ++Y8PWuSouun92lb4RZ4mDzupf3GimB/7R/xJpEsjf9qKETTqYYwjOEpVaTol4w2zC3vvCWFHFCfRbQ5lens4ib8WvIGJy+dqXASwWt4Xvdwzs36fh9xzWR12X80fVoOTzqbBZO2Edh1MMlCtrt8yZN5ZwVJsA5GDn+NjrzPDSzweo9SqpYqHSvfRSnxE6OT94NBArZjhlvp5nIEOEPc8nCIPDStXDYOOiIMyTnL83DOMSi02AAAA=", "超": "data:image/webp;base64,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", "闘": "data:image/webp;base64,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", "悪": "data:image/webp;base64,UklGRjgFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggjgQAAFAVAJ0BKkAAQAA+WSaPRSOiIZn6bqg4BYSyAFiPY4aKR/hXGVt4+jnbzXbXQF/Mc+ePjp9pyqSZeAeY5T98DqPH/Jeyx/L/+Typ/T3sCfrt6W/r8/cD2Kf2SWTIsOzJ1YlPz91/tVNDiOBpQSeTf95YM15FUS2maQcUMqHilISZcUXpyBoNTeHqtubLeEQiAmzCd37S57mOXBdnd8KSQimMNaLCyUFeZhiKdKyohXVlXDoAAPXqX+YmzfyvY/QAtx/yBeXFSP4HjfbFQZ4umVpz5V2VDXjMkfOelUakaTD4AF+mFX/jC+G5i2xJ/8056igxYdCZKFW8UoBFrX5sHcurMuczwndGZvsr+ayYv7kcd/ulwF8Eoh0fM5tCBjdii3jXOW/YOAqAVzX42XEofXuffMVYCD6bVBoDkHqDxjN4tBEC4Nninxfc9OMC9n67TbYNwerYjSjV4xJhWRgjYlUw3GGvPzUFbBMsG+QljpNjv5xoVhG/d35Nw1EAmLHqgoQR5r7VCfCeLFEZy8cfsWPb18/8ARujAAS5a0pkJu6+MibB9aK3+aJ9jXTteKP+2OsJJFcljKWw7k6qmiivyiC4pc4v3irwhFzlH/We468zU/bbyY42As61APJOGs0WUFmcnWuY+8//kaccd3+/AcnTYKF/bXodGrdzTuDN1OEby0yyiCz41C3KNbIKHaJslfGoD6/CilL0pZNDIl5sggEss/LvJdP6tAx+L89iIQ2nqCrfi5l44GWEy/DGbL1xuyNZmV03bskIAWedXZ/MbAxzXqtD006zIPS7lp+naZoP1af4hhDE+uSty4kzmdIGe0ID6aPYtsHsqxlQ2yjgJiAOKlfVwnNen+cckQdToasI1zTL06XXTKFll6EGHiuCagkHceYRfih5JAHLe3Q9kPsRUGY4Pxat4TPEAzMeOFqhi7M+WMXrcsIxB0o8OUDKk3Y4M+U4nR+0SBQFuJYtFXm2Pe4LVJeK/EIcJDs4vJ6NR9Yk6M2Wz+uQ+P3MJJ0oVRGv6MRLBVQs/Ptg4mlummR7lmv35z6sMaVf1Psm+4m84gYtS8wg6c5i2e3Sxcz4Y0duOiC+4l6d7gmXaJ0hiQdb06Z3ZqArzYDKD3/XGgNqJWwfbZfgvEALAiV7EAC1GNBQXYnWqXtN9s+H9NScldveWHJzvK9Lu6Cqkfg0qYs9DocOBd9OBRtUFx96KjPfDGPgj6lncHV8AsmyEPLp57YRx4sZMhwmGzYebr0r4IlhzCkmCZPmiTrFBdtyerRHw5KD1KYijZ49vdH6Q1PIPJCZxs6URXUNcOjTc87OVUbgNSDuAEGcybPK7DDuNQhP/SIsP3xCyh5TsNQcLwID0Ks2/jFF9d3l9tuAc3iQzl9YXv9NmtjzpkBcbwueyjCr2lXPmNeK7DRvRkV1j9VzTsPKT2e88QV7V49ehidHOYx3k/hGtNPSAh9BgliaaiOiwbptoQno28TwILqUnfYdboP7IDARZpBAOaqa8n4oyheadJbTDQK8NnGLOHgoWG+jAMaPNNlBN0OxjxhEcAAA", "鋼": "data:image/webp;base64,UklGRgwFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggYgQAAFAVAJ0BKkAAQAA+YS6TRyQiIaEiCzCADAlnAMd0dE8NdjH+G8HfE5709seSw0r/VcRuv7wL3o71V8HkwZ9IegP6f/73uD/qr/0fWq9d/ouqzX5YTEkv6eebAUVBz90bVlg+2s6Ptvs9qLeegmggpb7faYJCH+JupowdDI0sa4zIZa7NaDTcV7mG9GvWsDWX153V9QUdRAKsS9TS9UqiVJ50ozsK5pjuBIBZtoZcwYcggxIAAP6tDvcAGLOnzd/IM2fldG+gfZZV0HwW17oyjlRZJ5RTJItn1i29RSzxiNyIC/EjiKLIG6n+WB4F5bruc/SuTYfHFBx+wAT8sHwdMvwR8O/9NLQlGd6Z6d6B85Usp0QsP7v18enHUOW3srzAnZA/mATujBeAAnDPn4Uh9em9g61zSJ0+wacZ8h7yMxp7BtfRlm1oKa+QksEGQqOoDPTP90/FnhQXG30LvcwqKgn5d7erEHX3k4QRn8uAAG0BHlddRNnlQy66jlTFGhXW/ehS9eELYya8xvWl8sfvXsP7V/z4Kr9UunsH6/Mm7VGR0S73J1RY9bvd+bt1d7h093cfComsmhnm/7b3vwQ+evOBQd/lz7jbyLlUozP8c+HD+DTi8B5LExJ93f2A1FpI6AetrCeAgv+4ArEw+OK5tVLK7Q3sJ61McWNqRsZqmrC/4MrniJWCoUhQnH6JcAcuYT03OfTUO+Max9xLfbbUB5/trBYV+5kxXiGNSHeASXZNuPWsM+eF32T0+JOliSuaIR0CbP9OAvEukr5tRr56/T083Uyn++k4oYAsxMk8yKIRsz9vosHazqfiaNWu7FLEnnmfEhEUhV2V4ah3HQWcQFs60R4gsP1WmvQhDWbtGYv0KIvNYsvOQ64QFTBAwqhImfUdwreFxJ0GdAcrNOwz229EpxIpmpL76jP+xHj1urFdmoWtDJq2HAEe1783SjNJ4v050p13zjzKTvJF36BAnk6b4ZSIUOH+7fGdyPamUry7lqk/YlcTc6gPFr5ibaztTATcTc3Va5ufUwCkN8iZODTNDnRg/Di5XsJyuPF/2fXk4D4h+ihzWD13kpmBTWFZy9QrOkIli/rTH8mLZy4wET0IVztFJm4cXhqVW4ZcuegfKWvMMVTUrQ9oo3AYF/DvLnlzkN/NNFfvspYw6EUR/+HiNVwlPVPs/H3Wq8e1U8c0f8ARmUf31eV0SxZuCvqpW3s0Xsv61FKQB93XIfu4AikpmTcd6kCBwWuwgP5KChA4LCXCwaryATn6XI7UgaWpY/UbmBykbvzg54fZO61D9VenybFcd9K/OQRkbMIDpHdJLtqWsSzndiO4N28wPLzCYAEF+3gc1svYv8/ySVnjzbVKnHkXa8QE403jmMvO89ej8kCXLf//wabsuKtdBUpzGYQWe5dkyp40w4zwh5dBX7HJFgZ4Xyv5eAuFWDBdxth0vfsYWyNnpRsprVaANMQcgMv4PQZfKd++Tz534gAju/sUAA=="};
 const BK='https://www.pokemon-card.com/assets/images/noimage/poke_ura.jpg',RX=/[A-Za-z0-9]{6}-[A-Za-z0-9]{6}-[A-Za-z0-9]{6}/;
-const newP=()=>({code:'',cards:[],deck:[],hand:[],side:[],trash:[],phase:'none',piles:{battle:[],b0:[],b1:[],b2:[],b3:[],b4:[],b5:[],b6:[],b7:[],stadium:[]}});
+const newP=()=>({code:'',cards:[],deck:[],hand:[],side:[],trash:[],phase:'none',piles:{battle:[],b0:[],b1:[],b2:[],b3:[],b4:[],b5:[],b6:[],b7:[],stadium:[],staging:[]}});
 let P=[newP(),newP()],G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0},cur=0,HS=[],LG='';const me=()=>P[cur],lastOf=a=>a[a.length-1];
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
 const back=()=>`<div class="card back"><img src="${BK}" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
 const cardH=c=>`<div class="card t-${c.t}"><span class="nm">${e(c.name)}</span>${c.img?`<img src="${e(c.img)}" referrerpolicy="no-referrer" onerror="this.remove()">`:''}</div>`;
 const LGS=[];let ERR='',ERT=0;
 const lgH=()=>LGS.slice(-1).map(e).join('<br>'),log=t=>{LGS.push(t);if(LGS.length>500)LGS.shift();const l=$('#log');if(l)l.innerHTML=lgH();netSend()};
-const err=t=>{if(CPU.on&&cur===1)return;ERR=t;const x=$('#err');if(x)x.textContent=t;clearTimeout(ERT);ERT=setTimeout(()=>{ERR='';const y=$('#err');if(y)y.textContent=''},2000)};
+const err=t=>{ERRN++;if(isCpu(cur)){CPUX.err=t;return}ERR=t;const x=$('#err');if(x)x.textContent=t;clearTimeout(ERT);ERT=setTimeout(()=>{ERR='';const y=$('#err');if(y)y.textContent=''},2000)};
 function openLog(){const o=$('#ov'),z=document.createElement('div'),b=document.createElement('div'),d=document.createElement('div');z.className='sheet';o.innerHTML='';b.className='bar';b.innerHTML='<b style="flex:1">バトルログ</b>';
  b.append(btn('閉じる',closeAll,'sm'));d.style.cssText='font-size:13px;line-height:1.7';d.innerHTML=LGS.length?LGS.map((t,i)=>`${i+1}. ${e(t)}`).join('<br>'):'ログはまだありません';
  z.append(b,d);o.append(z);o.className='on';o.onclick=ev=>{if(ev.target===o)closeAll()};setTimeout(()=>{z.scrollTop=z.scrollHeight},0)}
-function act(fn,re){HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();render();re&&re()}
+let ACTN=0;function act(fn,re){ACTN++;HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();render();re&&re()}
 const draw1=p=>{if(p.deck.length){p.hand.push(p.deck.shift());return 1}};
 function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:c.img,t:c.t})));
- p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.sup=0;G.eat=0;delete G.act;delete G.fp}
+ p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
 function find(p,u){for(const k of['hand','deck','side','trash']){const i=p[k].findIndex(c=>c.u===u);if(i>=0)return p[k].splice(i,1)[0]}
  for(const k in p.piles){const i=p.piles[k].findIndex(c=>c.u===u);if(i>=0)return p.piles[k].splice(i,1)[0]}}
 function mv(u,d){const p=me(),c=find(p,u);if(!c)return;
@@ -179,9 +179,9 @@ const abB=(t,i,k)=>{const M=mi(t),A=M&&M.ab;if(i!==VW()||!A||A.passive||A.onBenc
 const hpOf=pl=>{const h=(mi(lastOf(pl))||{}).hp;return h?h+(stadName()==='ジャミングタワー'?0:100)*pl.slice(0,-1).filter(x=>x.t==='tool'&&/^ヒーローマント/.test(x.name)).length:0};
 const dmB=(t,pl)=>{const h=hpOf(pl),d=t.dm||0;if(!h)return d?`<span class="dm">-${d}</span>`:'';const r=Math.max(0,h-d),pc=Math.max(0,Math.min(100,r/h*100)),c=pc>=50?'g':pc>=20?'y':'r';
  return`<div class="hpb"><i class="${c}" style="width:${pc}%"></i></div><span class="dm ${c}">${r}/${h}</span>`+(t.cf?'<span class="st">混乱</span>':'')};
-function board(i,f){const p=P[i],o=[],cn=n=>`<span class="cnt">${n}</span>`;
+function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>x.phase==='setup'||x.phase==='wait'),cn=n=>`<span class="cnt">${n}</span>`;
  const sl=(x,y,w,a,inn)=>o.push(`<div class="slot ${inn?'f':''}" style="${at(x,y,w,f)}" ${a}>${inn}</div>`);
- const L=benchMax(i)===8?PX8:PX;for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t?t.u:''}" data-dm="${t&&t.dm||0}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k):'')}
+ const L=benchMax(i)===8?PX8:PX;for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
  sl(8,1300,150,`data-a="sidez" data-p="${i}"`,p.side.length?back()+cn(p.side.length):'');
  sl(762,1170,150,`data-a="deck" data-p="${i}"`,p.deck.length?back()+cn(p.deck.length):'');
  sl(775,1465,130,`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
@@ -191,7 +191,7 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  let h=`<div class="hrow">${MP()?`<div class="tl" style="background:#ffd23f">${CPU.on?'CPU戦':'対戦'} P${V+1}</div>`:`<button data-a="mode" class="${ed?'pri':''}">${ed?'編集モード':'プレイモード'}</button>`}`+(ed?`<button data-a="swap">視点 P${cur+1}</button>`:`<div class="tl">${pd>=0?`P${pd+1}準備中`:tl}</div>`)+'</div>';
  if(SEL)h+=`<div id="prompt">${e(SEL.ttl||'ポケモンを選んでください')}</div>`+(SEL.must?'':`<button data-a="selc">${e(SEL.cl||'キャンセル')}</button>`);
  else if(NET.wait)h+=`<div id="prompt">相手の選択を待っています…</div>`;
- else if(p.phase==='setup'&&(!MP()||CTRL()===V))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button data-a="mull">マリガン</button><button class="pri" data-a="side">サイドセット</button>`;
+ else if(p.phase==='setup'&&(!MP()||CTRL()===V))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button class="pri" data-a="side">サイドセット</button>`;
  else if(p.phase==='wait'||(MP()&&p.phase==='setup'))h+=`<div>相手のセットアップ待ち</div>`;
  else if(MP()&&p.phase==='play'&&CTRL()!==V)h+=`<div style="text-align:center">相手の番です</div>`;
  else if(p.phase==='play'&&!ed)h+=`<div class="hexw"><button class="hex" data-a="tend"><span>ターン終了</span></button></div>`;
@@ -202,14 +202,14 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  if(NET.on&&NET.me===0&&P[0].cards.length&&P[1].cards.length&&P[0].phase==='none'&&P[1].phase==='none')h+=`<button class="pri" data-a="nstart">対戦開始</button>`;
  if(NET.on&&P[V].cards.length&&!P[1-V].cards.length&&p.phase==='none')h+=`<div>相手のデッキ待ち</div>`;
  
- return`<div id="hud">${h}<div id="log" data-a="logs">${lgH()}</div><div id="err">${e(ERR)}</div></div>`}
+ return`<div id="hud">${h}<div id="err">${e(ERR)}</div></div><div id="log" data-a="logs" style="position:absolute;z-index:3;color:#111;${at(6,945,340,false)}">${lgH()}</div>`}
 function render0(){applyRatio();const V=VW();if(AS)P.forEach((q,z)=>{if((!MP()||z===MYS())&&q.cards.length&&q.hand.length>1)q.hand=dl(q,q.hand)});if(G.mode==='play'&&!MP()){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0)cur=pd}const si=P[V].piles.stadium.length?V:1-V,st=lastOf(P[si].piles.stadium);
  $('#mat').innerHTML=board(1-V,true)+board(V,false)+
- `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+hud();setTimeout(fixBench,0)}
+ `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`+(CPU.on?`<button data-a="cpuspd">速度：${CPUSPD[CPULV][0]}</button>`:'')):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+stgSlot()+hud();setTimeout(fixBench,0)}
 /* ---------- overlays ---------- */
 const btn=(l,f,c)=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;if(c)b.className=c;return b};
 const closeAll=()=>{for(const s of['#ov','#ov2','#ov3','#ov5'])$(s).className='';HOLD=0;$('#hold').style.display='none'};
-function menu(c,items,ttl,must,cx){if(CPU.on&&cur===1&&items.length){cpuMenu(items,ttl);return}
+function menu(c,items,ttl,must,cx){if(isCpu(cur)&&items.length)return cpuMenu(items,ttl,c,cur);
 const o=$('#ov2'),s=document.createElement('div');s.className='sheet';o.innerHTML='';
  s.innerHTML=(ttl?`<div style="margin-bottom:6px;font-weight:700;white-space:pre-line">${e(ttl)}</div>`:'')+(c?`<div class="zoom">${cardH(c)}</div>`:'');
  const cancel=()=>{o.className='';cx&&cx()};
@@ -224,7 +224,7 @@ function list(title,cs,pick,ex=[],num,dim,cl,nc,ovid){const o=$(ovid||'#ov'),s=d
 /* 山札の実際の順序は変えず、表示だけデッキリスト順に並べる */
 const dl=(p,cs)=>{const ix={};p.cards.forEach((c,i)=>ix[c.id]=i);return cs.map((c,i)=>[c,i]).sort((a,b)=>(ix[a[0].id]??99)-(ix[b[0].id]??99)||a[1]-b[1]).map(z=>z[0])};
 /* 山札サーチ：初期は対象のみ。「山札を確認」で全表示（選べるのは対象のみ）。閉じると null を返す */
-const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(CPU.on&&cur===1)return r(cpuPk(t,pool,n,min,ok));const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
+const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(isCpu(cur)){const w0=cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
  const draw=()=>{list(t+(all?'（全カード確認中：薄いカードは選べません）':''),all?view:view.filter(ok),(c,w)=>{if(!ok(c))return;
   if(s.has(c.u)){s.delete(c.u);w.classList.remove('sel')}else if(s.size<n){s.add(c.u);w.classList.add('sel')}},
   [...(pool.some(c=>!ok(c))?[[all?'対象のみ表示':'山札を確認',()=>{all=!all;draw()}]]:[]),['決定',()=>{if(s.size>=min){closeAll();r(pool.filter(c=>s.has(c.u)))}}]],0,c=>!ok(c),()=>{closeAll();r(null)},1);
@@ -276,7 +276,7 @@ const freeBench=p=>BN.slice(0,benchMax(P.indexOf(p))).find(k=>!p.piles[k].length
 let SEL=null;
 /* ---------- オンライン対戦：行動中のプレイヤーが盤面を更新し、全状態を相手へ送る ---------- */
 const NET={on:0,me:0,ch:null,pc:null,mid:0,buf:{},pend:{},wait:0,applying:0,was:0};
-const CPU={on:0,busy:0,tried:new Set(),sug:0,d:700,iv:0},MP=()=>NET.on||CPU.on,MYS=()=>NET.on?NET.me:0;
+const CPU={on:0,busy:0,tried:new Set(),sug:0,d:700,iv:0,who:[0,1]},isCpu=i=>!!CPU.on&&!!CPU.who[i],MP=()=>NET.on||CPU.on,MYS=()=>NET.on?NET.me:0;
 const VW=()=>MP()?MYS():cur;
 const CTRL=()=>{const pd=P.findIndex(x=>x.phase==='setup');return pd>=0?pd:(G.act===undefined?cur:G.act)};
 const canAct=()=>!MP()||CTRL()===MYS();
@@ -292,20 +292,21 @@ function onMsg(m){
   render();NET.was=canAct();NET.applying=0}
  else if(m.t==='deck'){for(const k in(m.vm||{}))if(VMAP[k]===undefined)VMAP[k]=m.vm[k];if(P[m.i].phase!=='none')return;P[m.i].cards=m.cards;P[m.i].code=m.code||'';render()}
  else if(m.t==='ask'){SEL={ks:m.ks,i:m.i,ttl:m.ttl,must:m.must,cl:m.cl,r:k=>sendMsg({t:'ans',id:m.id,k})};closeAll();render()}
- else if(m.t==='sur'){G.over=1;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
+ else if(m.t==='sur'){G.over=1;G.win=1-m.i;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
  else if(m.t==='ans'){const r=NET.pend[m.id];delete NET.pend[m.id];NET.wait=0;render();r&&r(m.k)}}
 const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{
- if(CPU.on&&(who!==undefined?who:cur)===1)return r(cpuAsk(ks,q,ttl,must));
+ {const w=who!==undefined?who:cur;if(isCpu(w))return sleep(CPU.d*.4).then(()=>r(cpuAsk(ks,q,ttl,must,w,c)))}
  if(NET.on&&who!==undefined&&who!==NET.me){const id=++NET.mid;NET.pend[id]=r;NET.wait=1;netSend(1);sendMsg({t:'ask',id,ks,i:P.indexOf(q),ttl,must,cl});render();return}
  SEL={ks,i:P.indexOf(q),ttl,must,cl,r};closeAll();render()});
 const yn=q=>new Promise(r=>menu(null,[['はい',()=>r(1)],['いいえ',()=>r(0)]],q,1));
-const fin=(c,fn)=>act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn;fn&&fn()});
+const fin=(c,fn)=>{STG.done=1;act(()=>{if(c.t==='sup')G.sup=G.turn;fn&&fn()})};   // 使用カードは runFX が効果終了後にトラッシュへ送る
 /* ---- サポート・グッズ（効果文は公式サイト・ユーザー提供テキストに基づく） ---- */
 const FX={
  'ハイパーボール':async c=>{const p=me(),o=p.hand.filter(x=>x.u!==c.u);if(o.length<2)return err('手札が足りません');
-  const d=await pk('トラッシュする手札を2枚選択',o,2);if(!d)return;
-  const t=await pk('山札からポケモンを1枚選択',p.deck,1,0,x=>x.t==='pke');if(!t)return;
-  fin(c,()=>{d.forEach(x=>mv(x.u,'trash'));t.forEach(x=>mv(x.u,'hand'));shuffle(p.deck)});log('ハイパーボールを使用')},
+   const d=await pk('トラッシュする手札を2枚選択',o,2);if(!d)return;
+   act(()=>{d.forEach(x=>mv(x.u,'trash'));STG.commit=1});log('ハイパーボール：手札2枚をトラッシュ（コスト）');await stgPause();   // コストは選択直後にトラッシュへ
+   const t=await pk('山札からポケモンを1枚選択',p.deck,1,0,x=>x.t==='pke');
+   fin(c,()=>{(t||[]).forEach(x=>mv(x.u,'hand'));shuffle(p.deck)});log('ハイパーボールを使用')},
  'シアノ':async c=>{const p=me(),t=await pk('山札から「ポケモンex」を3枚まで選ぶ',p.deck,3,0,isEx);if(!t)return;
   fin(c,()=>{t.forEach(x=>mv(x.u,'hand'));shuffle(p.deck)});log('シアノ：'+(t.map(x=>x.name).join('、')||'なし')+'を手札に')},
  'アカマツ':async c=>{const p=me(),t=await pk('基本エネルギーをタイプの異なるように2枚まで選ぶ',p.deck,2,0,isBE);if(!t)return;
@@ -367,15 +368,15 @@ function playCard(c,own,inB){const p=me();
    const bad=M.hab.ok({p,o:P[1-cur],c});if(bad)return err(bad);
    act(()=>{mv(c.u,own);G.ab[c.u]=G.turn});log(`${c.name}の特性「${M.hab.n}」で、進化せずにベンチに出しました`);return}
   const ec=evoCheck(p,c,own,was);if(ec)return err(ec)}
-  act(()=>{mv(c.u,own);if(!was)c.ev=G.turn;if(isB&&was&&p.phase==='play')hazard(c)});if(isB&&was&&p.phase==='play')afterBench(own,c)}
+  act(()=>{mv(c.u,own);if(!was)c.ev=G.turn;if(isB&&was&&p.phase==='play')hazard(c)});if(isB&&was&&p.phase==='play')return afterBench(own,c)}
  else if(c.t==='ene'||c.t==='tool'){if(c.t==='tool'&&own&&p.piles[own].some(x=>x.t==='tool'))return err('どうぐは、ポケモン1匹につき1枚までです');
   if(!own||!p.piles[own].length)return err('ポケモンの上にドラッグしてください');
   if(c.t==='ene'&&G.eat===G.turn)return err('エネルギーは自分の番に1枚しかつけられません');
   act(()=>{mv(c.u,own);if(c.t==='ene')G.eat=G.turn});log(`P${cur+1}が${c.name}を${lastOf(p.piles[own]).name}につけました`)}
  else if(c.t==='sta'){if(!(inB&&!own))return err('盤面にドラッグしてスタジアムを出します');
   if(G.stp===G.turn)return err('スタジアムは自分の番に1枚しか出せません');if(stadName()===c.name)return err('同じ名前のスタジアムは場に出せません');
-  act(()=>{G.stp=G.turn;mv(c.u,'stadium')});(async()=>{await koScan(P[0]);await koScan(P[1])})()}
- else if(inB&&!own){if(c.t==='tr'&&G.noGoods===G.turn)return err('スボミーの効果で、この番はグッズを使えません');if(c.t==='sup'&&G.turn===1)return err('先攻の最初の番はサポートを使えません');if(c.t==='sup'&&G.sup===G.turn)return err('サポートは自分の番に1枚しか使えません');if(FX[c.name])return FX[c.name](c);else{act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn});log(c.name+'を使用（効果は手動で処理してください）')}}
+  act(()=>{G.stp=G.turn;mv(c.u,'stadium')});return (async()=>{await koScan(P[0]);await koScan(P[1])})()}
+ else if(inB&&!own){if(c.t==='tr'&&G.noGoods===G.turn)return err('スボミーの効果で、この番はグッズを使えません');if(c.t==='sup'&&G.turn===1)return err('先攻の最初の番はサポートを使えません');if(c.t==='sup'&&G.sup===G.turn)return err('サポートは自分の番に1枚しか使えません');if(FX[c.name])return runFX(c);else{act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn});log(c.name+'を使用（効果は手動で処理してください）')}}
  else err('盤面にドラッグして使います')}
 /* ---- ポケモンデータ（HP・タイプ・にげる・弱点/抵抗力・特性・ワザ）。ここに足していく ---- */
 const isFireB=y=>y.name==='基本炎エネルギー',hibiki=p=>BN.filter(k=>p.piles[k].length&&/^ヒビキの/.test(lastOf(p.piles[k]).name));
@@ -434,7 +435,7 @@ async function spread(x,n){const ks=BN.filter(k=>x.o.piles[k].length);if(!ks.len
  for(let i=0;i<n;i++){const k=await ask(null,ks,x.o,`ダメカンをのせる相手のベンチポケモンを選択（残り${n-i}個）`,1);act(()=>{const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10});await sleep(250)}
  x.msg.push(`ダメカン${n}個を相手のベンチにのせた`)}
 async function curse(x,n){const ks=OWN(x.o);if(!ks.length)return false;const k=await ask(null,ks,x.o,`カースドボム：ダメカン${n}個をのせる相手のポケモンを選択`,1);
- const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10*n;render();log(`カースドボム：${t.name}にダメカン${n}個`);await sleep(800);await doKO(P.indexOf(x.p),x.k);await koScan(x.o)}
+ const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10*n;render();log(`カースドボム：${t.name}にダメカン${n}個`);await sleep(800);G.defer=1;try{await doKO(P.indexOf(x.p),x.k);await koScan(x.o)}finally{G.defer=0}judge()}
 mon('ドラパルトex',{hp:320,type:'龍',rc:1,st:'2進化',tera:1,bnc:1,
  at:[{n:'ジェットヘッド',dt:'70',cost:['無'],run:async x=>{hit(x,'battle',70)}},
   {n:'ファントムダイブ',dt:'200',cost:[...'炎超'],run:async x=>{hit(x,'battle',200);await spread(x,6)}}]});
@@ -521,15 +522,22 @@ function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
  return Math.max(0,n)}
 function hit(x,k,n,o){const t=lastOf(x.o.piles[k]);if(!t)return 0;const d=calc(x,k,n,o);t.dm=(t.dm||0)+d;x.msg.push(`${t.name}に${d}ダメージ${k==='battle'?'':'（ベンチ）'}`);return d}
 async function koScan(o){const i=P.indexOf(o),ks=['battle',...BN].filter(k=>{const h=hpOf(o.piles[k]);return h&&(lastOf(o.piles[k]).dm||0)>=h});
- for(const k of ks.filter(k=>k!=='battle'))await doKO(i,k,1);if(ks.includes('battle'))await doKO(i,'battle')}
+ for(const k of ks.filter(k=>k!=='battle')){if(G.over)break;await doKO(i,k,1)}if(!G.over&&ks.includes('battle'))await doKO(i,'battle');judge()}
+/* ---- 勝利条件（3つ）：①サイドを取り切る ②相手が自分の番の開始時に山札を引けない ③相手の場にポケモンが1匹もいない
+   同時に満たしたら「満たした条件が多い方」の勝ち。同数なら両者敗北（引き分け）。G.win = 0 / 1 / -1(両者敗北) ---- */
+const winCond=i=>{const q=P[i],o=P[1-i],w=[],on=x=>x.phase==='wait'||x.phase==='play';
+ if(on(q)&&!q.side.length)w.push('サイド');if(o.dko)w.push('山札切れ');if(on(o)&&!OWN(o).length)w.push('場にポケモンなし');return w};
+function judge(){if(G.over||G.defer)return 0;const a=winCond(0),b=winCond(1);if(!a.length&&!b.length)return 0;
+ G.over=1;G.win=a.length>b.length?0:b.length>a.length?1:-1;G.why=[a,b];
+ const t=G.win<0?'両者が同時に勝利条件を満たしたため、両者敗北（引き分け）':`P${G.win+1}の勝利！（${(G.win?b:a).join('・')}）`;log(t);banner(G.win<0?'両者敗北（引き分け）':`P${G.win+1}の勝利！`);return 1}
 async function doKO(i,k,np){const q=P[i],t=lastOf(q.piles[k]);if(!t)return;const n=prize(t),m=P[1-i];
- act(()=>{q.trash.push(...q.piles[k].splice(0));q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n));if(!m.side.length)G.over=1});
- log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）${m.side.length?'':'。勝利！'}`);
- if(G.over){banner(`P${2-i}の勝利！`);return}
- if(k==='battle'&&!np)await promote(i)}
+  act(()=>{q.trash.push(...q.piles[k].splice(0));q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n))});
+  log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）`);
+  if(judge()||G.over)return;
+  if(k==='battle'&&!np)await promote(i)}
 async function promote(i){const q=P[i],ks=OWN(q).filter(k=>k!=='battle');
  if(G.over)return;
- if(!ks.length){G.over=1;banner(`P${2-i}の勝利！`);return log(`P${i+1}の場にポケモンがいません。P${2-i}の勝利！`)}
+ if(!ks.length){log(`P${i+1}の場にポケモンがいません`);judge();return}
  const back=cur;if(i!==cur&&G.mode==='play'&&!MP()){await sleep(700);cur=i;render();log(`P${i+1}のバトル場のポケモンがきぜつ。視点をP${i+1}に切り替えました`)}
  const k=await ask(null,ks,q,`P${i+1}：バトル場に出すベンチポケモンを選んでください`,1,undefined,i);
  act(()=>{const r=P[i].piles;[r.battle,r[k]]=[r[k],r.battle]});log(`P${i+1}が${lastOf(P[i].piles.battle).name}をバトル場に出しました`);
@@ -559,7 +567,7 @@ async function runHab(c){const p=me(),a=mi(c).hab,x={p,o:P[1-cur],c};
  if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');const bad=a.ok(x);if(bad)return err(bad);
  HS.push(JSON.stringify([P,G,cur]));const r=await a.run(x);if(r===false){HS.pop();return}G.ab[c.u]=G.turn;render();log(`${c.name}の特性「${a.n}」を使用`)}
 function afterBench(k,c){const a=(mi(c)||{}).ab;if(!a||!a.onBench)return;
- menu(c,[[`特性「${a.n}」を使う`,()=>runAb(c,k)],['使わない',()=>{}]],`${c.name}をベンチに出しました`,1)}
+ return menu(c,[[`特性「${a.n}」を使う`,()=>runAb(c,k)],['使わない',()=>{}]],`${c.name}をベンチに出しました`,1)}
 function playPile(k){const p=me(),t=lastOf(p.piles[k]);if(!t)return;const m=mi(t),it=[];
  if(m&&m.ab&&!m.ab.passive&&!m.ab.onBench)it.push([`特性「${m.ab.n}」を使う`,()=>runAb(t,k),abWhy(t,k,p)?'ab used':'ab']);
  if(k==='battle')it.push([m&&m.at?'わざを使う…':'わざを使う（データ未登録）',()=>m&&m.at?atkMenu(t):err('このポケモンのデータは未登録です'),m&&m.at&&m.at.some(a=>canPay(a.cost,p.piles.battle))?'atk':'atk no'],['にげる',retreat]);
@@ -584,7 +592,7 @@ function finishSetup(){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){cur=
  const fi=(G.fp!==undefined&&P[G.fp]&&P[G.fp].phase==='wait')?G.fp:P.findIndex(x=>x.phase==='wait');if(fi<0)return;
  if(P[0].phase==='wait'&&P[1].phase==='wait'){const a=P[0].mull||0,b=P[1].mull||0,n=Math.abs(a-b);
   if(n){const w=a<b?0:1;for(let i=0;i<n;i++)draw1(P[w]);log(`P${w+1}は、相手のマリガン差${n}回ぶん、${n}枚引きました`)}}
- P.forEach(x=>{if(x.phase==='wait')x.phase='play'});G.turn=1;G.act=fi;cur=fi;draw1(P[fi]);log(`バトルスタート！先攻P${fi+1}：1枚引きました`);banner('バトルスタート！')}
+ P.forEach(x=>{if(x.phase==='wait')x.phase='play'});log('バトル場・ベンチのポケモンを一斉に表にしました');G.turn=1;G.act=fi;cur=fi;draw1(P[fi]);log(`バトルスタート！先攻P${fi+1}：1枚引きました`);banner('バトルスタート！')}
 /* ---------- モーション ---------- */
 let HOLD=0;const holdList=()=>{$('#ov').className='';$('#hold').style.display='block';HOLD=1};
 $('#hold').onclick=()=>{$('#ov').className='on';$('#hold').style.display='none';HOLD=0};
@@ -623,124 +631,143 @@ function render(){const hs=$('.hand'),sc=hs?hs.scrollLeft:0,pv=snapDom(),c0=VW()
  const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;netSend()}
 async function turnSwitch(){if(G.over)return;act(()=>{const a0=G.act===undefined?cur:G.act,nx=P[1-a0].phase==='play'?1-a0:a0;G.act=nx;G.turn++;G.drawn=1;cur=nx});
  const lb=G.turn%2?'先攻'+(G.turn+1)/2:'後攻'+G.turn/2;banner(`${lb}ターン ｜ P${cur+1}の番`);await sleep(1100);
- act(()=>{if(!draw1(me()))err('山札がありません');else log(`${lb}ターン：P${cur+1}が1枚引きました`)})}
+ act(()=>{if(!draw1(me())){me().dko=1;log(`P${cur+1}は山札が0枚で引けません`)}else log(`${lb}ターン：P${cur+1}が1枚引きました`)});judge()}
 async function endTurn(){if(TE)return;TE=1;try{await turnSwitch()}finally{TE=0}}
 function ratioMenu(){menu(null,RATIOS.map(([n,v])=>[(RSEL===v?'● ':'')+n,()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render()}]),'画面比率を選択（現在：'+(RSEL?RSEL.toFixed(3):'自動')+'）')}
 addEventListener('resize',()=>{LASTCUR=-1;render()});
-/* ---------- CPU対戦（P2をプログラムが操作） ---------- */
-const isBas=c=>c.t==='pke'&&(!mi(c)||stageOf(c)==='たね'),knownBas=c=>c.t==='pke'&&mi(c)&&stageOf(c)==='たね';
-const remHp=pl=>{const t=lastOf(pl),h=hpOf(pl);return h?h-(t.dm||0):999},enCnt=(q,k)=>eunits(q.piles[k]);
-const candyOpts=p=>G.turn<=2?[]:p.hand.filter(y=>y.t==='pke'&&BASE2[nk(y.name)]).filter(y=>['battle',...BN].some(k=>p.piles[k].length&&nk(lastOf(p.piles[k]).name)===BASE2[nk(y.name)]&&stageOf(lastOf(p.piles[k]))==='たね'&&lastOf(p.piles[k]).pt!==G.turn&&lastOf(p.piles[k]).ev!==G.turn));
-function dmgVs(a,p,o,c,def){if(!def)return 0;const M=mi(c)||{},D=mi(def)||{},n=a.n;let b=parseInt(String(a.dt).replace(/[^\d]/g,''))||0;
- if(n==='マシンガンコンボ')b=250;else if(n==='ストームエメラルダ')b=50*OWN(p).reduce((s,k)=>s+eunits(p.piles[k]),0);else if(n==='ユニオンビート')b=30*(OWN(p).length-1);
- else if(n==='ぎゃっきょうテール')b=60*OWN(o).filter(k=>/ex$/.test(lastOf(o.piles[k]).name)).length;
- else if(n==='きあいタックル'&&stageOf(def)==='1進化')b+=90;else if(n==='とうしのつばさ'&&/ex$/.test(def.name))b+=90;
- if(b<=0)return 0;const drill=n==='ドリルブレイク';if(!drill&&(def.dg===G.turn||(def.sh===G.turn&&stageOf(c)==='たね'&&M.type!=='無')))return 0;
- if(G.plus30===G.turn&&/(ex|V)$/.test(def.name))b+=30;if(D.weak&&D.weak===M.type)b*=2;if(D.res&&D.res===M.type)b-=30;return Math.max(0,b)}
-const estAtk=(a,p,o,c)=>dmgVs(a,p,o,c,lastOf(o.piles.battle));
-function ready(p,k){const q=P[1-P.indexOf(p)],pl=p.piles[k],t=lastOf(pl),M=mi(t);if(!M||!M.at)return 0;let b=0;
- for(const a of M.at){if(canPay(a.cost,pl))b=Math.max(b,100+estAtk(a,p,q,t));else b=Math.max(b,60-Math.max(0,a.cost.length-eunits(pl))*12)}return b}
-function bestAttack(p,o){const pl=p.piles.battle,t=lastOf(pl),M=mi(t),d=lastOf(o.piles.battle);if(!t||!M||!M.at||!d||G.turn===1||t.na===G.turn)return null;let best=null;
- for(const a of M.at){if(!canPay(a.cost,pl))continue;const x={p,o,c:t,msg:[],k:'battle'};if(a.chk&&a.chk(x))continue;const e=estAtk(a,p,o,t),ko=e>=remHp(o.piles.battle);
-  let sc=e+(ko?1000+prize(d)*300:0);if(a.n==='ファントムダイブ')sc+=60;if(a.n==='げきりゅうポンプ')sc+=20;if(a.n==='いれかわる'||a.n==='むかえにいく')sc-=200;if(a.n==='しっぽをまく')sc-=40;
-  if(!best||sc>best.sc)best={a,sc,ko,e}}
- return best}
-function bossTarget(ks){const p=P[1],o=P[0],t=lastOf(p.piles.battle),M=mi(t);if(!t||!M||!M.at)return ks[0];let best=null,bs=-1e9;
- for(const k of ks){const def=lastOf(o.piles[k]);let e=0;for(const a of M.at)if(canPay(a.cost,p.piles.battle)&&!(a.chk&&a.chk({p,o,c:t,msg:[],k:'battle'})))e=Math.max(e,dmgVs(a,p,o,t,def));
-  const r=remHp(o.piles[k]),sc=(e>=r?1000+prize(def)*100:0)+prize(def)*10-r/20;if(sc>bs){bs=sc;best=k}}return best}
-function bossKO(){const p=P[1],o=P[0],ks=BN.filter(k=>o.piles[k].length);if(!ks.length||G.turn===1)return 0;const k=bossTarget(ks),t=lastOf(p.piles.battle),M=mi(t);if(!k||!M||!M.at)return 0;
- const def=lastOf(o.piles[k]);let e=0;for(const a of M.at)if(canPay(a.cost,p.piles.battle))e=Math.max(e,dmgVs(a,p,o,t,def));if(e<remHp(o.piles[k]))return 0;
- const ba=bestAttack(p,o);if(ba&&ba.ko&&prize(lastOf(o.piles.battle))>=prize(def))return 0;return 96}
-function bestEnergyTarget(p,c){let bk=null,bs=0;const o=P[1-P.indexOf(p)];
- for(const k of OWN(p)){const pl=p.piles[k],t=lastOf(pl),M=mi(t);if(!M||!M.at)continue;const sim=[c,...pl];let s=0;
-  for(const a of M.at){if(!canPay(a.cost,pl)&&canPay(a.cost,sim))s=Math.max(s,60+estAtk(a,p,o,t)/4+(k==='battle'?60:0))}
-  const mx=Math.max(...M.at.map(a=>a.cost.length),1);if(s===0&&eunits(pl)<mx)s=8+(k==='battle'?6:0);if(s>0&&/ex$/.test(t.name))s+=3;if(s>bs){bs=s;bk=k}}
- return bk?{k:bk,s:bs}:null}
-function trScore(c){const p=P[1],o=P[0],T=G.turn,hs=p.hand.length,n=c.name.replace(/\(ACE SPEC\)$/,''),ba=bestAttack(p,o);
- if(c.t==='sup'){if(T===1||G.sup===T)return 0;
-  switch(n){case'ボスの指令':return bossKO();
-   case'スグリ':{if(ba&&ba.ko)return 0;const sv=G.plus30;G.plus30=T;const b2=bestAttack(p,o);G.plus30=sv;if(b2&&b2.ko){CPU.sug=2;return 94}
-    const bk=BN.filter(k=>p.piles[k].length&&ready(p,k)>=100);if((!ba||ba.e<=0)&&bk.length){CPU.sug=1;return 74}return 0}
-   case'リーリエの決心':return Math.max(20,92-hs*13);case'博士の研究':return hs<=2?86:20;
-   case'ジャッジマン':return hs<=o.hand.length-3?(hs<=3?72:45):(hs<=2?50:10);
-   case'メイのはげまし':return(p.side.length>o.side.length&&OWN(p).some(k=>stageOf(lastOf(p.piles[k]))==='2進化')&&p.trash.some(isBE))?80:0;
-   case'シアノ':return p.deck.some(isEx)?78:15;case'アカマツ':return p.deck.some(isBE)?82:20;case'トウコ':return 72;case'ヒカリ':return 70;case'暗号マニアの解読':return hs<=3?58:30;default:return 50}}
- if(c.t==='tr'){if(G.noGoods===T)return 0;
-  switch(n){case'なかよしポフィン':return room(p)>0&&p.deck.some(y=>y.t==='pke'&&mi(y)&&stageOf(y)==='たね'&&mi(y).hp<=70)?76:0;
-   case'ハイパーボール':return hs>=3&&p.deck.some(y=>y.t==='pke')?60:0;case'ポケパッド':return p.deck.some(y=>y.t==='pke'&&!isRule(y))?56:0;
-   case'ふしぎなアメ':return candyOpts(p).length?93:0;case'夜のタンカ':return p.trash.some(y=>y.t==='pke'||isBE(y))&&hs<=6?46:0;
-   case'アンフェアスタンプ':return p.koTurn===T-1?(o.hand.length>=5&&hs<=4?78:30):0;case'スペシャルレッドカード':return o.side.length<=3&&o.hand.length>=4?82:0;
-   case'クラッシュハンマー':return lastOf(o.piles.battle)&&o.piles.battle.some(y=>y.t==='ene')?52:0;case'ぼうけんのランタン':return p.deck.filter(isBE).length>=2?44:0;
-   case'ガラスのラッパ':return hasTera(p)&&BN.some(k=>p.piles[k].length)&&p.trash.some(isBE)?68:0;default:return 0}}
- return 0}
-function cpuPick(){const p=P[1],o=P[0],T=G.turn,C=[],add=(key,score,run)=>{if(score>0&&!CPU.tried.has(key))C.push({key,score,run})},inPlay=OWN(p);
- for(const k of inPlay){const t=lastOf(p.piles[k]),M=mi(t),A=M&&M.ab;if(!A||A.passive||A.onBench||abWhy(t,k,p))continue;const nm=A.n;let sc=60;
-  if(nm==='おつかいダッシュ'||nm==='ていさつしれい')sc=92;else if(nm==='さかてにとる')sc=93;else if(nm==='こんじきのほのお')sc=84;
-  else if(nm==='アドレナブレイン')sc=inPlay.some(z=>(lastOf(p.piles[z]).dm||0)>0)?68:0;
-  else if(nm==='カースドボム'){const n=nk(t.name)==='ヨノワール'?13:5,tg=OWN(o).filter(z=>remHp(o.piles[z])<=10*n);sc=tg.length&&prize(lastOf(o.piles[tg[0]]))>=prize(t)?89:0}
-  else if(nm==='にげあしドロー')sc=(k!=='battle'&&p.hand.length<=5)?50:0;
-  add('ab'+t.u,sc,()=>runAb(t,k))}
- for(const c of p.hand){const M=mi(c),tk='c'+c.u;
-  if(M&&M.hab&&G.ab[c.u]!==T&&!M.hab.ok({p,o,c}))add('hab'+c.u,70,()=>runHab(c));
-  if(c.t==='pke'&&M&&stageOf(c)==='たね'){if(room(p)>0&&BN.filter(z=>p.piles[z].length).length<4)add(tk,72+(/ex$/.test(c.name)?5:0)+(M.ab&&M.ab.onBench?9:0),()=>playCard(c,freeBench(p),true))}
-  else if(c.t==='pke'&&M){for(const z of inPlay)if(evoCheck(p,c,z,false)===''&&EVO[nk(c.name)]&&nk(lastOf(p.piles[z]).name)===EVO[nk(c.name)])add(tk+z,88,()=>playCard(c,z,true))}
-  else if(c.t==='tool'&&/^ヒーローマント/.test(c.name)&&stadName()!=='ジャミングタワー'){const z=inPlay.find(k=>!p.piles[k].some(y=>y.t==='tool')&&mi(lastOf(p.piles[k])));if(z)add(tk,56,()=>playCard(c,z,true))}
-  else if(c.t==='sta'&&G.stp!==T&&stadName()!==c.name.replace(/\(ACE SPEC\)$/,'')){const n=c.name;let sc=0;if(n==='ゼロの大空洞')sc=hasTera(p)?74:0;else if(n==='危ない廃墟')sc=stadName()?0:34;else if(n==='ジャミングタワー')sc=OWN(o).some(z=>o.piles[z].some(y=>y.t==='tool'))?62:0;add(tk,sc,()=>playCard(c,null,true))}
-  else if(c.t==='tr'||c.t==='sup')add(tk,trScore(c),()=>{trScore(c);return playCard(c,null,true)})}
- if(G.eat!==T){let best=null;for(const c of p.hand.filter(y=>y.t==='ene'&&(isBE(y)||/^ネオアッパー/.test(y.name)))){const r=bestEnergyTarget(p,c);if(r&&(!best||r.s>best.s))best={c,...r}}if(best)add('en'+best.c.u,86,()=>playCard(best.c,best.k,true))}
- const at=lastOf(p.piles.battle);if(at&&at.nr!==T){const ba=bestAttack(p,o);if(!ba||ba.e<=0){if(BN.some(k=>p.piles[k].length&&ready(p,k)>=100))add('retreat',64,()=>retreat())}}
- return C.sort((a,b)=>b.score-a.score)[0]}
-async function cpuTurn(){const p=P[1],o=P[0];CPU.tried=new Set();await sleep(CPU.d);
- for(let it=0;it<40&&!G.over&&G.act===1&&p.piles.battle.length;it++){const a=cpuPick();if(!a)break;CPU.tried.add(a.key);try{await a.run()}catch(e){console.error(e)}await sleep(CPU.d*.8)}
- if(G.over||G.act!==1)return;const ba=bestAttack(p,o);if(ba&&ba.sc>0){await sleep(CPU.d*.6);await useAttack(ba.a)}
- if(!G.over&&G.act===1){await sleep(CPU.d*.5);await turnSwitch()}}
-function actScore(c){const M=mi(c);if(!M)return 0;const ch=Math.min(...(M.at||[{cost:[1,1,1]}]).map(a=>a.cost.length));return M.hp/10+(/ex$/.test(c.name)?-15:0)-ch*2+(M.ab&&M.ab.onBench?-10:0)}
-async function cpuSetup(){const p=P[1];await sleep(CPU.d);
- for(let g=0;g<12&&!p.hand.some(isBas);g++){act(()=>{p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.mull=(p.mull||0)+1;log(`P2（CPU）がマリガン（${p.mull}回目）`)});await sleep(CPU.d)}
- const bs=p.hand.filter(isBas).sort((a,b)=>actScore(b)-actScore(a));if(bs.length){act(()=>mv(bs[0].u,'battle'));await sleep(CPU.d*.6);
-  for(const c of bs.slice(1,5)){act(()=>mv(c.u,freeBench(p)));await sleep(CPU.d*.4)}}
- act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';log('P2（CPU）がサイドをセットしました');finishSetup()})}
-function cardVal(c,p){if(c.t==='ene'){if(/^ネオ/.test(c.name))return 55;const t=(c.name.match(/^基本(.)/)||[])[1],need=OWN(p).some(k=>{const pl=p.piles[k],M=mi(lastOf(pl));return M&&M.at&&M.at.some(a=>a.cost.includes(t)&&!canPay(a.cost,pl))});return 30+(need?25:0)}
- if(c.t==='pke'){const M=mi(c),inP=OWN(p).some(k=>nk(lastOf(p.piles[k]).name)===nk(c.name));return(M?M.hp/10:5)+(/ex$/.test(c.name)?12:0)+(M&&stageOf(c)!=='たね'?6:0)+(inP?-8:6)}
- return c.t==='sup'?55:c.t==='tr'?42:34}
-function cpuPk(t,pool,n,min,ok){const p=P[1],v=x=>cardVal(x,p),disc=/トラッシュする手札|トラッシュするエネルギー|山札にもどすエネルギー|手札にもどすエネルギー/.test(t);
- let s=pool.filter(ok).sort((a,b)=>disc?v(a)-v(b):v(b)-v(a));if(/タイプの異なる/.test(t)){const seen=new Set();s=s.filter(x=>!seen.has(x.name)&&seen.add(x.name))}
- return s.slice(0,Math.max(Math.min(min,s.length),Math.min(n,s.length)))}
-function cpuAsk(ks,q,ttl,must){const p=P[1],own=P.indexOf(q)===1,rem=k=>remHp(q.piles[k]),pz=k=>prize(lastOf(q.piles[k]));
- if(!own){if(/呼び出す/.test(ttl))return bossTarget(ks)||ks[0];if(/エネルギーをトラッシュ/.test(ttl))return ks.slice().sort((a,b)=>enCnt(q,b)-enCnt(q,a))[0];
-  const amt=/13個/.test(ttl)?130:/5個/.test(ttl)?50:/120ダメージ/.test(ttl)?120:/100ダメージ/.test(ttl)?100:/ベンチ/.test(ttl)?20:30;
-  const sc=k=>(rem(k)<=amt?1000+pz(k)*100:0)+pz(k)*20-rem(k)/10;return ks.slice().sort((a,b)=>sc(b)-sc(a))[0]}
- if(/ダメカンを取る/.test(ttl))return ks.slice().sort((a,b)=>(lastOf(q.piles[b]).dm||0)-(lastOf(q.piles[a]).dm||0))[0];
- if(/バトル場に出す|にげる|入れ替え/.test(ttl))return ks.slice().sort((a,b)=>ready(p,b)-ready(p,a)||rem(b)-rem(a))[0];
- if(/つける|つけ替え先|進化/.test(ttl))return ks.slice().sort((a,b)=>ready(p,b)+(b==='battle'?20:0)-ready(p,a)-(a==='battle'?20:0))[0];
- if(/元のポケモン/.test(ttl))return ks.slice().sort((a,b)=>(a==='battle')-(b==='battle')||enCnt(q,b)-enCnt(q,a))[0];
- if(/トラッシュするポケモン/.test(ttl))return ks.slice().sort((a,b)=>rem(a)-rem(b))[0];
- return ks[0]}
-const gekiryuOK=()=>BN.some(k=>P[0].piles[k].length&&(remHp(P[0].piles[k])<=120||/ex$/.test(lastOf(P[0].piles[k]).name)));
-function cpuMenu(items,ttl){const L=items.map(x=>x[0]);let i=0;
- if(L.length===2&&L[0]==='はい')i=/120ダメージ/.test(ttl)?(gekiryuOK()?0:1):0;
- else if(/効果を1つ選んで/.test(ttl))i=CPU.sug===1?0:1;
- else if(/動かすダメカン/.test(ttl))i=L.length-1;
- else if(L.some(x=>/ゆきにしずめる/.test(x)))i=(stadName()&&!(stadName()==='ゼロの大空洞'&&hasTera(P[1])))?0:1;
- else if(L.some(x=>/特性「/.test(x)))i=Math.max(0,L.findIndex(x=>!/使わない/.test(x)));
- else{i=L.findIndex(x=>!/使わない|ここまで|キャンセル|この中にない/.test(x));if(i<0)i=0}
- items[i][1]()}
-function cpuCheck(){if(!CPU.on||CPU.busy||G.over||TE||NET.on||HOLD||SEL)return;if(CTRL()!==1)return;const ph=P[1].phase;if(ph!=='setup'&&!(ph==='play'&&G.act===1))return;CPU.busy=1;cur=1;cpuStep()}
-async function cpuStep(){try{if(P[1].phase==='setup')await cpuSetup();else await cpuTurn()}catch(e){console.error(e);log('CPUでエラー：'+e.message);try{if(G.act===1&&!G.over&&P[1].phase==='play')await turnSwitch()}catch(_){}}finally{CPU.busy=0;render()}}
+/* ---------- CPU対戦：プレイアルゴリズムは外部ファイル（ai/*.js）。ここは盤面⇔AIの橋渡しだけ ----------
+   ・AIには「そのプレイヤーに見える情報」だけを渡す（相手の手札・山札の中身と順序・サイドの中身は渡さない）
+   ・AIからは「行動（play/ab/hab/retreat/attack/end）」と「選択結果」だけを受け取り、実処理はこの盤面のルール処理が行う
+   ・AIは常にJSONの複製を受け取る（盤面オブジェクトそのものには触れない）
+   ・未対応デッキは ai/legacy_cpu.js（旧アルゴリズム）にフォールバック */
+const isBas=c=>c.t==='pke'&&(!mi(c)||stageOf(c)==='たね');
+const AIR=()=>(typeof window!=='undefined'&&window.CPUAI)||null;
+const CPUX={ctl:[null,null],type:['',''],opt:[{},{}],err:'',sh:[null,null],sent:[null,null]};   // sent: AIに送信済みのカードデータ(差分だけ送る)
+const cj=o=>{const r=AIR();return r&&r.__marshal?o:JSON.parse(JSON.stringify(o))};   // 橋渡し側でJSON化する環境(ヘッドレス)では二重に複製しない
+const NKC={},mkey=c=>{const k=NKC[c.name]||(NKC[c.name]=nk(c.name));return VARS[k]?k+'#'+VMAP[c.id]:k},PUBC={};
+const unitsL=pl=>ens(pl).flatMap(c=>unitsOf(c,lastOf(pl)));
+function cpuPub(c){const M=mi(c);if(!M)return null;return{st:M.st||'たね',hp:M.hp,type:M.type,rc:M.rc,weak:M.weak||'',res:M.res||'',tera:M.tera?1:0,bnc:M.bnc?1:0,
+ at:(M.at||[]).map(a=>({n:a.n,dt:a.dt,cost:a.cost})),ab:M.ab?{n:M.ab.n,key:M.ab.key||'',passive:M.ab.passive?1:0,onBench:M.ab.onBench?1:0}:null,hab:M.hab?{n:M.hab.n}:null}}
+/* そのプレイヤー視点の盤面。mode: 'setup'(相手情報なし) / 'turn'(合法手つき) / 'ask'(選択中) */
+function cpuView(i,mode){const p=P[i],o=P[1-i],T=G.turn,cd={};
+ const add=c=>{const k=mkey(c);if(!(k in cd))cd[k]=k in PUBC?PUBC[k]:(PUBC[k]=cpuPub(c));return k};
+ const cc=c=>({u:c.u,id:c.id,name:c.name,t:c.t,mk:add(c)});
+ const bd=q=>{const r={};for(const k of['battle',...BN]){const pl=q.piles[k];if(!pl.length)continue;const t=lastOf(pl),a=pl.slice(0,-1);
+  r[k]={...cc(t),dm:t.dm||0,hp:hpOf(pl)||0,cf:t.cf?1:0,na:t.na||0,nr:t.nr||0,dg:t.dg||0,sh:t.sh||0,pt:t.pt||0,ev:t.ev||0,
+   en:a.filter(x=>x.t==='ene').map(x=>x.name),eu:unitsL(pl),tl:a.filter(x=>x.t==='tool').map(x=>x.name),un:a.filter(x=>x.t==='pke').map(x=>x.name)}}return r};
+ const v={me:i,turn:T,first:G.fp===undefined?0:G.fp,mode,oppType:CPUX.type[1-i],
+  deck:p.cards.map(c=>({id:c.id,name:c.name,t:c.t,n:c.n,mk:add(c)})),
+  self:{hand:p.hand.map(cc),stage:p.piles.staging.map(cc),trash:p.trash.map(cc),deckN:p.deck.length,prizeN:p.side.length,board:bd(p),bm:benchMax(i),koTurn:p.koTurn,mull:p.mull||0},
+  stadium:stadName()?{name:stadName(),own:P[i].piles.stadium.length?i:1-i}:null,
+  fl:{sup:G.sup===T,eat:G.eat===T,stp:G.stp===T,atk:G.atk===T,noGoods:G.noGoods===T,plus30:G.plus30===T,
+   abU:[...p.hand,...OWN(p).map(k=>lastOf(p.piles[k]))].filter(c=>G.ab[c.u]===T).map(c=>c.u),nm:Object.keys(G.nm).filter(k=>G.nm[k]===T)}};
+ if(mode!=='setup'){v.opp={handN:o.hand.length,deckN:o.deck.length,prizeN:o.side.length,stage:o.piles.staging.map(cc),trash:o.trash.map(cc),board:bd(o),bm:benchMax(1-i),koTurn:o.koTurn,mull:o.mull||0};
+  const sh=CPUX.sh[i];v.pz=[];if(sh){v.pz=p.hand.filter(c=>sh.has(c.u)).map(c=>c.name);CPUX.sh[i]=new Set(p.side.map(c=>c.u))}}
+ if(mode==='turn'){const at=lastOf(p.piles.battle),M=at&&mi(at),ks=OWN(p),bk=ks.filter(k=>k!=='battle'),lg={evo:[],bench:[],att:{},stad:[],abil:[],habs:[],sup:T!==1&&G.sup!==T,goods:G.noGoods!==T,retreat:null,atk:[],room:room(p)};
+  for(const c of p.hand){const m=mi(c);
+   if(c.t==='pke'&&m){if(stageOf(c)==='たね'){if(lg.room>0)lg.bench.push(c.u)}
+    else if(EVO[nk(c.name)])for(const k of ks)if(nk(lastOf(p.piles[k]).name)===EVO[nk(c.name)]&&evoCheck(p,c,k,false)==='')lg.evo.push({u:c.u,k});
+    if(m.hab&&G.ab[c.u]!==T&&!m.hab.ok({p,o,c}))lg.habs.push(c.u)}
+   else if(c.t==='ene'&&(isBE(c)||/^ネオアッパー/.test(c.name))){if(G.eat!==T)lg.att[c.u]=ks.slice()}
+   else if(c.t==='tool'&&/^ヒーローマント/.test(c.name)){lg.att[c.u]=ks.filter(k=>!p.piles[k].some(y=>y.t==='tool'))}
+   else if(c.t==='sta'&&G.stp!==T&&stadName()!==c.name.replace(/\(ACE SPEC\)$/,''))lg.stad.push(c.u)}
+  for(const k of ks){const t=lastOf(p.piles[k]),m=mi(t),A=m&&m.ab;if(A&&!A.passive&&!A.onBench&&!abWhy(t,k,p))lg.abil.push({u:t.u,k,n:A.n})}
+  if(at&&M){const rc=retreatCost(p,at);lg.retreat=at.nr!==T&&eunits(p.piles.battle)>=rc&&bk.length?{cost:rc,ks:bk}:null;
+   if(T!==1&&G.atk!==T&&at.na!==T)for(const a of(M.at||[]))lg.atk.push({n:a.n,ok:canPay(a.cost,p.piles.battle)&&!(a.chk&&a.chk({p,o,c:at,msg:[],k:'battle'}))})}
+  v.lg=lg}
+ const sn=CPUX.sent[i]||(CPUX.sent[i]={deck:0,cd:new Set()});if(sn.deck)delete v.deck;else sn.deck=1;
+ for(const k in cd)if(sn.cd.has(k))delete cd[k];else sn.cd.add(k);
+ v.cd=cd;return v}
+function cpuPoolKind(p,pool){if(!pool.length)return'none';const has=(a,c)=>a.includes(c);
+ if(pool.every(c=>has(p.deck,c)))return pool.length===p.deck.length?'deck':'topN';if(pool.every(c=>has(p.hand,c)))return'hand';if(pool.every(c=>has(p.trash,c)))return'trash';
+ if(pool.every(c=>OWN(p).some(k=>has(p.piles[k],c))))return'board';return'other'}
+const cpuShuf=a=>{const b=a.slice();for(let i=b.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[b[i],b[j]]=[b[j],b[i]]}return b};
+const mkp=(v,x,i)=>{const k=mkey(x),sn=CPUX.sent[i];if(!(k in v.cd)&&!(sn&&sn.cd.has(k))){v.cd[k]=k in PUBC?PUBC[k]:(PUBC[k]=cpuPub(x));if(sn)sn.cd.add(k)}return k};
+function cpuPk(t,pool,n,min,ok,who){const c=CPUX.ctl[who];if(!c)return typeof legacyPk==='function'?legacyPk(t,pool,n,min,ok,who):pool.filter(ok).slice(0,n);
+ const p=P[who],kind=cpuPoolKind(p,pool),v=cpuView(who,'ask'),src=kind==='deck'?cpuShuf(pool):pool;
+ const q={title:t,n,min,kind,pool:src.map(x=>({u:x.u,id:x.id,name:x.name,t:x.t,mk:mkp(v,x,who),ok:!!ok(x)}))};
+ let r=c.pk(cj(v),cj(q))||[];const okU=new Set(pool.filter(ok).map(x=>x.u));r=[...new Set(r)].filter(u=>okU.has(u)).slice(0,n);
+ if(r.length<Math.min(min,okU.size))for(const x of pool)if(okU.has(x.u)&&!r.includes(x.u)&&r.length<Math.min(min,okU.size))r.push(x.u);
+ return pool.filter(x=>r.includes(x.u))}
+function cpuAsk(ks,q,ttl,must,who,cd){const c=CPUX.ctl[who];if(!c)return typeof legacyAsk==='function'?legacyAsk(ks,q,ttl,must,who):ks[0];
+ const v=cpuView(who,'ask'),r=c.ask(cj(v),cj({title:ttl,ks,owner:P.indexOf(q)===who?'me':'opp',must:!!must,card:cd?{name:cd.name,t:cd.t}:null}));
+ return ks.includes(r)?r:(must||r===undefined?ks[0]:null)}
+function cpuMenu(items,ttl,card,who){const c=CPUX.ctl[who];if(!c)return typeof legacyMenu==='function'?legacyMenu(items,ttl,who):items[0][1]();
+ const v=cpuView(who,'ask');let r=c.menu(cj(v),cj({title:ttl||'',items:items.map(x=>x[0]),card:card?{name:card.name,t:card.t}:null}));
+ if(!(r>=0&&r<items.length))r=0;return items[r][1]()}
+function cpuOrder(w){const c=CPUX.ctl[w];return c&&c.order?!!c.order(cj(cpuView(w,'setup'))):false}
+async function cpuDo(i,a){const p=P[i],hc=u=>p.hand.find(x=>x.u===u);
+ if(a.t==='play'){const c=hc(a.u);if(!c)return;let k=a.k;if(k==='bench')k=freeBench(p);return playCard(c,k||null,true)}
+ if(a.t==='ab'){const t=lastOf(p.piles[a.k]);if(t)return runAb(t,a.k)}
+ if(a.t==='hab'){const c=hc(a.u);if(c)return runHab(c)}
+ if(a.t==='retreat')return retreat()}
+async function cpuTurn(i){const c=CPUX.ctl[i];cur=i;
+ if(!c){if(typeof legacyTurn==='function')return legacyTurn(i);log('AIファイル（ai/*.js）が読み込まれていません');return turnSwitch()}
+ const p=P[i];await sleep(CPU.d);
+ for(let it=0;it<70&&!G.over&&G.act===i&&p.piles.battle.length;it++){
+  const a=c.decide(cj(cpuView(i,'turn')));if(!a||a.t==='end')break;
+  if(a.t==='attack'){const m=mi(lastOf(p.piles.battle)),at=m&&m.at&&m.at.find(x=>x.n===a.n);if(at){await sleep(CPU.d*.6);await useAttack(at);if(G.over||G.act!==i)return}break}
+  const b4=ACTN;CPUX.err='';try{await cpuDo(i,a)}catch(e){console.error(e);log('CPUでエラー：'+e.message)}
+  await sleep(0);c.result&&c.result(a,ACTN>b4,CPUX.err);await sleep(CPU.d*.8)}
+ if(!G.over&&G.act===i){await sleep(CPU.d*.5);await turnSwitch()}}
+async function cpuSetup(i){const p=P[i],c=CPUX.ctl[i];cur=i;if(!c&&typeof legacySetup==='function')return legacySetup(i);await sleep(CPU.d);
+ for(let g=0;g<12;g++){const bs=p.hand.filter(isBas);let r=bs.length?(c?c.setup(cj(cpuView(i,'setup'))):{}):{mull:true};
+  if(!bs.length||(r&&r.mull&&!bs.length)){act(()=>{p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.mull=(p.mull||0)+1;log(`P${i+1}（CPU）がマリガン（${p.mull}回目）`)});await sleep(CPU.d);continue}
+  const av=bs.find(x=>x.u===(r&&r.active))||bs[0];act(()=>mv(av.u,'battle'));await sleep(CPU.d*.6);
+  for(const u of((r&&r.bench)||[]).slice(0,5)){const x=p.hand.find(y=>y.u===u&&isBas(y));if(x&&freeBench(p)){act(()=>mv(x.u,freeBench(p)));await sleep(CPU.d*.4)}}break}
+ act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';CPUX.sh[i]=new Set(p.side.map(x=>x.u));log(`P${i+1}（CPU）がサイドをセットしました`);finishSetup()})}
+function cpuBind(){const R=AIR();[0,1].forEach(i=>{CPUX.type[i]='';CPUX.ctl[i]=null;CPUX.sh[i]=null;CPUX.sent[i]=null;if(R&&P[i].cards.length)CPUX.type[i]=R.detect(P[i].cards.map(c=>({name:c.name,t:c.t,n:c.n})))||''});
+ [0,1].forEach(i=>{if(!isCpu(i))return;const o=CPUX.opt[i]||{},ty=CPUX.type[i];if(R&&ty&&!o.legacy)CPUX.ctl[i]=R.create(ty,{me:i,opp:CPUX.type[1-i]||'unknown',...o})})}
+function cpuCheck(){if(!CPU.on||CPU.busy||G.over||TE||NET.on||HOLD||SEL)return;const w=CTRL();if(!isCpu(w))return;const ph=P[w].phase;if(ph!=='setup'&&!(ph==='play'&&G.act===w))return;CPU.busy=1;cur=w;cpuStep(w)}
+async function cpuStep(w){try{if(P[w].phase==='setup')await cpuSetup(w);else await cpuTurn(w)}catch(e){console.error(e);log('CPUでエラー：'+e.message);try{if(G.act===w&&!G.over&&P[w].phase==='play')await turnSwitch()}catch(_){}}finally{CPU.busy=0;render()}}
 async function coinToss(){log('先攻・後攻をコインで決めます（オモテ：あなたが選ぶ／ウラ：CPUが選ぶ）');const h=await coin();let first;
  if(h)first=await new Promise(r=>menu(null,[['先攻にする',()=>r(0)],['後攻にする',()=>r(1)]],'コインはオモテ！先攻・後攻を選んでください',1));
- else{first=0;log('コインはウラ：CPUは後攻を選びました')}
+ else{first=cpuOrder(1)?1:0;log(`コインはウラ：CPUは${first?'先攻':'後攻'}を選びました`)}
  G.fp=first;log(`先攻：P${first+1}${first?'（CPU）':'（あなた）'}`)}
 async function cpuBegin(code){cur=0;if(code){let d=null;try{d=JSON.parse(localStorage['dk2_'+code])}catch(_){}if(!d)return err('そのデッキのデータがありません');P[1].cards=d;P[1].code=code}
- if(!P[1].cards.length)return err('CPUのデッキがありません');CPU.on=1;NET.on=0;G.mode='play';HS=[];await askVars();
- [0,1].forEach(z=>{cur=z;start()});cur=0;G.mode='play';render();await showMissing([1]);await coinToss();
- clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
+ if(!P[1].cards.length)return err('CPUのデッキがありません');CPU.on=1;CPU.who=[0,1];cpuSpd();NET.on=0;G.mode='play';HS=[];await askVars();
+ [0,1].forEach(z=>{cur=z;start()});cur=0;cpuBind();G.mode='play';render();await showMissing([1]);
+ if(!AIR())log('注意：ai/ フォルダのAIファイルが読み込まれていません（CPUは最低限の動きになります）');
+ else log(`CPUのデッキタイプ：${CPUX.type[1]||'未対応（旧アルゴリズム）'} ／ あなたのデッキ：${CPUX.type[0]||'未判定'}`);
+ await coinToss();clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
 function cpuStart(){if(!P[0].cards.length)return err('先に、あなた（P1）のデッキを読み込んでください');
  const items=hist().filter(x=>{try{return!!localStorage['dk2_'+x.c]}catch(_){return false}}).map(x=>[x.n,()=>cpuBegin(x.c)]);
  if(P[1].cards.length)items.unshift(['P2に読み込み済みのデッキを使う',()=>cpuBegin(null)]);
  if(!items.length)return err('CPUのデッキがありません（デッキ読込でP2に読み込むか、保存済みのデッキを用意してください）');
  menu(null,items,'CPUのデッキを選択（保存済みのものが表示されます）')}
-function surrender(){if(G.over)return;if(!confirm('投了しますか？'))return;const m=MYS();G.over=1;log(`P${m+1}が投了。P${2-m}の勝利！`);banner(`P${2-m}の勝利！`);if(NET.on)sendMsg({t:'sur',i:m});render()}
+
+/* ---------- ルール処理の補助（マリガン強制・使用待機・CPU速度） ---------- */
+let ERRN=0;
+const STG={c:null,commit:0,done:0};
+const stgPause=()=>sleep(isCpu(cur)?CPU.d*.5:350);
+/* グッズ・サポート：手札から離して盤面(使用待機)に置く → 効果処理 → 終了後にトラッシュ。
+   条件を満たさない／取り消した場合は手札に戻す。コスト支払い済み(commit)や効果実行済み(done)なら取り消せない */
+async function runFX(c){const p=me(),idx=p.hand.indexOf(c),n0=ERRN;STG.c=c;STG.commit=0;STG.done=0;
+ const back=()=>{const z=p.piles.staging.indexOf(c);if(z>=0){p.piles.staging.splice(z,1);p.hand.splice(Math.min(idx,p.hand.length),0,c)}};
+ act(()=>{p.hand.splice(idx,1);p.piles.staging.push(c)});
+ let pr;try{pr=FX[c.name](c)}catch(e){pr=Promise.reject(e)}
+ if(ERRN!==n0){HS.pop();back();render();return pr}
+ try{await pr}catch(e){console.error(e)}
+ if(p.piles.staging.includes(c)){
+  if(STG.done||STG.commit){await stgPause();act(()=>mv(c.u,'trash'))}
+  else{act(back)}}}
+/* 強制マリガン：たねポケモンがいなければ、手札を相手に公開して引き直す（いれば行えない） */
+const MULLQ=[];
+function autoMull(p,i){for(let g=0;g<30&&!p.hand.some(isBas);g++){const cs=p.hand.slice();p.mull=(p.mull||0)+1;
+  log(`P${i+1}：たねポケモンがいないため強制マリガン（${p.mull}回目）。手札を公開：${cs.map(c=>c.name).join('、')}`);MULLQ.push({i,cs});
+  p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7)}
+ if(CPU.d>0)setTimeout(showMull,0);else MULLQ.length=0}
+function showMull(){if(!MULLQ.length||$('#ov').className==='on')return;const m=MULLQ.shift();
+ list(`P${m.i+1}のマリガン（手札を公開）`,m.cs,()=>{},[['次へ',()=>{closeAll();showMull()}]],0,null,()=>{closeAll();MULLQ.length=0})}
+/* CPUの動作速度（2段階）。立て続けに処理せず、行動の間に間を入れる */
+const CPUSPD=[['ゆっくり',2000],['ふつう',1100]];let CPULV=0;try{CPULV=+localStorage.cpulv||0}catch(_){}
+const cpuSpd=()=>{CPU.d=CPUSPD[CPULV][1]};
+function cpuSpdToggle(){CPULV=(CPULV+1)%CPUSPD.length;try{localStorage.cpulv=CPULV}catch(_){}cpuSpd();render()}
+/* 使用待機スロット。枠・背景は付けない（盤面と同化させる）。
+   ひとり回し（視点が手番に反転する）／自分の番：ターン終了ボタンの下。CPU・オンライン戦で相手の番：ボタンは出さず、相手盤面寄りの上側に置く */
+const stgSlot=()=>{const i=P.findIndex(x=>x.piles.staging&&x.piles.staging.length);if(i<0)return'';const z=lastOf(P[i].piles.staging),opp=MP()&&i!==VW();
+ return`<div class="slot f" style="${at(669,opp?640:868,150,false)};border:0;background:none;outline:0;${opp?'z-index:4':''}" data-a="stg" data-p="${i}" data-u="${z.u}">${cardH(z)}</div>`};
+function surrender(){if(G.over)return;if(!confirm('投了しますか？'))return;const m=MYS();G.over=1;G.win=1-m;log(`P${m+1}が投了。P${2-m}の勝利！`);banner(`P${2-m}の勝利！`);if(NET.on)sendMsg({t:'sur',i:m});render()}
 /* ---------- events ---------- */
 $('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;
  if(SEL){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,r=SEL.r;
@@ -748,10 +775,11 @@ $('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;
 if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='hand')detail(me().hand.find(x=>x.u===t.dataset.u));else if(t.dataset.a==='pile'){const c=lastOf(P[+t.dataset.p].piles[t.dataset.k]);if(c)menu(c,[])}
   else if(t.dataset.a==='trash'){const q=P[+t.dataset.p];list(`トラッシュ ${q.trash.length}枚（新しい順）`,q.trash.slice().reverse(),c=>menu(c,[]),[],0,null,()=>{$('#ov5').className=''},0,'#ov5')}return}
  if(MP()&&(NET.wait||!canAct())){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,my=P[MYS()];
-  if(a==='sur'){surrender();return}if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render();return}
+  if(a==='cpuspd'){cpuSpdToggle();return}if(a==='sur'){surrender();return}if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render();return}
   if(a==='hand'){const c=my.hand.find(x=>x.u===t.dataset.u);if(c)menu(c,[])}
   else if(a==='pile'||a==='stad'){const q=P[+t.dataset.p],c=a==='pile'?lastOf(q.piles[t.dataset.k]):lastOf(q.piles.stadium);if(c)menu(c,[])}
-  else if(a==='trash')openTrash(+t.dataset.p);else if(a==='logs')openLog();
+  else if(a==='stg'){const z=lastOf(P[+t.dataset.p].piles.staging);if(z)menu(z,[])}
+else if(a==='trash')openTrash(+t.dataset.p);else if(a==='logs')openLog();
   else if(a==='hall')list(`手札 ${my.hand.length}枚`,my.hand,c=>menu(c,[]));
   else if(a==='hsort'){my.hand=dl(my,my.hand);render()}else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
   return}
@@ -761,8 +789,7 @@ if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='ha
  else if(a==='undo'){if(HS.length){[P,G,cur]=JSON.parse(HS.pop());render()}}
  else if(a==='rst'){if(P.some(x=>x.cards.length)&&confirm('双方の盤面をリセットし、ログも消去します。よろしいですか？')){LGS.length=0;HS=[];G.plus30=0;G.noGoods=0;[0,1].forEach(z=>{if(P[z].cards.length){cur=z;start()}});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));render();log('盤面をリセットしました')}}
  else if(a==='load'){renderHist();$('#ov3').className='on'}
- else if(a==='mull'){if(p.phase!=='setup')return;if(OWN(p).length)return err('場にポケモンを出した後はマリガンできません');
-  act(()=>{p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.mull=(p.mull||0)+1;log(`P${cur+1}がマリガン（${p.mull}回目）`)})}
+ else if(a==='mull')err('マリガンは自動です（たねポケモンがいなければ強制、いれば行えません）')
  else if(a==='side'){if(p.phase!=='setup')return;if(!p.piles.battle.length)return err('バトル場にたねポケモンを出してください');
   act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';log(`P${cur+1}がサイドをセットしました`);finishSetup()})}
  else if(a==='tstart')act(()=>{G.drawn=1;if(!draw1(p))err('山札がありません')});
@@ -772,7 +799,7 @@ if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='ha
  else if(a==='shuf')act(()=>shuffle(p.deck));
  else if(a==='logs')openLog();
  else if(a==='net')$('#ovn').className='on';
- else if(a==='cpu')cpuStart();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
+ else if(a==='cpu')cpuStart();else if(a==='cpuspd')cpuSpdToggle();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
  else if(a==='nstart'){if(NET.me!==0||!P[0].cards.length||!P[1].cards.length)return;HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));log('対戦開始！');render()}
  else if(a==='ratio')ratioMenu();
  else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
@@ -781,6 +808,7 @@ if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='ha
  else if(a==='deck'){if(ed&&own)openDeck()}
  else if(a==='trash')openTrash(i);
  else if(a==='stad')stadMenu(i);
+else if(a==='stg'){const z=lastOf(P[i].piles.staging);if(z)menu(z,[])}
  else if(a==='hand'){if(own)ed?handMenu(d.u):detail(p.hand.find(x=>x.u===d.u),1)}
  else if(a==='pile'){if(own)ed?pileMenu(d.k):playPile(d.k);else if(ed)err('相手側の編集は「視点」で切り替えてください');else{const oc=lastOf(P[i].piles[d.k]);if(oc)menu(oc,[])}}};
 /* ---------- deck loading ---------- */
@@ -843,4 +871,12 @@ $('#nmk').onclick=async()=>{try{const pc=NET.pc=new RTCPeerConnection(RTC);pc.on
  await pc.setLocalDescription(await pc.createAnswer());await gather(pc);$('#nresp').value=enc(pc.localDescription);nst('返答コードができました。ホストに送ってください。')}catch(x){nst('招待コードが正しくありません')}};
 addEventListener('beforeunload',ev=>{if(P.some(p=>p.cards.length)){ev.preventDefault();ev.returnValue=''}});
 render();
-</script></body></html>
+</script>
+<!-- CPUのプレイアルゴリズム（外部ファイル）。順番：core → 各デッキ用AI → 調整済みパラメータ → 旧CPU(未対応デッキ用) -->
+<script src="ai/ai_core.js"></script>
+<script src="ai/ai_dragapult.js"></script>
+<script src="ai/ai_rayquaza.js"></script>
+<script src="ai/params_dragapult.js"></script>
+<script src="ai/params_rayquaza.js"></script>
+<script src="ai/legacy_cpu.js"></script>
+</body></html>
