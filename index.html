@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ポケカ盤面</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;color:#eaf4f2;font:14px/1.3 "Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
+#mat{position:relative;margin:auto;width:min(100vw,calc(100dvh*var(--r,.45)));aspect-ratio:var(--r,.45);--u:calc(1cqw*var(--sc,1));container-type:inline-size;overflow:hidden;background:linear-gradient(#6a2a30 0 27%,#cdd0d6 27% 55%,#1f3e73 55%)}
+button{background:#25454f;color:#eaf4f2;border:1px solid #3f6a75;border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+button.pri{background:#ffd23f;color:#222;border-color:#ffd23f;font-weight:700}
+button.sm{padding:3px 8px;font-size:12px}
+input,textarea,select{background:#0b1417;color:#eaf4f2;border:1px solid #3f6a75;border-radius:8px;padding:7px;font:inherit}
+.bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.slot{position:absolute;aspect-ratio:63/88;border:1px dashed #fff5;border-radius:4%;overflow:hidden;cursor:pointer;background:#0002}
+.slot.f{border:0;background:none}
+.card{position:relative;width:100%;height:100%;border-radius:5%;overflow:hidden;background:#3a4258;font-size:10px}
+#mat .card{font-size:calc(2.6*var(--u))}
+.card .nm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:4px;text-align:center}
+.card img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block}
+.t-ene{background:#2e6b3a}.t-pke{background:#8a5a1f}.t-tr{background:#3b4d8a}.t-tool{background:#6a3b8a}.t-sta{background:#2a7a7a}
+.back{background:linear-gradient(160deg,#2b58d0,#182b72);border:2px solid #e9c23a}
+.cnt{position:absolute;right:2%;bottom:2%;z-index:2;background:#000c;color:#fff;padding:0 .4em;border-radius:1em;font-size:12px}
+#mat .cnt{font-size:calc(3.4*var(--u))}
+.hand{position:absolute;left:0;top:83%;width:100%;height:17%;display:flex;gap:1.5%;overflow-x:auto;padding:0 2%}
+.hc{flex:0 0 22%;aspect-ratio:63/88;cursor:pointer}
+.oh{position:absolute;left:14%;top:-3.5%;width:72%;height:7%;display:flex;gap:1%;pointer-events:none}
+.oh .card{flex:0 0 11%;height:auto;aspect-ratio:63/88}
+#hud{position:absolute;left:62.5%;top:27.6%;width:36.5%;display:flex;flex-wrap:wrap;gap:calc(1.2*var(--u));font-size:calc(2.8*var(--u));z-index:3;color:#111}
+#hud button{flex:1 1 45%;padding:calc(1.4*var(--u)) calc(1*var(--u));font-size:calc(2.8*var(--u))}
+#hud div{flex:1 1 100%}
+#log{font-size:calc(2.6*var(--u));background:#fffd;border-radius:6px;padding:calc(1*var(--u));min-height:1.6em}
+#ov,#ov2,#ov3{display:none;position:fixed;inset:0;background:#000a;z-index:10;align-items:flex-end;justify-content:center}
+#ov2{z-index:20}#ov3{z-index:30}.on{display:flex!important}
+.sheet{background:#183038;width:100%;max-width:600px;max-height:90vh;overflow:auto;border-radius:14px 14px 0 0;padding:10px}
+.sheet>button{display:block;width:100%;margin-top:6px;padding:10px}
+.zoom{width:min(44vw,190px);aspect-ratio:63/88;margin:0 auto 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:6px}
+.gc{position:relative;aspect-ratio:63/88;cursor:pointer;outline-offset:-3px}
+.gc.sel{outline:4px solid #ffd23f}
+#mat{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.hc{touch-action:pan-x}.slot{touch-action:none}
+.zoom{width:min(60vw,260px)!important}
+.t-sup{background:#8a3b5a}
+.ic{position:absolute;left:1%;bottom:1%;z-index:2;display:flex;gap:1%;flex-wrap:wrap;max-width:96%}
+.ic i{font-style:normal;width:calc(5.4*var(--u));height:calc(5.4*var(--u));border-radius:50%;font-size:calc(3*var(--u));line-height:calc(5*var(--u));text-align:center;color:#fff;border:1px solid #fff;text-shadow:0 0 2px #000,0 0 2px #000}
+.ic i.tl{border-radius:20%;background:#c9a227}
+#hud .big{flex:1 1 100%;font-size:calc(6*var(--u));padding:calc(3.5*var(--u)) calc(1*var(--u))}
+.tw{position:absolute;z-index:2;width:38%;aspect-ratio:1.575;border:1px solid #fff;border-radius:2px;box-shadow:0 0 3px #000;background-size:113.6% auto;background-position:50% 17.5%;background-repeat:no-repeat}
+.tw.tn{background:#c9a227;text-align:center;font-size:calc(3*var(--u))}
+.ic{left:0!important;right:0;max-width:none!important;flex-wrap:nowrap!important;justify-content:center;gap:0!important;bottom:0!important}
+.ic img,.ic i{flex:0 1 calc(5.8*var(--u));min-width:0;max-width:calc(5.8*var(--u));width:auto;height:auto;aspect-ratio:1;border:0;border-radius:50%}
+.ic i{background:#888;font-size:calc(2.6*var(--u));line-height:calc(5.8*var(--u));color:#fff;text-align:center}
+html,body{overscroll-behavior:none;overflow:hidden}
+.sheet{overscroll-behavior:contain}
+#hud button{font-size:calc(2.4*var(--u));padding:calc(1.4*var(--u)) calc(0.4*var(--u));white-space:nowrap}
+#hud .big{font-size:calc(6*var(--u))}
+.dm{position:absolute;right:2%;top:2%;z-index:3;background:#c00;color:#fff;border-radius:1em;padding:0 .4em;font-size:calc(2.6*var(--u));font-weight:700}
+#log{font-size:calc(2.3*var(--u));line-height:1.35}
+.hand{-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;will-change:scroll-position}
+.hand::-webkit-scrollbar{display:none}
+.hcnt{position:absolute;z-index:4;background:#000b;color:#fff;border-radius:1em;padding:0 calc(2*var(--u));font-size:calc(2.8*var(--u));pointer-events:none}
+.hexw{display:flex;justify-content:center}
+#hud .hex{position:relative;flex:none;width:calc(27*var(--u));height:calc(23.4*var(--u));padding:0;border:0;background:#d11;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%);display:flex;align-items:center;justify-content:center}
+#hud .hex::before{content:'';position:absolute;inset:calc(1.3*var(--u));background:#fff;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+#hud .hex span{position:relative;color:#111;font-size:calc(4.6*var(--u));font-weight:700;white-space:nowrap}
+#hud .tl{flex:1 1 45%;text-align:center;background:#fff;border-radius:8px;padding:calc(1.6*var(--u)) calc(0.4*var(--u));font-size:calc(2.4*var(--u));white-space:nowrap;font-weight:700}
+#err{color:#e00;font-weight:700;background:#fff;border:1px solid #e00;border-radius:6px;padding:calc(1*var(--u));font-size:calc(2.8*var(--u))}
+#err:empty{display:none}
+#prompt{background:#ffd23f;border-radius:6px;padding:calc(1.2*var(--u));font-size:calc(2.8*var(--u));font-weight:700}
+#log{cursor:pointer}
+.slot[data-s]{outline:4px solid #ffd23f;box-shadow:0 0 14px 6px #ffd23f;z-index:5;animation:pl 1s infinite alternate}
+@keyframes pl{to{box-shadow:0 0 4px 2px #ffd23f}}
+.fl{position:fixed;z-index:60;pointer-events:none;transform-origin:0 0}
+.fl .card{width:100%;height:100%}
+.dn{position:fixed;z-index:70;pointer-events:none;font-weight:900;color:#ff3b3b;white-space:nowrap;text-shadow:-2px -2px 0 #fff,2px -2px 0 #fff,-2px 2px 0 #fff,2px 2px 0 #fff}
+.dn.hl{color:#1fae5b}
+.bn{position:fixed;z-index:80;pointer-events:none;left:50%;top:40%;transform:translate(-50%,-50%);background:#000d;color:#fff;border:3px solid #ffd23f;border-radius:14px;padding:12px 26px;font-size:min(7.5vw,42px);font-weight:900;white-space:nowrap}
+.dm.g{background:#bfe8c8;color:#1d5a2c;border:1px solid #7fbf92}.dm.y{background:#f7e8a4;color:#6b5a00;border:1px solid #d9c25c}.dm.r{background:#f5b9b9;color:#7a1a1a;border:1px solid #d98a8a}
+.hpb{position:absolute;left:0;right:0;top:0;height:calc(2.2*var(--u));background:#0007;z-index:3}
+.hpb i{display:block;height:100%}.hpb i.g{background:#8fe0a6}.hpb i.y{background:#f2dc7a}.hpb i.r{background:#f29a9a}
+.dm{top:3%!important}
+.st{position:absolute;left:1%;top:3%;z-index:3;background:#b57fd6;color:#fff;border-radius:.4em;padding:0 .3em;font-size:calc(2.8*var(--u));font-weight:700}
+.hrow{display:flex;gap:calc(1.2*var(--u));flex:1 1 100%;height:calc(7.5*var(--u))}
+#hud .hrow>button,#hud .hrow>.tl{flex:1 1 0;height:100%;padding:0;font-size:calc(2.7*var(--u));display:flex;align-items:center;justify-content:center}
+#hud .hex{width:calc(26*var(--u));height:calc(22.5*var(--u))}
+#hold{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:25;font-size:16px;padding:10px 18px;display:none}
+.dm{z-index:9!important;font-size:calc(3.6*var(--u))!important;font-weight:800!important;padding:0 .5em!important;top:3.4%!important;text-shadow:none!important;opacity:1!important}
+.dm.g{background:#b6ecc6;color:#0b3d1a;border:1.5px solid #2e8b4a}.dm.y{background:#fbe98f;color:#4a3c00;border:1.5px solid #b89a00}.dm.r{background:#f9b4b4;color:#6b0000;border:1.5px solid #c03030}
+.sheet .bar button.big{flex:1 1 40%;padding:16px 10px;font-size:18px;font-weight:700}
+#hold{font-size:19px!important;padding:16px 34px!important}
+.hc{flex:0 0 calc(22%*var(--sc,1))!important}
+.oh .card{flex:0 0 calc(11%*var(--sc,1))!important}
+.abx{position:absolute;right:3%;top:calc(3.4% + 6.4*var(--u));z-index:8;width:0;height:0;border-left:calc(2.6*var(--u)) solid transparent;border-right:calc(2.6*var(--u)) solid transparent;border-bottom:calc(4.6*var(--u)) solid #2ecc71;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #063)}
+.abx.u{border-bottom:0;border-top:calc(3.2*var(--u)) solid #e02b2b;border-left-width:calc(1.9*var(--u));border-right-width:calc(1.9*var(--u));filter:drop-shadow(0 0 1.5px #fff)}
+#hud button:not(.hex){min-height:calc(7.5*var(--u));padding:0 calc(1.2*var(--u));font-size:calc(2.7*var(--u));display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.sheet .bar button.big{flex:1 1 30%;padding:10px 8px;font-size:15px;font-weight:700}
+.sheet .bar b{flex:1 1 100%!important;font-size:15px;line-height:1.4}
+#hold{font-size:16px!important;padding:12px 26px!important}
+.hr{display:flex;gap:6px;margin:5px 0}.hr .hn{flex:1;text-align:left;padding:10px 12px}.hr small{display:block;opacity:.7;font-size:11px;word-break:break-all}.hr .hs{flex:0 0 44px;padding:0}
+.hbtn{position:absolute;z-index:6;display:flex;flex-wrap:wrap;gap:calc(1.2*var(--u));width:calc(27*var(--u))}
+.hbtn button{flex:1 1 0;height:calc(7.2*var(--u));padding:0 calc(1.2*var(--u));font-size:calc(3.2*var(--u));white-space:nowrap}.hbtn button.au{flex:1 1 100%;height:calc(6*var(--u));font-size:calc(2.9*var(--u))}
+#ovn{display:none;position:fixed;inset:0;background:#000a;z-index:35;align-items:flex-end;justify-content:center}
+.sheet>button.ab{border:1px solid #e33}.sheet>button.ab.used{opacity:.4;border-color:#666}
+.sheet>button.atk{background:#ffd23f;color:#222;border-color:#ffd23f;font-weight:700}
+.ic img.neo{border:calc(.4*var(--u)) solid #fff!important;box-sizing:border-box}
+#ov5{display:none;position:fixed;inset:0;background:#000a;z-index:15;align-items:flex-end;justify-content:center}
+.sheet>button.atk.no{background:#25454f;color:#eaf4f2;border-color:#666;opacity:.4;font-weight:400}
+.abx{border-left-width:calc(1.9*var(--u));border-right-width:calc(1.9*var(--u));border-bottom-width:calc(3.2*var(--u))}
+.lbtn{position:absolute;z-index:6;display:flex;flex-direction:column;gap:calc(1.2*var(--u))}
+.lbtn button{height:calc(7.2*var(--u));font-size:calc(2.6*var(--u));padding:0 .2em;white-space:nowrap}
+</style></head><body>
+<div id="mat"></div><div id="ovn"><div class="sheet">
+<div class="bar"><b style="flex:1">オンライン対戦</b><button id="ncl" class="sm">閉じる</button></div>
+<div id="nst" style="font-size:13px;color:#ffd23f;margin-bottom:6px">未接続。部屋を作る（先攻P1）か、参加する（後攻P2）を選んでください。</div>
+<div id="n0" class="bar"><button id="nhost" class="pri" style="flex:1">部屋を作る（先攻 P1）</button><button id="njoin" style="flex:1">参加する（後攻 P2）</button></div>
+<div id="nh" style="display:none"><div style="font-size:13px">① この招待コードを相手に送る</div><textarea id="noffer" readonly rows="4" style="width:100%"></textarea><button id="ncopy1" class="sm">コピー</button>
+<div style="font-size:13px;margin-top:8px">② 相手から届いた返答コードを貼り付ける</div><textarea id="nans" rows="4" style="width:100%"></textarea><button id="nconn" class="pri">接続する</button></div>
+<div id="ng" style="display:none"><div style="font-size:13px">① ホストから届いた招待コードを貼り付ける</div><textarea id="ninv" rows="4" style="width:100%"></textarea><button id="nmk" class="pri">返答コードを作る</button>
+<div style="font-size:13px;margin-top:8px">② この返答コードをホストに送る（送ったら、ホストが接続するのを待つ）</div><textarea id="nresp" readonly rows="4" style="width:100%"></textarea><button id="ncopy2" class="sm">コピー</button></div>
+<div style="font-size:11px;opacity:.75;margin-top:10px">通信は2台のブラウザ間で直接つなぎます（サーバーは使いません）。接続後は、それぞれがデッキを読み込み、ホストが「対戦開始」を押します。手札や山札はほかの人に見えない画面になりますが、友人同士で遊ぶ前提で、通信内容は暗号化以外の保護をしていません。</div>
+</div></div>
+<div id="ov5"></div>
+<div id="ov"></div><button id="hold" class="pri">◀ 確認画面に戻る</button><div id="ov2"></div>
+<div id="ov3"><div class="sheet">
+<div class="bar"><b style="flex:1">デッキ読込</b>読込先<select id="lt"><option value="0">P1</option><option value="1">P2</option></select><button id="cl" class="sm">閉じる</button></div>
+<div class="bar"><input id="code" placeholder="デッキコード kvwbdF-zcJSFF-VVVFFk" style="flex:1;min-width:0"><button class="pri" id="go">読込</button></div>
+<div style="font-size:13px;margin:8px 0 2px">過去のデッキから読み込む（読込先は上で選択）</div><div id="hist"></div>
+<div style="font-size:13px;margin:10px 0 2px">P1・P2まとめて読込（上の一覧の「→1」「→2」でも入力できます）</div>
+<div class="bar"><input id="c1" placeholder="P1 デッキコード" style="flex:1;min-width:0"><input id="c2" placeholder="P2 デッキコード" style="flex:1;min-width:0"></div>
+<button id="gob" class="pri" style="width:100%">両方を読み込んで開始</button>
+<div id="msg" style="font-size:12px;color:#ffd23f"></div>
+<details open><summary>自動取得できない場合：デッキページのソースを貼り付け（一度貼れば、以後はコードだけで読込できます）</summary>
+<textarea id="src" rows="4" style="width:100%"></textarea><button id="gosrc" class="sm">貼り付けから読込</button></details>
+<button id="demo" class="sm">テストデッキ</button></div></div>
+<script>
+const $=s=>document.querySelector(s),e=s=>String(s??'').replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const EI={"NEO": "data:image/webp;base64,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", "草": "data:image/webp;base64,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", "炎": "data:image/webp;base64,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", "水": "data:image/webp;base64,UklGRroFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggEAUAAPAVAJ0BKkAAQAA+XSSQRSOiIZcKT4w4BcS2AE6ZUt3n3vzXqr/U91XL72yaAPRB4pHS6/TP1O+dn6MPQP6Tz0Ruls/bfCK7QfPdnww7MyL/s+Wj6k9gv9ZfSz9ffok/rMpudRvdMt2C7ZWllWcVl0IUT0Gh0zBeep5AU3zNUQQXmXQf4AXQ030TxEA+OvJ5Ah2U50te07Vz6144yD7cY4EN7dAxewyG7lBx9tkXAl/0CtlBIq6PF8AA/cwP6AIxbAyTRR86/dAD8Q4SPuxKoysKE5hXEsAEKXD7vTS1/V//QIEo/KpVQnIK/+4px/SwUi5bCb58YCLfXVf/v3vN9AHr9WYJ+BL3cn+RaEI3Pc/qlJ64Dbjj0Y7JRsQzn2gz9Yftu4iUNvfnBMD4uH3gdVlvV2UoG/fURYuwsE7VRf9GdfEm+FtuLSs9iXILBR97BMSUtHVEw24qwjPZQ67mF1ZAMskqePfL+0o1HE7+2Robw2HDYwMVrWFk2zyj/fsWZdFOccRmdTRTB//H9/NAPV/hFg+pFDpBI2BY2LdoWdnbGE6sn/iXwbZax7H6eLHatUCZ9605fwEkNECK937adVEaLaE5xKRSjG8sBfF0M2JEK/lQnRdT2LQcFEE21YDHuIily/zN/6ojqYfqqZfUbMPwoSqUHNCi8nqCwPNLkKdfgEl9bjfOEnLBQ4JUR/muR6jCaahK4gn8NX56Y+r/xbZTZfb63rb5gxcDJ7gd3gB/bvJJBbx7Hi8BKUULTLvDLv4rk+q1dxE/wGV7Uk65bLB4PyPi9P9+Kdmwjf9yjd4h+97KO/Q7TQZeK79YP6AgY96SszL7T5/Me/25KcVZBWZ89JiFLmL0b1F+5TH7ezuSa9fX94BeXCzIjAmBV0ZbopnCg+mnK2F55EW7R6DfS2f1zp8hbQhbGm+A59HcjpG/o0mOTjFszUU1exMx7ADeZ/Q2fabwjcAgt5D5yf/3wKCZ61HTAMyDSHcst9i5+VT3rfr8LSeH5MP1zlVFvP96a95CG1kLmXEkMUCi1M8Tyd7E59OgwkN3f8dS3++vBd+FQwuP1LVrdH509wes9VS8aV6TXmX7nPOrMSOHKwrkCZseXgJwM5W3vwBjzZBXc0WjhxkFsNZa0kfhpnKYoFHyYYLY7JRfZFtqgCS3im6kk5fgp8HNVQ5cbUF6aUWR+JPp/MElNahhJxntCR7OeznBjMi//jn/i42qg7LyYx5HKwWTeTM+v+YYzrbcRKtq7awBBtfxxfJ5c3nG0fOQ+zL9p9YoU3uqtFwkxpjR8V3pN6ub5fmlaq4XuvvaPZIw0Ee+NkoZAROfuBtNM45C0vs6/NXZpidTxVO8/kL9uvK6p1LfwoG0FQqZ5ac/8JcrM5PxwSVn82JX/ygOmatPbnYSNECuNWT0efllcTRippcSTqfjXSt2h53rYXIcN3Xom4ZDFH2RLeYe59OxiRhS0GtDvx5xw5IyGB6wlJV8KjTJAeCnOJWnQsnRc7+RIdNjmV26l9s/3SxK6e/6bMMEyvPHs7v3KPm/NeyQ6AfVeVgHaVQZlyLXyraygcYOFAx5AjcBgxi+yraY6pLrcju6qqrbeywQ42Bk+p3bS7aUA69ETX2hpqn6KMQsz2z/OxQvxlmOHFAn20GJOucK9SelcFTftRrO5KmAVvWyQIIA/L1+jTZetFqt/hq7x5VCSeyMa5TG0GJF8XRFrh32HjrT4wAAAA==", "雷": "data:image/webp;base64,UklGRnwFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDgg0gQAAJAXAJ0BKkAAQAA+YSqSRqQiIaEqEzrogAwJbACdMqp9V715idO/pP4S3WgtHafOH8wD9Semn5i/2k9Xb0k+gX+wHW8eh55af7X/C7+3PpDZpfmR2QRgXe6N5DMwrne+lvRT6yf7brXikg3UAckh7qb0KcWFwysaXtjdT5Sl3cdQp3R1uCIhobqwoq3PDlcYMNefWk1VsJoOZW7dNjCtjkz+sVMA9F3haNyBimCVKcSjbvP8wzzvJUEqgWcfhKG/TB+/7l+AAP76R8/QR1yPEc9Yx1DIBTMp2tGpQZY3xDu33R//kQHnv1K+OgzQoRfziII6sf/AI7k3t+g0OsN1bOn10cPsky6FIZiSC7BdFm9fI4TebjOYWC1ZbLceJk5qv1LkaNdH8sGoQuQEl8Am/8EWOpBxRM4//oq7KklTpOeEO5jrWuxdSKOygLRaSBYzoXNDRaj6FWczW1oJozhIXNfKA/X3zfu+26SbGGuLfXB1VZZo6aPx5+0wSrRB3d7vltAz4auI6aqKFhX05d/7jV4dyktg0ezl/WafoqI2q/jJxEUW6Ko9UVGAa24pe+KfJUYCby6CBO4goknJd8m8LFbzpE0DHJdzRmXtsmGIFB3gZpeRU8DPvJQyFudg46u+F+P+DxSVZ0GwJgrYuobTasHcHlvvPlDFmN37wHrpTx9VNVVhQNuT3jVpcUN1KlGoC/MkFY9Mp3aXnCndcSEzZKlNfXLchg/6gfOsZA9qGWif//2hF74RHGI2LOu3tA2gLJ+Y0SBGT0XdTVjjr+VVLxyITZx3zfef7+cobiS7XJG/6HXzyzfkI0KCkdsNhkZ3thB+vfbH+kce3W1XAoAQfMssLhJVaBGz5D/mcw+VUEuBypZDiJytJ6i0KuccAtWEMUF0TaiFNphuUOUXiNRGtUFTvfZnDA9JBLGwm76fz1GNDG+C8cO0gKrunfyuJnYzxpvkyA+wJL7nwTacOvdT75eYLiSwl3quPsHEBXiyFZc9fQ/xwD4x0Q1aaVcTaHiDxt/ezNQ0BmBcmr5O+SF6FaGCTVbHHbtUm0F6QtqFXJwtNnAQlDwRKhPr+DCafn5nLjEqDuctf+Of0lMSC1/rCGATqqwF7C1S4wryaQaOqE4reU1bHbU/hVG1xvYCKiLvmsWo2PxKmog/aGyPL0bMzBWpAzF142TEG7x6Mirrlz1Ylr/2geGof4rna2R53Nh9quoKfP2VHkihuevgJwWnt2tAJ+mBD9S5gR3cN1PgQc11Z4wYrfn93i1MGDwr3XR9DXWzwSo0QSRybPziMgizbWR7DvHO5C6hCu1qvHprEZcd/UHQ++6iq1sGVl174iJwP5LosUhcLInviAimhzfhjIkLfP/m+e3N+kZastiaKetIVsr38IGHqF1kFQ++Y8PWuSouun92lb4RZ4mDzupf3GimB/7R/xJpEsjf9qKETTqYYwjOEpVaTol4w2zC3vvCWFHFCfRbQ5lens4ib8WvIGJy+dqXASwWt4Xvdwzs36fh9xzWR12X80fVoOTzqbBZO2Edh1MMlCtrt8yZN5ZwVJsA5GDn+NjrzPDSzweo9SqpYqHSvfRSnxE6OT94NBArZjhlvp5nIEOEPc8nCIPDStXDYOOiIMyTnL83DOMSi02AAAA=", "超": "data:image/webp;base64,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", "闘": "data:image/webp;base64,UklGRqAGAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDgg9gUAAPAcAJ0BKkAAQAA+YS6RRyQioaEkGAyQgAwJbACdMoR8r6T5kVX/te1MzN5O/NfOH/PfsDfZv/L+wP+0X4gfA/9ev1093H/XeoD/C+oB0jf7X+xB+2Ppu+yf+4X7Ze1Bmlf8a7VOgMCzn8x5iojiGbqu6A4xj/VepnGAfnH/a+mP/v/cB7bvpb2CP1p/6HXV/cb2Jf2qY61aa9R9uYXi//krzWM62ukXS0yP/9MEiNXbLhb3fn6+jXBgs5kvIQt4vuqXpwl+rYj/QmfYM14TRydvPYY3LNvIl24Cx0D2/Ta6E0zLRv0l0RyMI0h76U7mmAD7ESyUjHaqIA7b7r4/eH7HPPtxJhWBcDWMIczJvx4VnGjXPsRj2ktQ1T7H1P8v/3116ZFHFN+hSE8JgYMYRhR0Zh/+j9hBsArLZuZPGIMy2/n7MhAgHCGn7DxmT7lpMn3vZ7SyfVrHAhKldKbPeZtY6+Oy9CH+nO8qFPThdVu0x/VwsOMEudMMV1mRlevpYfcg2/015hJTKajcg4i30uO8A/6Gwj6gXGbb8DhZ/JxcnqnAgXH0bzvebJRzkwpe6vS/Gkkx/w1W4SjQC8LgzJ55FF3Ln8mVmmGtI9l62dSr2/ARn1Gujrx0Le5vYTGi/HZ5tgpOJ/pnpr2H3X2Be3JJT0H9D+W7lYxVs65j+KTo62tihr0HFDYe/bzKWwNxUWkUG3MPFHl6hj/3L695bZwX6K+cjmLZuG39fs34RKMrkj9D9JMrJIhEsTO8G8jOf8XcA4KbLTeDfSJ/J/9zZ/9bYpin/y49D7uxFCugsVsYPqJsi+JDXeFS/Vr7F11QkgxFPJV8MPK4+Wkic9A38ESaE/nSgos9NpVulagNYuU88QUIbUwh+e2kmJQv5zyWJy0uGqcgLct5naEfWaETG0Bl+3ezmrptn8640vmFzNtxieS2skBOH3bepAoL9CkZtLWtVqujZpD0uNoMbZxHKIW+0iatSYkuHt7Ykvu0OEQB3C54cDHopP8mZ6i2+6ZtVPyjH/2fXEFiSCtFUib9Dz4RUkYcsIHg013YGH9gDLW4BUnDxyfZNhC1PnyHl9jThvwAIKa/PiA2wg08mlgdfOisKtqL5JZzst82L+xrSFj0NpOO9FI3qZJwhmHzvFg/ElqYeTyTUajqB8cvEK6f/cxZ97+WX5q9zG6EzSU6B/eGazAIPWfxlsd0s6rfq1r6iNOkHO8R7Jx7I38306fyAn9//EBT+HUbz+rPwylyHCUM5i1tI8AmIJj7+gIHcMOF4sfG7HyhjwqdXz8pOQMRIfKrFVgbCdnNkCvu+Pp8UpNlfF8a/OQ9WdXSAXCbb6VIa+9tTzAa9bmCW1wZM9Y+e9v4ZR5th+dIE/Z35gPXXkWFpcfcgXT/z6RRvXPjeejmriAx+IUgBAJPc7RB5lRbjwG6qeQM/lHJR+15+wIkQswom87uM9j/B2csuIYd3pvMwPa1aBcG0EDFb+maiUepvFcH7ztXuz4GpV+fkrlksi6rZHf674xK4df7+9M6Tt65UXt6IEZO3glIMuSfgaJ8Mg8OWKZaj9JLFtzmReZGe7cjMtJcofUej9/8+3BcRee668HY0z3tlUNxT2GuoVwYQ4XsZkned3c0dzDdkx4Oa+J88BQRpUyjzj7kFEejwG5DbN8AyBwnwXrr5vHuZdkth3KftIL1DkZm7ak3U33J/GbSHgHDeQUhX512rZaTvO25afXmxhZLIUdbl5mAZFmqLeR93zctpt/cBOQiGsk/xdyDrFyjhD7rW6f93tI8D81/Ccso5Vtilg+Mp9WFomwvu4GEdba6lXlLIAXedM5JxpxheljcWhUGzgo5qAWw+l7aQMnbunn/gqtH36KCVydZnuVWs4gfegerQBkERhbYv6jZxc7K4tLODvNj1SRx3MjzfVtFoT6WUe73n7Aqxl47HuZfaAgjP5xjVUnjOTEe0tuoUu4+vJwn72Bb8n1ZEURk6t6lLuw/pBtTJ7aAVJWmElQQaXn7rT1H4410OV1ck8smC7twAAAA", "悪": "data:image/webp;base64,UklGRjgFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggjgQAAFAVAJ0BKkAAQAA+WSaPRSOiIZn6bqg4BYSyAFiPY4aKR/hXGVt4+jnbzXbXQF/Mc+ePjp9pyqSZeAeY5T98DqPH/Jeyx/L/+Typ/T3sCfrt6W/r8/cD2Kf2SWTIsOzJ1YlPz91/tVNDiOBpQSeTf95YM15FUS2maQcUMqHilISZcUXpyBoNTeHqtubLeEQiAmzCd37S57mOXBdnd8KSQimMNaLCyUFeZhiKdKyohXVlXDoAAPXqX+YmzfyvY/QAtx/yBeXFSP4HjfbFQZ4umVpz5V2VDXjMkfOelUakaTD4AF+mFX/jC+G5i2xJ/8056igxYdCZKFW8UoBFrX5sHcurMuczwndGZvsr+ayYv7kcd/ulwF8Eoh0fM5tCBjdii3jXOW/YOAqAVzX42XEofXuffMVYCD6bVBoDkHqDxjN4tBEC4Nninxfc9OMC9n67TbYNwerYjSjV4xJhWRgjYlUw3GGvPzUFbBMsG+QljpNjv5xoVhG/d35Nw1EAmLHqgoQR5r7VCfCeLFEZy8cfsWPb18/8ARujAAS5a0pkJu6+MibB9aK3+aJ9jXTteKP+2OsJJFcljKWw7k6qmiivyiC4pc4v3irwhFzlH/We468zU/bbyY42As61APJOGs0WUFmcnWuY+8//kaccd3+/AcnTYKF/bXodGrdzTuDN1OEby0yyiCz41C3KNbIKHaJslfGoD6/CilL0pZNDIl5sggEss/LvJdP6tAx+L89iIQ2nqCrfi5l44GWEy/DGbL1xuyNZmV03bskIAWedXZ/MbAxzXqtD006zIPS7lp+naZoP1af4hhDE+uSty4kzmdIGe0ID6aPYtsHsqxlQ2yjgJiAOKlfVwnNen+cckQdToasI1zTL06XXTKFll6EGHiuCagkHceYRfih5JAHLe3Q9kPsRUGY4Pxat4TPEAzMeOFqhi7M+WMXrcsIxB0o8OUDKk3Y4M+U4nR+0SBQFuJYtFXm2Pe4LVJeK/EIcJDs4vJ6NR9Yk6M2Wz+uQ+P3MJJ0oVRGv6MRLBVQs/Ptg4mlummR7lmv35z6sMaVf1Psm+4m84gYtS8wg6c5i2e3Sxcz4Y0duOiC+4l6d7gmXaJ0hiQdb06Z3ZqArzYDKD3/XGgNqJWwfbZfgvEALAiV7EAC1GNBQXYnWqXtN9s+H9NScldveWHJzvK9Lu6Cqkfg0qYs9DocOBd9OBRtUFx96KjPfDGPgj6lncHV8AsmyEPLp57YRx4sZMhwmGzYebr0r4IlhzCkmCZPmiTrFBdtyerRHw5KD1KYijZ49vdH6Q1PIPJCZxs6URXUNcOjTc87OVUbgNSDuAEGcybPK7DDuNQhP/SIsP3xCyh5TsNQcLwID0Ks2/jFF9d3l9tuAc3iQzl9YXv9NmtjzpkBcbwueyjCr2lXPmNeK7DRvRkV1j9VzTsPKT2e88QV7V49ehidHOYx3k/hGtNPSAh9BgliaaiOiwbptoQno28TwILqUnfYdboP7IDARZpBAOaqa8n4oyheadJbTDQK8NnGLOHgoWG+jAMaPNNlBN0OxjxhEcAAA", "鋼": "data:image/webp;base64,UklGRgwFAABXRUJQVlA4WAoAAAAQAAAAPwAAPwAAQUxQSIQAAAABDzD/ERHCUWzbbXM9dSkIhiJoDjRBMQQtUzR+i/eVDiCi/xMAtIwXabQqJWtSNkkCio1w2ArVEjTLcNoOCp+4REOJxiNaezVKvWu09VqUe2e0v09//4z297Uo967R1qtR6h3R2ivReIkGIp44bYdmGaolOGyFYiNgAE3KVqVkRRqNlgFWUDggYgQAAFAVAJ0BKkAAQAA+YS6TRyQiIaEiCzCADAlnAMd0dE8NdjH+G8HfE5709seSw0r/VcRuv7wL3o71V8HkwZ9IegP6f/73uD/qr/0fWq9d/ouqzX5YTEkv6eebAUVBz90bVlg+2s6Ptvs9qLeegmggpb7faYJCH+JupowdDI0sa4zIZa7NaDTcV7mG9GvWsDWX153V9QUdRAKsS9TS9UqiVJ50ozsK5pjuBIBZtoZcwYcggxIAAP6tDvcAGLOnzd/IM2fldG+gfZZV0HwW17oyjlRZJ5RTJItn1i29RSzxiNyIC/EjiKLIG6n+WB4F5bruc/SuTYfHFBx+wAT8sHwdMvwR8O/9NLQlGd6Z6d6B85Usp0QsP7v18enHUOW3srzAnZA/mATujBeAAnDPn4Uh9em9g61zSJ0+wacZ8h7yMxp7BtfRlm1oKa+QksEGQqOoDPTP90/FnhQXG30LvcwqKgn5d7erEHX3k4QRn8uAAG0BHlddRNnlQy66jlTFGhXW/ehS9eELYya8xvWl8sfvXsP7V/z4Kr9UunsH6/Mm7VGR0S73J1RY9bvd+bt1d7h093cfComsmhnm/7b3vwQ+evOBQd/lz7jbyLlUozP8c+HD+DTi8B5LExJ93f2A1FpI6AetrCeAgv+4ArEw+OK5tVLK7Q3sJ61McWNqRsZqmrC/4MrniJWCoUhQnH6JcAcuYT03OfTUO+Max9xLfbbUB5/trBYV+5kxXiGNSHeASXZNuPWsM+eF32T0+JOliSuaIR0CbP9OAvEukr5tRr56/T083Uyn++k4oYAsxMk8yKIRsz9vosHazqfiaNWu7FLEnnmfEhEUhV2V4ah3HQWcQFs60R4gsP1WmvQhDWbtGYv0KIvNYsvOQ64QFTBAwqhImfUdwreFxJ0GdAcrNOwz229EpxIpmpL76jP+xHj1urFdmoWtDJq2HAEe1783SjNJ4v050p13zjzKTvJF36BAnk6b4ZSIUOH+7fGdyPamUry7lqk/YlcTc6gPFr5ibaztTATcTc3Va5ufUwCkN8iZODTNDnRg/Di5XsJyuPF/2fXk4D4h+ihzWD13kpmBTWFZy9QrOkIli/rTH8mLZy4wET0IVztFJm4cXhqVW4ZcuegfKWvMMVTUrQ9oo3AYF/DvLnlzkN/NNFfvspYw6EUR/+HiNVwlPVPs/H3Wq8e1U8c0f8ARmUf31eV0SxZuCvqpW3s0Xsv61FKQB93XIfu4AikpmTcd6kCBwWuwgP5KChA4LCXCwaryATn6XI7UgaWpY/UbmBykbvzg54fZO61D9VenybFcd9K/OQRkbMIDpHdJLtqWsSzndiO4N28wPLzCYAEF+3gc1svYv8/ySVnjzbVKnHkXa8QE403jmMvO89ej8kCXLf//wabsuKtdBUpzGYQWe5dkyp40w4zwh5dBX7HJFgZ4Xyv5eAuFWDBdxth0vfsYWyNnpRsprVaANMQcgMv4PQZfKd++Tz534gAju/sUAA=="};
+const BK='https://www.pokemon-card.com/assets/images/noimage/poke_ura.jpg',RX=/[A-Za-z0-9]{6}-[A-Za-z0-9]{6}-[A-Za-z0-9]{6}/;
+const newP=()=>({code:'',cards:[],deck:[],hand:[],side:[],trash:[],phase:'none',piles:{battle:[],b0:[],b1:[],b2:[],b3:[],b4:[],b5:[],b6:[],b7:[],stadium:[]}});
+let P=[newP(),newP()],G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0},cur=0,HS=[],LG='';const me=()=>P[cur],lastOf=a=>a[a.length-1];
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
+const back=()=>`<div class="card back"><img src="${BK}" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
+const cardH=c=>`<div class="card t-${c.t}"><span class="nm">${e(c.name)}</span>${c.img?`<img src="${e(c.img)}" referrerpolicy="no-referrer" onerror="this.remove()">`:''}</div>`;
+const LGS=[];let ERR='',ERT=0;
+const lgH=()=>LGS.slice(-1).map(e).join('<br>'),log=t=>{LGS.push(t);if(LGS.length>500)LGS.shift();const l=$('#log');if(l)l.innerHTML=lgH();netSend()};
+const err=t=>{if(CPU.on&&cur===1)return;ERR=t;const x=$('#err');if(x)x.textContent=t;clearTimeout(ERT);ERT=setTimeout(()=>{ERR='';const y=$('#err');if(y)y.textContent=''},2000)};
+function openLog(){const o=$('#ov'),z=document.createElement('div'),b=document.createElement('div'),d=document.createElement('div');z.className='sheet';o.innerHTML='';b.className='bar';b.innerHTML='<b style="flex:1">バトルログ</b>';
+ b.append(btn('閉じる',closeAll,'sm'));d.style.cssText='font-size:13px;line-height:1.7';d.innerHTML=LGS.length?LGS.map((t,i)=>`${i+1}. ${e(t)}`).join('<br>'):'ログはまだありません';
+ z.append(b,d);o.append(z);o.className='on';o.onclick=ev=>{if(ev.target===o)closeAll()};setTimeout(()=>{z.scrollTop=z.scrollHeight},0)}
+function act(fn,re){HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();render();re&&re()}
+const draw1=p=>{if(p.deck.length){p.hand.push(p.deck.shift());return 1}};
+function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:c.img,t:c.t})));
+ p.side=[];p.trash=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.mull=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.sup=0;G.eat=0;delete G.act;delete G.fp}
+function find(p,u){for(const k of['hand','deck','side','trash']){const i=p[k].findIndex(c=>c.u===u);if(i>=0)return p[k].splice(i,1)[0]}
+ for(const k in p.piles){const i=p.piles[k].findIndex(c=>c.u===u);if(i>=0)return p.piles[k].splice(i,1)[0]}}
+function mv(u,d){const p=me(),c=find(p,u);if(!c)return;
+ if(['hand','deckB','deckT','trash','stadium'].includes(d)){c.dm=0;c.sh=0;c.na=0;c.nr=0;c.cf=0}
+ if(d==='hand')p.hand.push(c);else if(d==='deckB')p.deck.push(c);else if(d==='deckT')p.deck.unshift(c);else if(d==='trash')p.trash.push(c);
+ else if(d==='stadium'){P.forEach(x=>x.trash.push(...x.piles.stadium.splice(0)));p.piles.stadium.push(c)}
+ else{const pl=p.piles[d];if(c.t==='pke'&&!pl.length)c.pt=G.turn;if(c.t==='pke'){const pv=lastOf(pl);c.dm=pv&&pv.t==='pke'?pv.dm||0:0}
+  if((c.t==='ene'||c.t==='tool')&&pl.length)pl.unshift(c);else pl.push(c)}}
+const swap=k=>{const q=me().piles;[q.battle,q[k]]=[q[k],q.battle];q[k].forEach(y=>y.cf=0)};
+const prize=c=>/VMAX$|^メガ.*ex$/.test(c.name)?3:/(ex|V|VSTAR)$/.test(c.name)?2:1;
+/* ---------- render (screenshot layout, 922x2048 basis) ---------- */
+const att=pl=>{const a=pl.slice(0,-1),en=a.filter(c=>c.t==='ene'),tl=a.filter(c=>c.t==='tool');let h='';
+ tl.forEach((c,i)=>{h+=c.img?`<div class="tw" style="top:${18+i*7}%;left:${4+i*5}%;background-image:url('${e(c.img)}')" title="${e(c.name)}"></div>`:`<div class="tw tn" style="top:${18+i*7}%;left:${4+i*5}%">道</div>`});
+ if(en.length)h+=`<div class="ic">${en.map(c=>{const m=c.name.match(/基本(.)エネルギー/),k=m?m[1]:(/^ネオアッパーエネルギー/.test(c.name)?'NEO':'');return EI[k]?`<img src="${EI[k]}"${k==='NEO'?' class="neo"':''} title="${e(c.name)}">`:`<i title="${e(c.name)}">特</i>`}).join('')}</div>`;return h};
+const RATIOS=[['画面に合わせる（自動）',0],['9:16（一般的なスマホ）',9/16],['9:18',1/2],['9:19',9/19],['9:19.5（iPhone系）',9/19.5],['9:20（縦長Android）',.45],['9:21（Xperia系）',9/21],['10:16（Androidタブレット）',10/16],['3:4（iPad）',.75]];
+let AS=0;try{AS=+localStorage.asort||0}catch(_){}
+let RSEL=0;try{RSEL=+localStorage.ratio||0}catch(_){}
+const RT=()=>RSEL||Math.max(.2,Math.min(1.2,innerWidth/innerHeight));
+function applyRatio(){const r=RT();document.documentElement.style.setProperty('--r',r);$('#mat').style.setProperty('--sc',Math.min(1,(1/r)/(2048/922)))}
+const at=(x,y,w,f)=>{const k=(1/RT())/(2048/922),SC=Math.min(1,k),h=w*88/63/Math.max(1,k);if(f)y=1695-y-h;return`left:${(461+(x-461)*SC)/9.22}%;top:${y/20.48}%;width:${w*SC/9.22}%`};
+const PX={battle:[355,855,215],b0:[200,1170,165],b1:[378,1170,165],b2:[556,1170,165],b3:[289,1415,165],b4:[467,1415,165]};
+const PX8={battle:[355,855,215],b0:[146,1170,150],b1:[306,1170,150],b2:[466,1170,150],b3:[626,1170,150],b4:[146,1389,150],b5:[306,1389,150],b6:[466,1389,150],b7:[626,1389,150]};
+/* 特性が今使えない理由（使用済み・同名特性を使用済み・発動条件を満たさない）。使えるなら空文字 */
+function abWhy(t,k,p){const A=(mi(t)||{}).ab;if(!A)return'';if(G.ab[t.u]===G.turn)return'used';if(A.key&&G.nm[A.key]===G.turn)return'key';const b=A.ok&&A.ok({p,o:P[1-P.indexOf(p)],c:t,k});return b||''}
+const abB=(t,i,k)=>{const M=mi(t),A=M&&M.ab;if(i!==VW()||!A||A.passive||A.onBench||P[i].phase!=='play')return'';const w=abWhy(t,k,P[i]);if(w==='used')return'<span class="abx u"></span>';return w?'':'<span class="abx"></span>'};
+const hpOf=pl=>{const h=(mi(lastOf(pl))||{}).hp;return h?h+(stadName()==='ジャミングタワー'?0:100)*pl.slice(0,-1).filter(x=>x.t==='tool'&&/^ヒーローマント/.test(x.name)).length:0};
+const dmB=(t,pl)=>{const h=hpOf(pl),d=t.dm||0;if(!h)return d?`<span class="dm">-${d}</span>`:'';const r=Math.max(0,h-d),pc=Math.max(0,Math.min(100,r/h*100)),c=pc>=50?'g':pc>=20?'y':'r';
+ return`<div class="hpb"><i class="${c}" style="width:${pc}%"></i></div><span class="dm ${c}">${r}/${h}</span>`+(t.cf?'<span class="st">混乱</span>':'')};
+function board(i,f){const p=P[i],o=[],cn=n=>`<span class="cnt">${n}</span>`;
+ const sl=(x,y,w,a,inn)=>o.push(`<div class="slot ${inn?'f':''}" style="${at(x,y,w,f)}" ${a}>${inn}</div>`);
+ const L=benchMax(i)===8?PX8:PX;for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t?t.u:''}" data-dm="${t&&t.dm||0}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k):'')}
+ sl(8,1300,150,`data-a="sidez" data-p="${i}"`,p.side.length?back()+cn(p.side.length):'');
+ sl(762,1170,150,`data-a="deck" data-p="${i}"`,p.deck.length?back()+cn(p.deck.length):'');
+ sl(775,1465,130,`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
+ o.push(f?`<div class="oh">${p.hand.map(()=>back()).join('')}</div>`:`<div class="hand">${p.hand.map(c=>`<div class="hc" data-a="hand" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div>`);
+ o.push(`<div class="hcnt" style="${f?'left:2%;top:.6%':'left:2%;top:81.4%'}">P${i+1} 手札 ${p.hand.length}枚</div>`);if(!f)o.push(`<div class="hbtn" style="left:2%;top:74.4%"><button data-a="hsort">整理</button><button data-a="hall">全手札</button><button class="au${AS?' pri':''}" data-a="hauto">自動整理：${AS?'ON':'OFF'}</button></div>`);return o.join('')}
+function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x.phase==='setup'),tl=G.turn%2?`先攻${(G.turn+1)/2}ターン`:`後攻${G.turn/2}ターン`;
+ let h=`<div class="hrow">${MP()?`<div class="tl" style="background:#ffd23f">${CPU.on?'CPU戦':'対戦'} P${V+1}</div>`:`<button data-a="mode" class="${ed?'pri':''}">${ed?'編集モード':'プレイモード'}</button>`}`+(ed?`<button data-a="swap">視点 P${cur+1}</button>`:`<div class="tl">${pd>=0?`P${pd+1}準備中`:tl}</div>`)+'</div>';
+ if(SEL)h+=`<div id="prompt">${e(SEL.ttl||'ポケモンを選んでください')}</div>`+(SEL.must?'':`<button data-a="selc">${e(SEL.cl||'キャンセル')}</button>`);
+ else if(NET.wait)h+=`<div id="prompt">相手の選択を待っています…</div>`;
+ else if(p.phase==='setup'&&(!MP()||CTRL()===V))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button data-a="mull">マリガン</button><button class="pri" data-a="side">サイドセット</button>`;
+ else if(p.phase==='wait'||(MP()&&p.phase==='setup'))h+=`<div>相手のセットアップ待ち</div>`;
+ else if(MP()&&p.phase==='play'&&CTRL()!==V)h+=`<div style="text-align:center">相手の番です</div>`;
+ else if(p.phase==='play'&&!ed)h+=`<div class="hexw"><button class="hex" data-a="tend"><span>ターン終了</span></button></div>`;
+ if(ed){h+=`<div>ターン${G.turn}（P${cur+1}）</div>`;
+  if(p.phase!=='none')h+=`<button data-a="draw">山札を引く</button><button data-a="shuf">山札を混ぜる</button><button data-a="sdraw">サイドを引く</button><button data-a="deck">山札を見る</button>`;
+  h+=`<button data-a="undo">↩ 戻す</button><button data-a="rst">やり直し</button><button data-a="ratio">画面比率</button>`}
+ if(ed||!p.cards.length||(NET.on&&p.phase==='none'))h+=`<button data-a="load">デッキ読込</button>`;
+ if(NET.on&&NET.me===0&&P[0].cards.length&&P[1].cards.length&&P[0].phase==='none'&&P[1].phase==='none')h+=`<button class="pri" data-a="nstart">対戦開始</button>`;
+ if(NET.on&&P[V].cards.length&&!P[1-V].cards.length&&p.phase==='none')h+=`<div>相手のデッキ待ち</div>`;
+ 
+ return`<div id="hud">${h}<div id="log" data-a="logs">${lgH()}</div><div id="err">${e(ERR)}</div></div>`}
+function render0(){applyRatio();const V=VW();if(AS)P.forEach((q,z)=>{if((!MP()||z===MYS())&&q.cards.length&&q.hand.length>1)q.hand=dl(q,q.hand)});if(G.mode==='play'&&!MP()){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0)cur=pd}const si=P[V].piles.stadium.length?V:1-V,st=lastOf(P[si].piles.stadium);
+ $('#mat').innerHTML=board(1-V,true)+board(V,false)+
+ `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+hud();setTimeout(fixBench,0)}
+/* ---------- overlays ---------- */
+const btn=(l,f,c)=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;if(c)b.className=c;return b};
+const closeAll=()=>{for(const s of['#ov','#ov2','#ov3','#ov5'])$(s).className='';HOLD=0;$('#hold').style.display='none'};
+function menu(c,items,ttl,must,cx){if(CPU.on&&cur===1&&items.length){cpuMenu(items,ttl);return}
+const o=$('#ov2'),s=document.createElement('div');s.className='sheet';o.innerHTML='';
+ s.innerHTML=(ttl?`<div style="margin-bottom:6px;font-weight:700;white-space:pre-line">${e(ttl)}</div>`:'')+(c?`<div class="zoom">${cardH(c)}</div>`:'');
+ const cancel=()=>{o.className='';cx&&cx()};
+ items.forEach(([l,f,cl])=>s.append(btn(l,()=>{o.className='';f()},cl)));if(!must)s.append(btn('キャンセル',cancel));
+ o.append(s);o.className='on';o.onclick=must?null:ev=>{if(ev.target===o)cancel()}}
+function list(title,cs,pick,ex=[],num,dim,cl,nc,ovid){const o=$(ovid||'#ov'),s=document.createElement('div');s.className='sheet';o.innerHTML='';const cx=cl||closeAll;
+ const bar=document.createElement('div');bar.className='bar';bar.innerHTML=`<b style="flex:1">${e(title)}</b>`;
+ ex.forEach(([l,f])=>bar.append(btn(l,f,(nc?'big':'sm')+(l==='決定'?' pri':''))));if(!ovid)bar.append(btn('保留',holdList,'big'));if(!nc)bar.append(btn('閉じる',cx,'big'));s.append(bar);
+ const g=document.createElement('div');g.className='grid';if(!cs.length)g.textContent='カードなし';
+ cs.forEach((c,i)=>{const w=document.createElement('div');w.className='gc';w.dataset.u=c.u;w.innerHTML=cardH(c)+(num?`<span class="cnt">${i+1}</span>`:'');if(dim&&dim(c))w.style.opacity=.35;w.onclick=()=>pick(c,w);g.append(w)});
+ s.append(g);o.append(s);o.className='on';o.onclick=nc?null:ev=>{if(ev.target===o)cx()}}
+/* 山札の実際の順序は変えず、表示だけデッキリスト順に並べる */
+const dl=(p,cs)=>{const ix={};p.cards.forEach((c,i)=>ix[c.id]=i);return cs.map((c,i)=>[c,i]).sort((a,b)=>(ix[a[0].id]??99)-(ix[b[0].id]??99)||a[1]-b[1]).map(z=>z[0])};
+/* 山札サーチ：初期は対象のみ。「山札を確認」で全表示（選べるのは対象のみ）。閉じると null を返す */
+const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(CPU.on&&cur===1)return r(cpuPk(t,pool,n,min,ok));const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
+ const draw=()=>{list(t+(all?'（全カード確認中：薄いカードは選べません）':''),all?view:view.filter(ok),(c,w)=>{if(!ok(c))return;
+  if(s.has(c.u)){s.delete(c.u);w.classList.remove('sel')}else if(s.size<n){s.add(c.u);w.classList.add('sel')}},
+  [...(pool.some(c=>!ok(c))?[[all?'対象のみ表示':'山札を確認',()=>{all=!all;draw()}]]:[]),['決定',()=>{if(s.size>=min){closeAll();r(pool.filter(c=>s.has(c.u)))}}]],0,c=>!ok(c),()=>{closeAll();r(null)},1);
+  document.querySelectorAll('#ov .gc').forEach(w=>{if(s.has(w.dataset.u))w.classList.add('sel')})};draw()});
+function openDeck(){const p=me();list(`山札 ${p.deck.length}枚（デッキリスト順で表示中）`,dl(p,p.deck),c=>menu(c,[
+ ['手札に加える',()=>act(()=>mv(c.u,'hand'),openDeck)],['トラッシュ',()=>act(()=>mv(c.u,'trash'),openDeck)]]),
+ [['混ぜて閉じる',()=>{act(()=>shuffle(me().deck));closeAll()}]])}
+function openTrash(i){const q=P[i],ed=G.mode==='edit'&&i===cur;list(`トラッシュ ${q.trash.length}枚（新しい順）`,q.trash.slice().reverse(),c=>{if(ed)menu(c,[
+ ['手札に加える',()=>act(()=>mv(c.u,'hand'),()=>openTrash(i))],['山札の下に戻す',()=>act(()=>mv(c.u,'deckB'),()=>openTrash(i))],['山札の上に戻す',()=>act(()=>mv(c.u,'deckT'),()=>openTrash(i))]])})}
+function openAtt(k){const cs=me().piles[k].slice(0,-1),ed=G.mode==='edit';list('付属カード（エネルギー等）',cs,c=>menu(c,[
+ ['トラッシュ',()=>act(()=>mv(c.u,'trash'),()=>openAtt(k))],...(ed?[['手札に戻す',()=>act(()=>mv(c.u,'hand'),()=>openAtt(k))]]:[])]))}
+const KL=k=>k==='battle'?'バトル場':'ベンチ'+(+k[1]+1);
+function targets(c,fn){const p=me();menu(c,['battle','b0','b1','b2','b3','b4'].filter(k=>p.piles[k].length).map(k=>[`${KL(k)}（${lastOf(p.piles[k]).name}）`,()=>act(()=>fn(k))]))}
+/* ---------- edit mode ---------- */
+function pileMenu(k){const p=me(),pl=p.piles[k],t=lastOf(pl);if(!t)return;
+ const it=[['手札に戻す',()=>act(()=>mv(t.u,'hand'))],['トラッシュ',()=>act(()=>mv(t.u,'trash'))],['山札の下に戻す',()=>act(()=>mv(t.u,'deckB'))]];
+ if(pl.length>1)it.push([`エネルギー・付属カード（${pl.length-1}枚）`,()=>openAtt(k)],['重なり全てをトラッシュ',()=>act(()=>p.trash.push(...pl.splice(0)))]);
+ if(k!=='battle')it.push(['バトル場と入れ替え',()=>act(()=>swap(k))]);it.push(['ダメージ +10',()=>act(()=>{t.dm=(t.dm||0)+10})],['ダメージ -10',()=>act(()=>{t.dm=Math.max(0,(t.dm||0)-10)})]);menu(t,it)}
+function handMenu(u){const c=me().hand.find(x=>x.u===u);if(!c)return;const v=(c.t==='ene'||c.t==='tool')?'につける':'に出す';
+ menu(c,[['バトル場'+v,()=>act(()=>mv(u,'battle'))],['ベンチ'+v+'…',()=>menu(c,BN.slice(0,benchMax(cur)).map((_,i)=>{const t=lastOf(me().piles['b'+i]);return[`ベンチ${i+1}（${t?t.name:'空'}）`,()=>act(()=>mv(u,'b'+i))]}))],
+ ['スタジアムに出す',()=>act(()=>mv(u,'stadium'))],['トラッシュ',()=>act(()=>mv(u,'trash'))],['山札の下に戻す',()=>act(()=>mv(u,'deckB'))]])}
+function stadMenu(i){const q=P[i],c=lastOf(q.piles.stadium);if(!c)return;
+ menu(c,[['トラッシュ',()=>act(()=>q.trash.push(...q.piles.stadium.splice(0)))],...(G.mode==='edit'&&i===cur?[['手札に戻す',()=>act(()=>q.hand.push(...q.piles.stadium.splice(0)))]]:[])])}
+/* ---------- play mode ---------- */
+/* ---- 共通ヘルパー ---- */
+const BN=['b0','b1','b2','b3','b4','b5','b6','b7'],nk=n=>String(n).replace(/[\s　]/g,''),MON={},mon=(n,o)=>MON[nk(n)]=o,mi=c=>{if(!c)return;const k=nk(c.name);return VARS[k]?MON[k+'#'+VMAP[c.id]]:MON[k]},stageOf=c=>(mi(c)||{}).st||'たね';
+const VARS={'ノコッチ':['HP70｜いれかわる／ぶつかる20','HP60｜かじる10／あなをほる30']};
+let VMAP={};try{VMAP=JSON.parse(localStorage.dvar||'{}')}catch(_){}
+const KSTA=['ゼロの大空洞','ジャミングタワー','危ない廃墟'],TG={pke:'ポケモン',tr:'グッズ',sup:'サポート',sta:'スタジアム',tool:'どうぐ',ene:'エネルギー'};
+function unimpl(c){const n=c.name.replace(/\(ACE SPEC\)$/,'');
+ if(c.t==='pke')return!mi(c);if(c.t==='tr'||c.t==='sup')return!(FX[c.name]||FX[n]);if(c.t==='sta')return!KSTA.includes(n);
+ if(c.t==='tool')return!/^ヒーローマント/.test(c.name);if(c.t==='ene')return!(/^基本.エネルギー/.test(c.name)||/^ネオアッパー/.test(c.name));return false}
+function showMissing(who=[0,1]){const L=[];who.forEach(i=>{const p=P[i];if(!p||!p.cards.length)return;const m=p.cards.filter(unimpl);
+  if(m.length)L.push(`【P${i+1}】\n`+m.map(c=>`・${c.name.replace(/\s+/g,' ')} ×${c.n}（${TG[c.t]||c.t}）`).join('\n'))});
+ return new Promise(res=>{if(!L.length)return res();menu(null,[['閉じる（対戦に戻る）',()=>res()]],`性能・効果のデータがないカードが含まれています。\n\n${L.join('\n\n')}\n\nこれらは自動では処理されません（手動で処理してください）。`,1)})}
+async function askVars(){for(const p of P)for(const c of p.cards){const v=VARS[nk(c.name)];if(!v||VMAP[c.id]!==undefined)continue;
+  const card={u:'v'+c.id,id:c.id,name:c.name,img:c.img,t:c.t},no=(c.full||'').replace(/^.*\((.*)\)$/,'$1');
+  const r=await new Promise(res=>menu(card,[...v.map((d,i)=>[d,()=>res(i)]),['この中にない（性能データなし）',()=>res(-1)]],`「${c.name}」${no?'（'+no+'）':''}は、どのカードですか？（カード画像で確認）`,1));
+  VMAP[c.id]=r;try{localStorage.dvar=JSON.stringify(VMAP)}catch(_){}}render()}
+const ens=pl=>pl.filter(x=>x.t==='ene'),etype=c=>{const m=c.name.match(/基本(.)エネルギー/);return m?m[1]:'無'};
+const OWN=p=>['battle',...BN].filter(k=>p.piles[k].length),isBE=x=>x.t==='ene'&&/^基本/.test(x.name),isEx=x=>x.t==='pke'&&/ex$/.test(x.name);
+const unitsOf=(c,top)=>/^ネオアッパーエネルギー/.test(c.name)?(stageOf(top)==='2進化'?['*','*']:['無']):[etype(c)];
+const eunits=pl=>ens(pl).reduce((a,c)=>a+unitsOf(c,lastOf(pl)).length,0);
+const canPay=(cost,pl)=>{const top=lastOf(pl),es=ens(pl).flatMap(c=>unitsOf(c,top));for(const t of cost.filter(x=>x!=='無')){let i=es.indexOf(t);if(i<0)i=es.indexOf('*');if(i<0)return 0;es.splice(i,1)}return es.length>=cost.filter(x=>x==='無').length};
+const isTera=c=>!!(mi(c)||{}).tera,hasTera=p=>['battle',...BN].some(k=>p.piles[k].length&&isTera(lastOf(p.piles[k])));
+const stadName=()=>{for(const x of P){const t=lastOf(x.piles.stadium);if(t)return t.name}return''};
+const benchMax=i=>stadName()==='ゼロの大空洞'&&hasTera(P[i])?8:5;
+const freeBench=p=>BN.slice(0,benchMax(P.indexOf(p))).find(k=>!p.piles[k].length);
+let SEL=null;
+/* ---------- オンライン対戦：行動中のプレイヤーが盤面を更新し、全状態を相手へ送る ---------- */
+const NET={on:0,me:0,ch:null,pc:null,mid:0,buf:{},pend:{},wait:0,applying:0,was:0};
+const CPU={on:0,busy:0,tried:new Set(),sug:0,d:700,iv:0},MP=()=>NET.on||CPU.on,MYS=()=>NET.on?NET.me:0;
+const VW=()=>MP()?MYS():cur;
+const CTRL=()=>{const pd=P.findIndex(x=>x.phase==='setup');return pd>=0?pd:(G.act===undefined?cur:G.act)};
+const canAct=()=>!MP()||CTRL()===MYS();
+function sendMsg(m){const c=NET.ch;if(!c||c.readyState!=='open')return;const t=JSON.stringify(m),id=++NET.mid,n=Math.max(1,Math.ceil(t.length/12000));
+ for(let i=0;i<n;i++)c.send(JSON.stringify({k:id,n,i,d:t.slice(i*12000,(i+1)*12000)}))}
+let NTM=0;
+function netSend(now){if(!NET.on||NET.applying||!P.some(x=>x.phase!=='none'))return;const ok=canAct()||NET.was;NET.was=canAct();if(!ok)return;clearTimeout(NTM);
+ const go=()=>{G.ver=(G.ver||0)+1;sendMsg({t:'snap',P,G,cur,L:LGS.slice(-200)})};now?go():NTM=setTimeout(go,25)}
+function onRaw(ev){const f=JSON.parse(ev.data),b=NET.buf[f.k]||(NET.buf[f.k]=[]);b[f.i]=f.d;if(b.filter(x=>x!==undefined).length<f.n)return;delete NET.buf[f.k];onMsg(JSON.parse(b.join('')))}
+function onMsg(m){
+ if(m.t==='snap'){if((m.G.ver||0)<(G.ver||0))return;const t0=G.turn,keep=P.map(q=>q.cards);NET.applying=1;P=m.P;P.forEach((q,i)=>{if(!q.cards.length)q.cards=keep[i]});G=m.G;cur=m.cur;LGS.length=0;LGS.push(...m.L);
+  if(G.turn!==t0&&G.act!==undefined&&P.every(q=>q.phase==='none'||q.phase==='play'))banner(`${G.turn%2?'先攻'+(G.turn+1)/2:'後攻'+G.turn/2}ターン ｜ P${G.act+1}の番`);
+  render();NET.was=canAct();NET.applying=0}
+ else if(m.t==='deck'){for(const k in(m.vm||{}))if(VMAP[k]===undefined)VMAP[k]=m.vm[k];if(P[m.i].phase!=='none')return;P[m.i].cards=m.cards;P[m.i].code=m.code||'';render()}
+ else if(m.t==='ask'){SEL={ks:m.ks,i:m.i,ttl:m.ttl,must:m.must,cl:m.cl,r:k=>sendMsg({t:'ans',id:m.id,k})};closeAll();render()}
+ else if(m.t==='sur'){G.over=1;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
+ else if(m.t==='ans'){const r=NET.pend[m.id];delete NET.pend[m.id];NET.wait=0;render();r&&r(m.k)}}
+const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{
+ if(CPU.on&&(who!==undefined?who:cur)===1)return r(cpuAsk(ks,q,ttl,must));
+ if(NET.on&&who!==undefined&&who!==NET.me){const id=++NET.mid;NET.pend[id]=r;NET.wait=1;netSend(1);sendMsg({t:'ask',id,ks,i:P.indexOf(q),ttl,must,cl});render();return}
+ SEL={ks,i:P.indexOf(q),ttl,must,cl,r};closeAll();render()});
+const yn=q=>new Promise(r=>menu(null,[['はい',()=>r(1)],['いいえ',()=>r(0)]],q,1));
+const fin=(c,fn)=>act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn;fn&&fn()});
+/* ---- サポート・グッズ（効果文は公式サイト・ユーザー提供テキストに基づく） ---- */
+const FX={
+ 'ハイパーボール':async c=>{const p=me(),o=p.hand.filter(x=>x.u!==c.u);if(o.length<2)return err('手札が足りません');
+  const d=await pk('トラッシュする手札を2枚選択',o,2);if(!d)return;
+  const t=await pk('山札からポケモンを1枚選択',p.deck,1,0,x=>x.t==='pke');if(!t)return;
+  fin(c,()=>{d.forEach(x=>mv(x.u,'trash'));t.forEach(x=>mv(x.u,'hand'));shuffle(p.deck)});log('ハイパーボールを使用')},
+ 'シアノ':async c=>{const p=me(),t=await pk('山札から「ポケモンex」を3枚まで選ぶ',p.deck,3,0,isEx);if(!t)return;
+  fin(c,()=>{t.forEach(x=>mv(x.u,'hand'));shuffle(p.deck)});log('シアノ：'+(t.map(x=>x.name).join('、')||'なし')+'を手札に')},
+ 'アカマツ':async c=>{const p=me(),t=await pk('基本エネルギーをタイプの異なるように2枚まで選ぶ',p.deck,2,0,isBE);if(!t)return;
+  if(t.length===2&&t[0].name===t[1].name)return err('タイプの異なるエネルギーを選んでください');
+  if(!t.length)return fin(c,()=>shuffle(p.deck));
+  let h=t[0];if(t.length===2){const s=await pk('手札に加える1枚を選ぶ（残りをポケモンにつけます）',t,1);if(!s)return;h=s[0]}
+  const rest=t.find(x=>x!==h);let k=null;
+  if(rest){const ks=OWN(p);if(!ks.length)return err('つけるポケモンがいません');k=await ask(rest,ks,p,'つけるポケモンを選択',1);if(!k)return}
+  fin(c,()=>{mv(h.u,'hand');if(rest)mv(rest.u,k);shuffle(p.deck)});log('アカマツを使用')},
+ 'ボスの指令':async c=>{const o=P[1-cur],ks=OWN(o).filter(k=>k!=='battle');if(!ks.length)return err('相手のベンチにポケモンがいません');
+  const k=await ask(c,ks,o,'呼び出す相手のベンチポケモンを選択');if(!k)return;fin(c,()=>{const q=o.piles;[q.battle,q[k]]=[q[k],q.battle]});log('ボスの指令：相手のポケモンを入れ替えました')},
+ 'ジャッジマン':c=>{fin(c,()=>P.forEach(x=>{if(x.phase!=='none'){x.deck.push(...x.hand.splice(0));shuffle(x.deck);for(let i=0;i<4;i++)draw1(x)}}));log('ジャッジマン：お互い手札を山札に戻して切り、4枚引く')},
+ 'リーリエの決心':c=>{fin(c,()=>{const p=me(),n=p.side.length===6?8:6;p.deck.push(...p.hand.splice(0));shuffle(p.deck);for(let i=0;i<n;i++)draw1(p)});log('リーリエの決心を使用')},
+ '暗号マニアの解読':async c=>{const p=me(),t=await pk('山札から2枚選ぶ',p.deck,2,2);if(!t)return;
+  const f=await new Promise(r=>menu(null,t.map(x=>[x.name,()=>r(x)]),'山札の一番上にするカードを選んでください（もう1枚が2番目）',1)),s2=t.find(x=>x!==f);
+  fin(c,()=>{t.forEach(x=>find(p,x.u));shuffle(p.deck);p.deck.unshift(f,s2)});log(`暗号マニアの解読：山札の上に ${f.name}（1番目）、${s2.name}（2番目）`)},
+ 'スグリ':async c=>{const p=me();
+  const ch=await new Promise(r=>menu(c,[['バトルポケモンをベンチポケモンと入れ替える',()=>r(1)],['この番、ワザのダメージ+30（相手のバトル場のポケモンex・V）',()=>r(2)]],'効果を1つ選んでください'));
+  if(ch===1){const ks=OWN(p).filter(k=>k!=='battle');if(!ks.length||!p.piles.battle.length)return err('入れ替えるベンチポケモンがいません');
+   const k=await ask(null,ks,p,'バトル場と入れ替えるベンチポケモンを選択');if(!k)return;fin(c,()=>swap(k));log('スグリ：バトルポケモンを入れ替えました')}
+  else{fin(c,()=>{G.plus30=G.turn});log('スグリ：この番、相手のex・Vへのワザのダメージ+30')}},
+ 'エネルギーつけかえ':async c=>{const p=me(),ks=OWN(p),be=k=>p.piles[k].filter(isBE);
+  if(ks.length<2)return err('ポケモンが2匹以上必要です');const has=ks.filter(k=>be(k).length);if(!has.length)return err('基本エネルギーがついていません');
+  const src=await ask(null,has,p,'① エネルギーをつけ替える元のポケモンを選択');if(!src)return;
+  const s=await pk(`② ${lastOf(p.piles[src]).name}の基本エネルギーを1個選択`,be(src),1);if(!s)return;
+  const k=await ask(s[0],ks.filter(x=>x!==src),p,'③ つけ替え先のポケモンを選択');if(!k)return;fin(c,()=>mv(s[0].u,k));log('エネルギーをつけ替えました')},
+ 'スペシャルレッドカード':c=>{const o=P[1-cur];if(o.phase!=='play'||o.side.length>3)return err('相手のサイドが残り3枚以下のときしか使えません');
+  fin(c,()=>{const h=o.hand.splice(0);shuffle(h);o.deck.push(...h);for(let i=0;i<3;i++)draw1(o)});log('スペシャルレッドカード：相手は手札を山札の下に戻し、3枚引きました')},
+ 'ガラスのラッパ':async c=>{const p=me();if(!hasTera(p))return err('自分の場に「テラスタル」のポケモンがいません');
+  const pairs=[];let ks=BN.filter(k=>p.piles[k].length),pool=p.trash.filter(isBE);
+  if(!ks.length)return err('ベンチにポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
+  for(let i=0;i<2&&ks.length&&pool.length;i++){
+   const k=await ask(null,ks,p,`ガラスのラッパ：エネルギーをつけるポケモンを盤面から選択（${i+1}/2）`,0,'ここまで');
+   if(!k)break;const s=await pk('トラッシュから基本エネルギーを1枚選択',pool,1);if(!s||!s.length)break;
+   pairs.push([s[0],k]);ks=ks.filter(z=>z!==k);pool=pool.filter(z=>z!==s[0])}
+  fin(c,()=>pairs.forEach(([z,k])=>mv(z.u,k)));log(`ガラスのラッパ：${pairs.length}匹にエネルギーをつけました`)}};
+function detail(c,hand){if(!c)return;const it=[];const m=mi(c);
+ if(hand&&m&&m.hab)it.push([`特性「${m.hab.n}」を使う`,()=>runHab(c),(G.ab[c.u]===G.turn||m.hab.ok({p:me(),o:P[1-cur],c}))?'ab used':'ab']);
+ menu(c,it)}
+/* ドラッグ操作（プレイモード）：手札→場で使用、盤面のポケモン同士でドラッグ入れ替え */
+let DR=null,NOCLK=0;
+$('#mat').addEventListener('pointerdown',ev=>{if(G.mode!=='play'||TE||HOLD||(MP()&&(NET.wait||!canAct())))return;const t=ev.target.closest('.hc');if(!t||+t.dataset.p!==cur||me().phase==='none')return;
+ const h=t.dataset.a==='hand',c=h?me().hand.find(x=>x.u===t.dataset.u):lastOf(me().piles[t.dataset.k]);if(!c)return;DR={h,k:t.dataset.k,c,x:ev.clientX,y:ev.clientY,g:null}});
+addEventListener('pointermove',ev=>{if(!DR)return;
+ if(!DR.g){const dx=ev.clientX-DR.x,dy=ev.clientY-DR.y;if(Math.hypot(dx,dy)<12)return;if(Math.abs(dx)>Math.abs(dy)){DR=null;return}const g=document.createElement('div');g.style.cssText='position:fixed;z-index:50;width:88px;aspect-ratio:63/88;pointer-events:none;opacity:.9';g.innerHTML=cardH(DR.c);document.body.append(g);DR.g=g}
+ DR.g.style.left=ev.clientX-44+'px';DR.g.style.top=ev.clientY-62+'px'});
+const endDrag=(ev,go)=>{if(!DR)return;const d=DR;DR=null;if(!d.g)return;DROPR={u:d.c.u,r:d.g.getBoundingClientRect()};d.g.remove();NOCLK=Date.now();if(go)dropCard(d,ev.clientX,ev.clientY)};
+addEventListener('pointerup',ev=>endDrag(ev,1));addEventListener('pointercancel',ev=>endDrag(ev,0));
+function dropCard(d,x,y){const p=me(),c=d.c;if(p.phase==='wait')return err('相手のセットアップ中です');if(p.phase==='setup'&&d.h&&c.t!=='pke')return err('セットアップ中はたねポケモンだけ出せます');
+ const el=document.elementFromPoint(x,y),tg=el&&el.closest('[data-a=pile],[data-a=stad]'),m=$('#mat').getBoundingClientRect(),
+ own=tg&&tg.dataset.a==='pile'&&+tg.dataset.p===cur?tg.dataset.k:null,inB=x>=m.left&&x<=m.right&&y>=m.top&&y<m.top+m.height*.83;
+ if(!d.h)return;
+ return playCard(c,own,inB)}
+function playCard(c,own,inB){const p=me();
+ if(c.t==='pke'){if(!own)return err('ポケモンはバトル場かベンチにドラッグしてください');const isB=BN.includes(own),was=!p.piles[own].length;
+  if(isB&&was&&BN.indexOf(own)>=benchMax(cur))return err('ベンチが満員です');{const M=mi(c);if(was&&isB&&M&&M.hab&&stageOf(c)!=='たね'){
+   if(p.phase!=='play')return err('セットアップ中はたねポケモンだけ出せます');
+   if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');
+   const bad=M.hab.ok({p,o:P[1-cur],c});if(bad)return err(bad);
+   act(()=>{mv(c.u,own);G.ab[c.u]=G.turn});log(`${c.name}の特性「${M.hab.n}」で、進化せずにベンチに出しました`);return}
+  const ec=evoCheck(p,c,own,was);if(ec)return err(ec)}
+  act(()=>{mv(c.u,own);if(!was)c.ev=G.turn;if(isB&&was&&p.phase==='play')hazard(c)});if(isB&&was&&p.phase==='play')afterBench(own,c)}
+ else if(c.t==='ene'||c.t==='tool'){if(c.t==='tool'&&own&&p.piles[own].some(x=>x.t==='tool'))return err('どうぐは、ポケモン1匹につき1枚までです');
+  if(!own||!p.piles[own].length)return err('ポケモンの上にドラッグしてください');
+  if(c.t==='ene'&&G.eat===G.turn)return err('エネルギーは自分の番に1枚しかつけられません');
+  act(()=>{mv(c.u,own);if(c.t==='ene')G.eat=G.turn});log(`P${cur+1}が${c.name}を${lastOf(p.piles[own]).name}につけました`)}
+ else if(c.t==='sta'){if(!(inB&&!own))return err('盤面にドラッグしてスタジアムを出します');
+  if(G.stp===G.turn)return err('スタジアムは自分の番に1枚しか出せません');if(stadName()===c.name)return err('同じ名前のスタジアムは場に出せません');
+  act(()=>{G.stp=G.turn;mv(c.u,'stadium')});(async()=>{await koScan(P[0]);await koScan(P[1])})()}
+ else if(inB&&!own){if(c.t==='tr'&&G.noGoods===G.turn)return err('スボミーの効果で、この番はグッズを使えません');if(c.t==='sup'&&G.turn===1)return err('先攻の最初の番はサポートを使えません');if(c.t==='sup'&&G.sup===G.turn)return err('サポートは自分の番に1枚しか使えません');if(FX[c.name])return FX[c.name](c);else{act(()=>{mv(c.u,'trash');if(c.t==='sup')G.sup=G.turn});log(c.name+'を使用（効果は手動で処理してください）')}}
+ else err('盤面にドラッグして使います')}
+/* ---- ポケモンデータ（HP・タイプ・にげる・弱点/抵抗力・特性・ワザ）。ここに足していく ---- */
+const isFireB=y=>y.name==='基本炎エネルギー',hibiki=p=>BN.filter(k=>p.piles[k].length&&/^ヒビキの/.test(lastOf(p.piles[k]).name));
+mon('メガガルーラex',{hp:300,type:'無',rc:3,weak:'闘',
+ ab:{n:'おつかいダッシュ',key:'おつかいダッシュ',ok:x=>x.k==='battle'?null:'バトル場にいるときだけ使えます',run:x=>{draw1(x.p);draw1(x.p)}},
+ at:[{n:'マシンガンコンボ',dt:'200＋',cost:[...'無無無'],run:async x=>{let n=0;while(await coin())n++;x.msg.push(`コイン：オモテ${n}回`);hit(x,'battle',200+50*n)}}]});
+mon('メガレックウザex',{hp:280,type:'無',rc:2,weak:'雷',res:'闘',
+ ab:{n:'はしゃのほうこう',onBench:1,run:async x=>{const p=x.p,t4=p.deck.slice(0,4),s=await pk('山札の上4枚：基本エネルギーを1枚選ぶ（なしでも可）',t4,1,0,isBE);if(!s)return false;
+  p.deck.splice(0,4);const z=s[0],rest=t4.filter(y=>y!==z);if(z)p.piles[x.k].unshift(z);shuffle(rest);p.deck.push(...rest)}},
+ at:[{n:'ストームエメラルダ',dt:'50×',cost:[...'雷炎無'],run:async x=>{const n=OWN(x.p).reduce((a,k)=>a+eunits(x.p.piles[k]),0);x.msg.push(`エネルギー${n}個`);hit(x,'battle',50*n)}}]});
+mon('ニャースex',{hp:170,type:'無',rc:1,weak:'闘',
+ ab:{n:'おくのてキャッチ',key:'おくのて',onBench:1,run:async x=>{const t=await pk('山札からサポートを1枚選ぶ',x.p.deck,1,0,y=>y.t==='sup');if(!t)return false;t.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck)}},
+ at:[{n:'しっぽをまく',dt:'60',cost:[...'無無無'],run:async x=>{hit(x,'battle',60);const pl=x.p.piles.battle;pl.forEach(y=>y.dm=0);x.p.hand.push(...pl.splice(0));x.self=1}}]});
+mon('テラパゴスex',{hp:230,type:'無',rc:2,weak:'闘',tera:1,
+ at:[{n:'ユニオンビート',dt:'30×',cost:[...'無無'],chk:x=>G.turn===2&&x.o.phase==='play'?'後攻プレイヤーの最初の番には使えません':null,run:async x=>{const n=BN.filter(k=>x.p.piles[k].length).length;x.msg.push(`ベンチ${n}匹`);hit(x,'battle',30*n)}},
+  {n:'クラウンオパール',dt:'180',cost:[...'草水雷'],run:async x=>{hit(x,'battle',180);x.c.sh=G.turn+1}}]});
+mon('ファイアローex',{hp:280,type:'無',rc:0,weak:'雷',res:'闘',st:'2進化',
+ hab:{n:'エキサイトダイブ',ok:x=>!OWN(x.p).some(k=>{const t=lastOf(x.p.piles[k]);return /^メガ.*ex$/.test(t.name)&&(mi(t)||{}).type==='無'})?'場に無色タイプのメガシンカexがいません':(freeBench(x.p)?null:'ベンチに空きがありません'),run:x=>{mv(x.c.u,freeBench(x.p))}},
+ at:[{n:'かぎづめハント',dt:'150',cost:[...'無無'],run:async x=>{hit(x,'battle',150);if(await yn('のぞむなら：山札から好きなカードを2枚まで選び、手札に加えますか？')){const t=await pk('好きなカードを2枚まで選ぶ',x.p.deck,2,0);if(t){t.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck)}}}}]});
+mon('ヒビキのホウオウex',{hp:230,type:'炎',rc:2,weak:'水',
+ ab:{n:'こんじきのほのお',ok:x=>!x.p.hand.some(isFireB)?'手札に基本炎エネルギーがありません':(hibiki(x.p).length?null:'ベンチにヒビキのポケモンがいません'),
+  run:async x=>{const s=await pk('手札の基本炎エネルギーを2枚まで選ぶ',x.p.hand.filter(isFireB),2,1);if(!s||!s.length)return false;
+   const k=await ask(null,hibiki(x.p),x.p,'つけるベンチのヒビキのポケモンを選択',1);if(!k)return false;s.forEach(y=>mv(y.u,k))}},
+ at:[{n:'シャイニングフェザー',dt:'160',cost:[...'炎炎炎炎'],run:async x=>{hit(x,'battle',160);OWN(x.p).forEach(k=>{const t=lastOf(x.p.piles[k]);t.dm=Math.max(0,(t.dm||0)-50)});x.msg.push('自分のポケモン全員を50回復')}}]});
+mon('オーガポンいどのめんex',{hp:210,type:'水',rc:1,weak:'雷',tera:1,
+ at:[{n:'すすりなく',dt:'20',cost:['無'],run:async x=>{hit(x,'battle',20);const t=lastOf(x.o.piles.battle);if(t&&!imm(t))t.nr=G.turn+1}},
+  {n:'げきりゅうポンプ',dt:'100',cost:[...'水無無'],run:async x=>{hit(x,'battle',100);const en=ens(x.p.piles.battle);
+   if(en.length>=3&&await yn('のぞむなら：エネルギー3個を山札にもどして切り、相手のベンチポケモン1匹にも120ダメージ')){
+    const s=await pk('山札にもどすエネルギーを3個選択',en,3);
+    if(s&&s.length===3){s.forEach(y=>{find(x.p,y.u);x.p.deck.push(y)});shuffle(x.p.deck);const ks=BN.filter(k=>x.o.piles[k].length);
+     if(ks.length){const k=await ask(null,ks,x.o,'120ダメージを与える相手のベンチポケモンを選択',1);if(k)hit(x,k,120)}}}}}]});
+mon('キチキギスex',{hp:210,type:'悪',rc:1,weak:'闘',
+ ab:{n:'さかてにとる',key:'さかてにとる',ok:x=>x.p.koTurn===G.turn-1?null:'前の相手の番に自分のポケモンがきぜつしていません',run:x=>{for(let i=0;i<3;i++)draw1(x.p)}},
+ at:[{n:'クルーエルアロー',dt:'100',cost:[...'無無無'],run:async x=>{const ks=OWN(x.o);if(!ks.length)return false;const k=await ask(null,ks,x.o,'100ダメージを与える相手のポケモンを選択',1);if(!k)return false;hit(x,k,100)}}]});
+mon('ラティアスex',{hp:210,type:'超',rc:2,weak:'悪',res:'闘',
+ ab:{n:'スカイライン',passive:1,tx:'自分のたねポケモン全員のにげるエネルギーはなくなる（常時）'},
+ at:[{n:'むげんのやいば',dt:'200',cost:[...'超無無'],run:async x=>{hit(x,'battle',200);x.c.na=G.turn+(P[1-cur].phase==='play'?2:1)}}]});
+mon('パルデア ケンタロス',{hp:130,type:'炎',rc:2,weak:'水',
+ at:[{n:'うしろげり',dt:'30',cost:['炎'],run:async x=>{hit(x,'battle',30)}},
+  {n:'きあいタックル',dt:'90＋',cost:[...'炎無無'],run:async x=>{const d=lastOf(x.o.piles.battle),b=d&&stageOf(d)==='1進化';if(b)x.msg.push('相手は1進化：+90');hit(x,'battle',90+(b?90:0))}}]});
+mon('パオジアン',{hp:120,type:'水',rc:1,weak:'鋼',
+ ab:{n:'ゆきにしずめる',onBench:1,ok:()=>stadName()?null:'場にスタジアムがありません',run:x=>{P.forEach(q=>q.trash.push(...q.piles.stadium.splice(0)))}},
+ at:[{n:'アイシクルループ',dt:'120',cost:[...'水無無'],run:async x=>{hit(x,'battle',120);const en=ens(x.p.piles.battle);if(en.length){const s=await pk('手札にもどすエネルギーを1個選択',en,1);if(s&&s[0])mv(s[0].u,'hand')}}}]});
+/* ---- ドラパルト・ヨノワール系ほか ---- */
+const room=p=>BN.slice(0,benchMax(P.indexOf(p))).filter(k=>!p.piles[k].length).length;
+const EVO={'ドロンチ':'ドラメシヤ','ドラパルトex':'ドロンチ','サマヨール':'ヨマワル','ヨノワール':'サマヨール'};
+function evoCheck(p,c,k,was){if(!mi(c))return'';const stg=stageOf(c);
+ if(was)return stg!=='たね'?'進化ポケモンは、進化元のポケモンに重ねてください':'';
+ const t=lastOf(p.piles[k]);if(stg==='たね')return'たねポケモンは、空いている場所に出してください';
+ if(p.phase!=='play'||G.turn<=2)return'最初の番には進化できません';
+ if(t.pt===G.turn)return'出したばかりのポケモンは進化できません';if(t.ev===G.turn)return'このターンに進化したポケモンは、もう進化できません';
+ const f=EVO[nk(c.name)];if(f&&nk(t.name)!==f)return`${c.name}は${f}から進化します`;return''}
+const hazard=c=>{if(stadName()==='危ない廃墟'&&stageOf(c)==='たね'&&(mi(c)||{}).type!=='悪')c.dm=(c.dm||0)+20};
+const isRule=y=>/(ex|V|VSTAR|VMAX|GX)$/.test(y.name),BASE2={'ドラパルトex':'ドラメシヤ','ヨノワール':'ヨマワル'};
+async function spread(x,n){const ks=BN.filter(k=>x.o.piles[k].length);if(!ks.length)return;
+ for(let i=0;i<n;i++){const k=await ask(null,ks,x.o,`ダメカンをのせる相手のベンチポケモンを選択（残り${n-i}個）`,1);act(()=>{const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10});await sleep(250)}
+ x.msg.push(`ダメカン${n}個を相手のベンチにのせた`)}
+async function curse(x,n){const ks=OWN(x.o);if(!ks.length)return false;const k=await ask(null,ks,x.o,`カースドボム：ダメカン${n}個をのせる相手のポケモンを選択`,1);
+ const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10*n;render();log(`カースドボム：${t.name}にダメカン${n}個`);await sleep(800);await doKO(P.indexOf(x.p),x.k);await koScan(x.o)}
+mon('ドラパルトex',{hp:320,type:'龍',rc:1,st:'2進化',tera:1,bnc:1,
+ at:[{n:'ジェットヘッド',dt:'70',cost:['無'],run:async x=>{hit(x,'battle',70)}},
+  {n:'ファントムダイブ',dt:'200',cost:[...'炎超'],run:async x=>{hit(x,'battle',200);await spread(x,6)}}]});
+mon('ドロンチ',{hp:90,type:'龍',rc:1,st:'1進化',
+ ab:{n:'ていさつしれい',run:async x=>{const t2=x.p.deck.slice(0,2);if(!t2.length)return false;const s=await pk('山札の上2枚：手札に加える1枚を選ぶ（残りは山札の下）',t2,1);if(!s||!s.length)return false;
+  mv(s[0].u,'hand');t2.filter(y=>y!==s[0]).forEach(y=>{find(x.p,y.u);x.p.deck.push(y)})}},
+ at:[{n:'リューズヘッド',dt:'70',cost:[...'炎超'],run:async x=>{hit(x,'battle',70)}}]});
+mon('ドラメシヤ',{hp:70,type:'龍',rc:1,
+ at:[{n:'ちょっとうらむ',dt:'10',cost:['超'],run:async x=>{hit(x,'battle',10)}},{n:'かみつく',dt:'40',cost:[...'炎超'],run:async x=>{hit(x,'battle',40)}}]});
+mon('ヨノワール',{hp:160,type:'超',rc:3,weak:'悪',res:'闘',st:'2進化',
+ ab:{n:'カースドボム',run:x=>curse(x,13)},
+ at:[{n:'かげしばり',dt:'150',cost:[...'超超無'],run:async x=>{hit(x,'battle',150);const t=lastOf(x.o.piles.battle);if(t&&!imm(t))t.nr=G.turn+1}}]});
+mon('サマヨール',{hp:90,type:'超',rc:2,weak:'悪',res:'闘',st:'1進化',
+ ab:{n:'カースドボム',run:x=>curse(x,5)},
+ at:[{n:'おにび',dt:'50',cost:[...'超超'],run:async x=>{hit(x,'battle',50)}}]});
+mon('ヨマワル',{hp:60,type:'超',rc:1,weak:'悪',res:'闘',
+ at:[{n:'むかえにいく',dt:'',cost:['超'],run:async x=>{const rm=room(x.p),pool=x.p.trash.filter(y=>nk(y.name)==='ヨマワル');
+   if(!rm||!pool.length){x.msg.push('出せるヨマワルがいません');return}
+   const s=await pk('トラッシュからヨマワルを3枚まで選び、ベンチに出す',pool,Math.min(3,rm),0);if(!s)return false;
+   s.forEach(y=>{mv(y.u,freeBench(x.p));hazard(y)});x.msg.push(`ヨマワルを${s.length}匹ベンチに出した`)}},
+  {n:'つぶやく',dt:'30',cost:[...'超超'],run:async x=>{hit(x,'battle',30)}}]});
+mon('スボミー',{hp:30,type:'草',rc:0,weak:'炎',
+ at:[{n:'むずむずかふん',dt:'10',cost:[],run:async x=>{hit(x,'battle',10);G.noGoods=G.turn+1}}]});
+mon('マシマシラ',{hp:110,type:'超',rc:1,weak:'悪',res:'闘',
+ ab:{n:'アドレナブレイン',ok:x=>ens(x.p.piles[x.k]).length?null:'このポケモンにエネルギーがついていません',
+  run:async x=>{const mine=OWN(x.p).filter(k=>(lastOf(x.p.piles[k]).dm||0)>0),tg=OWN(x.o);if(!mine.length||!tg.length){err('ダメカンを動かせません');return false}
+   const a=await ask(null,mine,x.p,'ダメカンを取る自分のポケモンを選択');if(!a)return false;
+   const mx=Math.min(3,Math.floor(lastOf(x.p.piles[a]).dm/10)),n=await new Promise(r=>menu(null,[...Array(mx)].map((_,i)=>[`${i+1}個`,()=>r(i+1)]),'動かすダメカンの数',1));
+   const b=await ask(null,tg,x.o,'ダメカンをのせる相手のポケモンを選択',1);
+   lastOf(x.p.piles[a]).dm-=10*n;const t=lastOf(x.o.piles[b]);t.dm=(t.dm||0)+10*n;render();await sleep(700);await koScan(x.o)}},
+ at:[{n:'サイコトリップ',dt:'60',cost:[...'超無'],run:async x=>{hit(x,'battle',60);const t=lastOf(x.o.piles.battle);if(t&&!imm(t)){t.cf=1;x.msg.push('相手はこんらん')}}}]});
+Object.assign(FX,{
+ 'なかよしポフィン':async c=>{const p=me(),n=Math.min(2,room(p));if(!n)return err('ベンチに空きがありません');
+  const t=await pk('HP70以下のたねポケモンを2枚まで選ぶ',p.deck,n,0,y=>y.t==='pke'&&mi(y)&&stageOf(y)==='たね'&&mi(y).hp<=70);if(!t)return;
+  fin(c,()=>{t.forEach(y=>{mv(y.u,freeBench(p));hazard(y)});shuffle(p.deck)});log('なかよしポフィン：'+(t.map(y=>y.name).join('、')||'なし')+'をベンチに出しました')},
+ 'ポケパッド':async c=>{const p=me(),t=await pk('山札からポケモン（ルールを持つポケモンを除く）を1枚選ぶ',p.deck,1,0,y=>y.t==='pke'&&!isRule(y));if(!t)return;
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('ポケパッド：'+(t[0]?t[0].name:'なし'))},
+ 'ふしぎなアメ':async c=>{const p=me();if(G.turn<=2)return err('最初の自分の番には使えません');
+  const tg=y=>['battle',...BN].filter(k=>p.piles[k].length&&nk(lastOf(p.piles[k]).name)===BASE2[nk(y.name)]&&stageOf(lastOf(p.piles[k]))==='たね'&&lastOf(p.piles[k]).pt!==G.turn&&lastOf(p.piles[k]).ev!==G.turn);
+  const cand=p.hand.filter(y=>y.t==='pke'&&BASE2[nk(y.name)]&&tg(y).length);if(!cand.length)return err('進化できる組み合わせがありません');
+  const s=await pk('進化させる2進化ポケモンを手札から選ぶ',cand,1);if(!s)return;
+  const k=await ask(null,tg(s[0]),p,'進化させるたねポケモンを選択');if(!k)return;fin(c,()=>{mv(s[0].u,k);s[0].ev=G.turn});log(`ふしぎなアメ：${s[0].name}に進化`)},
+ '夜のタンカ':async c=>{const p=me(),pool=p.trash.filter(y=>y.t==='pke'||isBE(y));if(!pool.length)return err('トラッシュに対象がありません');
+  const s=await pk('トラッシュからポケモンまたは基本エネルギーを1枚選ぶ',pool,1);if(!s)return;fin(c,()=>mv(s[0].u,'hand'));log('夜のタンカ：'+s[0].name)},
+ 'アンフェアスタンプ':c=>{const p=me(),o=P[1-cur];if(p.koTurn!==G.turn-1)return err('前の相手の番に自分のポケモンがきぜつしていないと使えません');
+  fin(c,()=>{[p,o].forEach(q=>{if(q.phase==='none')return;q.deck.push(...q.hand.splice(0));shuffle(q.deck)});for(let i=0;i<5;i++)draw1(p);if(o.phase!=='none')for(let i=0;i<2;i++)draw1(o)});log('アンフェアスタンプ：自分5枚、相手2枚引きました')},
+ 'ぼうけんのランタン':async c=>{const p=me(),t=await pk('山札から基本エネルギーを2枚まで選ぶ',p.deck,2,0,isBE);if(!t)return;
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('ぼうけんのランタン：'+t.length+'枚')},
+ 'ヒカリ':async c=>{const p=me(),T=[];for(const st of['たね','1進化','2進化']){const u=await pk(`山札から「${st}ポケモン」を1枚選ぶ`,p.deck,1,0,y=>y.t==='pke'&&mi(y)&&stageOf(y)===st);if(!u)return;if(u[0])T.push(u[0])}
+  fin(c,()=>{T.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('ヒカリ：'+(T.map(y=>y.name).join('、')||'なし'))},
+ 'トウコ':async c=>{const p=me(),a=await pk('山札から進化ポケモンを1枚選ぶ',p.deck,1,0,y=>y.t==='pke'&&['1進化','2進化'].includes(stageOf(y))&&mi(y));if(!a)return;
+  const b=await pk('山札からエネルギーを1枚選ぶ',p.deck,1,0,y=>y.t==='ene');if(!b)return;fin(c,()=>{[...a,...b].forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('トウコ：'+[...a,...b].map(y=>y.name).join('、'))}});
+FX['アンフェアスタンプ(ACE SPEC)']=FX['アンフェアスタンプ'];
+EVO['ノココッチ']='ノコッチ';EVO['ノココッチex']='ノコッチ';
+const imm=t=>!!t&&t.dg===G.turn;
+mon('ノココッチex',{hp:270,type:'無',rc:3,weak:'闘',st:'1進化',
+ at:[{n:'ぎゃっきょうテール',dt:'60×',cost:['無'],run:async x=>{const n=OWN(x.o).filter(k=>/ex$/.test(lastOf(x.o.piles[k]).name)).length;x.msg.push(`相手のポケモンex ${n}匹`);hit(x,'battle',60*n)}},
+  {n:'ドリルブレイク',dt:'150',cost:[...'無無無'],run:async x=>{hit(x,'battle',150,{ign:1});x.msg.push('相手にかかっている効果は計算しない')}}]});
+mon('ノココッチ',{hp:140,type:'無',rc:3,weak:'闘',st:'1進化',
+ ab:{n:'にげあしドロー',run:async x=>{for(let i=0;i<3;i++)draw1(x.p);const pl=x.p.piles[x.k];pl.forEach(y=>{y.dm=0;y.cf=0});x.p.deck.push(...pl.splice(0));shuffle(x.p.deck);if(x.k==='battle')await promote(P.indexOf(x.p))}},
+ at:[{n:'ランドクラッシュ',dt:'90',cost:[...'無無無'],run:async x=>{hit(x,'battle',90)}}]});
+mon('ノコッチ#0',{hp:70,type:'無',rc:1,weak:'闘',
+ at:[{n:'いれかわる',dt:'',cost:['無'],run:async x=>{const ks=BN.filter(k=>x.p.piles[k].length);if(!ks.length){err('ベンチにポケモンがいません');return false}const k=await ask(null,ks,x.p,'入れ替えるベンチポケモンを選択');if(!k)return false;swap(k);x.msg.push('ベンチと入れ替えた')}},
+  {n:'ぶつかる',dt:'20',cost:[...'無無'],run:async x=>{hit(x,'battle',20)}}]});
+mon('ノコッチ#1',{hp:60,type:'無',rc:0,weak:'闘',
+ at:[{n:'かじる',dt:'10',cost:['無'],run:async x=>{hit(x,'battle',10)}},
+  {n:'あなをほる',dt:'30',cost:[...'無無'],run:async x=>{hit(x,'battle',30);if(await coin()){x.c.dg=G.turn+1;x.msg.push('次の相手の番、ダメージも効果も受けない')}}}]});
+mon('ファイヤー',{hp:120,type:'炎',rc:1,weak:'水',
+ at:[{n:'とうしのつばさ',dt:'20＋',cost:['炎'],run:async x=>{const d=lastOf(x.o.piles.battle),b=d&&/ex$/.test(d.name);if(b)x.msg.push('相手はポケモンex：+90');hit(x,'battle',20+(b?90:0))}}]});
+Object.assign(FX,{
+ 'クラッシュハンマー':async c=>{const o=P[1-cur],ks=OWN(o).filter(k=>o.piles[k].some(y=>y.t==='ene'));if(!ks.length)return err('相手のポケモンにエネルギーがついていません');
+  fin(c);const h=await coin();if(!h){log('クラッシュハンマー：ウラ。効果なし');return}
+  const k=await ask(null,ks,o,'エネルギーをトラッシュする相手のポケモンを選択',1),s=await pk('トラッシュするエネルギーを1個選ぶ',o.piles[k].filter(y=>y.t==='ene'),1);if(!s)return;
+  act(()=>{const y=find(o,s[0].u);o.trash.push(y)});log(`クラッシュハンマー：${s[0].name}をトラッシュ`)},
+ 'メイのはげまし':async c=>{const p=me(),o=P[1-cur];if(p.side.length<=o.side.length)return err('自分のサイドが相手より多いときだけ使えます');
+  const ks=OWN(p).filter(k=>stageOf(lastOf(p.piles[k]))==='2進化'),pool=p.trash.filter(isBE);if(!ks.length)return err('場に2進化ポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
+  const k=await ask(null,ks,p,'エネルギーをつける2進化ポケモンを選択');if(!k)return;const t=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,2,0);if(!t)return;
+  fin(c,()=>t.forEach(y=>mv(y.u,k)));log(`メイのはげまし：${t.length}枚を${lastOf(p.piles[k]).name}につけました`)}});
+/* ---- ダメージ計算・きぜつ ---- */
+function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
+ if(k!=='battle'&&(tm.tera||tm.bnc))return 0;
+ if(!(o&&o.ign)&&((t.sh===G.turn&&stageOf(x.c)==='たね'&&am.type!=='無')||t.dg===G.turn))return 0;
+ if(k==='battle'){if(n>0&&G.plus30===G.turn&&/(ex|V)$/.test(t.name))n+=30;if(tm.weak&&tm.weak===am.type)n*=2;if(tm.res&&tm.res===am.type)n-=30}
+ return Math.max(0,n)}
+function hit(x,k,n,o){const t=lastOf(x.o.piles[k]);if(!t)return 0;const d=calc(x,k,n,o);t.dm=(t.dm||0)+d;x.msg.push(`${t.name}に${d}ダメージ${k==='battle'?'':'（ベンチ）'}`);return d}
+async function koScan(o){const i=P.indexOf(o),ks=['battle',...BN].filter(k=>{const h=hpOf(o.piles[k]);return h&&(lastOf(o.piles[k]).dm||0)>=h});
+ for(const k of ks.filter(k=>k!=='battle'))await doKO(i,k,1);if(ks.includes('battle'))await doKO(i,'battle')}
+async function doKO(i,k,np){const q=P[i],t=lastOf(q.piles[k]);if(!t)return;const n=prize(t),m=P[1-i];
+ act(()=>{q.trash.push(...q.piles[k].splice(0));q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n));if(!m.side.length)G.over=1});
+ log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）${m.side.length?'':'。勝利！'}`);
+ if(G.over){banner(`P${2-i}の勝利！`);return}
+ if(k==='battle'&&!np)await promote(i)}
+async function promote(i){const q=P[i],ks=OWN(q).filter(k=>k!=='battle');
+ if(G.over)return;
+ if(!ks.length){G.over=1;banner(`P${2-i}の勝利！`);return log(`P${i+1}の場にポケモンがいません。P${2-i}の勝利！`)}
+ const back=cur;if(i!==cur&&G.mode==='play'&&!MP()){await sleep(700);cur=i;render();log(`P${i+1}のバトル場のポケモンがきぜつ。視点をP${i+1}に切り替えました`)}
+ const k=await ask(null,ks,q,`P${i+1}：バトル場に出すベンチポケモンを選んでください`,1,undefined,i);
+ act(()=>{const r=P[i].piles;[r.battle,r[k]]=[r[k],r.battle]});log(`P${i+1}が${lastOf(P[i].piles.battle).name}をバトル場に出しました`);
+ if(!TE&&back!==i&&G.mode==='play'&&!MP()){cur=back;render()}}
+function oppPile(i,k){const t=lastOf(P[i].piles[k]);if(!t)return;menu(t,[[`きぜつさせる（サイド${prize(t)}枚）`,()=>doKO(i,k)]])}
+/* ---- ワザ・特性・にげる ---- */
+function atkMenu(t){menu(t,mi(t).at.map(a=>[`${a.n}　${a.dt}（${a.cost.join('')}）`,()=>useAttack(a),canPay(a.cost,me().piles.battle)?'atk':'atk no']),'わざを選択')}
+async function useAttack(a){const p=me(),o=P[1-cur],c=lastOf(p.piles.battle);if(!c)return;
+ if(G.turn===1)return err('先攻の最初の番はワザを使えません');
+ if(G.atk===G.turn)return err('この番はすでにワザを使いました');
+ if(c.na===G.turn)return err('このポケモンは、この番ワザが使えません');
+ if(!canPay(a.cost,p.piles.battle))return err('エネルギーが足りません');
+ const x={p,o,c,msg:[],k:'battle'},bad=a.chk&&a.chk(x);if(bad)return err(bad);
+ let conf=0;if(c.cf){const hd=await coin();conf=!hd}
+  HS.push(JSON.stringify([P,G,cur]));
+  if(conf){c.dm=(c.dm||0)+30;G.atk=G.turn;render();log(`${c.name}は混乱でワザに失敗。自分に30ダメージ`);TE=1;try{await sleep(900);await koScan(p);await sleep(300);await turnSwitch()}finally{TE=0}return}
+  const r=await a.run(x);if(r===false){HS.pop();return}
+ G.atk=G.turn;if(x.self)await promote(cur);render();log(`${c.name}の${a.n}！ ${x.msg.join('、')}`);
+ TE=1;try{await sleep(900);await koScan(o);await sleep(300);await turnSwitch()}finally{TE=0}}
+async function runAb(c,k){const p=me(),a=mi(c).ab,x={p,o:P[1-cur],c,k};
+ if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');
+ if(a.key&&G.nm[a.key]===G.turn)return err(`この番はすでに「${a.key}」を使っているため使えません`);
+ const bad=a.ok&&a.ok(x);if(bad)return err(bad);
+ HS.push(JSON.stringify([P,G,cur]));const r=await a.run(x);if(r===false){HS.pop();return}
+ G.ab[c.u]=G.turn;if(a.key)G.nm[a.key]=G.turn;render();log(`${c.name}の特性「${a.n}」を使用`)}
+async function runHab(c){const p=me(),a=mi(c).hab,x={p,o:P[1-cur],c};
+ if(G.ab[c.u]===G.turn)return err('この番はすでに使いました');const bad=a.ok(x);if(bad)return err(bad);
+ HS.push(JSON.stringify([P,G,cur]));const r=await a.run(x);if(r===false){HS.pop();return}G.ab[c.u]=G.turn;render();log(`${c.name}の特性「${a.n}」を使用`)}
+function afterBench(k,c){const a=(mi(c)||{}).ab;if(!a||!a.onBench)return;
+ menu(c,[[`特性「${a.n}」を使う`,()=>runAb(c,k)],['使わない',()=>{}]],`${c.name}をベンチに出しました`,1)}
+function playPile(k){const p=me(),t=lastOf(p.piles[k]);if(!t)return;const m=mi(t),it=[];
+ if(m&&m.ab&&!m.ab.passive&&!m.ab.onBench)it.push([`特性「${m.ab.n}」を使う`,()=>runAb(t,k),abWhy(t,k,p)?'ab used':'ab']);
+ if(k==='battle')it.push([m&&m.at?'わざを使う…':'わざを使う（データ未登録）',()=>m&&m.at?atkMenu(t):err('このポケモンのデータは未登録です'),m&&m.at&&m.at.some(a=>canPay(a.cost,p.piles.battle))?'atk':'atk no'],['にげる',retreat]);
+ menu(t,it)}
+const retreatCost=(p,c)=>{let r=(mi(c)||{}).rc??1;if(stageOf(c)==='たね'&&OWN(p).some(k=>nk(lastOf(p.piles[k]).name)==='ラティアスex'))r=0;return r};
+async function retreat(){const p=me(),c=lastOf(p.piles.battle),rc=retreatCost(p,c),en=ens(p.piles.battle);
+ if(c.nr===G.turn)return err('このポケモンは次の番までにげられません');
+ if(eunits(p.piles.battle)<rc)return err(`エネルギーが足りません（にげるには${rc}個必要）`);
+ const ks=OWN(p).filter(k=>k!=='battle');if(!ks.length)return err('ベンチにポケモンがいません');
+ const k=await ask(null,ks,p,'にげる：バトル場に出すベンチポケモンを選択');if(!k)return;
+ let pay=[];if(rc>0){if(eunits(p.piles.battle)===rc)pay=en;else{pay=await pk(`トラッシュするエネルギーを選択（${rc}個ぶん以上）`,en,en.length,1);if(!pay)return;if(pay.reduce((a,z)=>a+unitsOf(z,c).length,0)<rc)return err('選んだエネルギーが足りません')}}
+ act(()=>{pay.forEach(x=>mv(x.u,'trash'));swap(k)});log(rc?'にげました':'にげました（エネルギー不要）')}
+/* ゼロの大空洞：テラスタルがいなくなる／スタジアムがなくなるとベンチは5匹に */
+let fixing=0;
+async function fixBench(){if(fixing||(MP()&&!canAct()))return;fixing=1;let ch=0;
+ try{for(const i of[cur,1-cur]){const q=P[i];if(q.phase==='none')continue;
+  while(benchMax(i)===5&&BN.filter(k=>q.piles[k].length).length>5){const k=await ask(null,BN.filter(k=>q.piles[k].length),q,`P${i+1}：ベンチが5匹になるまでトラッシュするポケモンを選んでください`,1,undefined,i);act(()=>{q.trash.push(...q.piles[k].splice(0))});log('ベンチが5匹を超えたためトラッシュしました')}
+  if(benchMax(i)===5)for(const k of BN.slice(5))if(q.piles[k].length){const z=BN.slice(0,5).find(y=>!q.piles[y].length);if(z){[q.piles[z],q.piles[k]]=[q.piles[k],q.piles[z]];ch=1}}}
+ }finally{fixing=0}if(ch)render()}
+/* 開始手順：P1バトル場→サイド→P2バトル場→サイド→マリガン差ぶん引く→P1の番 */
+function finishSetup(){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){cur=pd;log(`P${pd+1}：バトル場にたねポケモンを出して、サイドをセットしてください`);return}
+ const fi=(G.fp!==undefined&&P[G.fp]&&P[G.fp].phase==='wait')?G.fp:P.findIndex(x=>x.phase==='wait');if(fi<0)return;
+ if(P[0].phase==='wait'&&P[1].phase==='wait'){const a=P[0].mull||0,b=P[1].mull||0,n=Math.abs(a-b);
+  if(n){const w=a<b?0:1;for(let i=0;i<n;i++)draw1(P[w]);log(`P${w+1}は、相手のマリガン差${n}回ぶん、${n}枚引きました`)}}
+ P.forEach(x=>{if(x.phase==='wait')x.phase='play'});G.turn=1;G.act=fi;cur=fi;draw1(P[fi]);log(`バトルスタート！先攻P${fi+1}：1枚引きました`);banner('バトルスタート！')}
+/* ---------- モーション ---------- */
+let HOLD=0;const holdList=()=>{$('#ov').className='';$('#hold').style.display='block';HOLD=1};
+$('#hold').onclick=()=>{$('#ov').className='on';$('#hold').style.display='none';HOLD=0};
+const CN={F:"data:image/webp;base64,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",B:"data:image/webp;base64,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"};
+function coinAnim(head){return new Promise(res=>{const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;perspective:900px;background:#0004';
+ const c=document.createElement('div');c.style.cssText='width:min(34vw,150px);aspect-ratio:1;position:relative;transform-style:preserve-3d';
+ const f=document.createElement('img'),b=document.createElement('img');f.src=CN.F;b.src=CN.B;[f,b].forEach(i=>{i.style.cssText='position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:50%;box-shadow:0 0 12px #000'});b.style.transform='rotateY(180deg)';
+ c.append(f,b);o.append(c);document.body.append(o);const end=head?1800:1980;
+ A(c,[{transform:'translateY(0) scale(.6) rotateY(0deg)'},{transform:`translateY(-22vh) scale(1.25) rotateY(${end/2}deg)`,offset:.5},{transform:`translateY(0) scale(1) rotateY(${end}deg)`}],{duration:1300,easing:'ease-in-out',fill:'forwards'},()=>{setTimeout(()=>{o.remove();res()},550)})})}
+async function coin(){const h=Math.random()<.5;await coinAnim(h);log(`コイン：${h?'オモテ':'ウラ'}`);return h}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));let TE=0,LASTCUR=0,LASTHC=[0,0],LASTSC=[0,0],DROPR=null;
+const A=(el,kf,o,cb)=>{if(!el.animate){cb&&cb();return}const a=el.animate(kf,o);if(cb)a.onfinish=cb};
+function snapDom(){const m={},z={};document.querySelectorAll('#mat [data-u]').forEach(el=>{if(el.dataset.u)m[el.dataset.u]={r:el.getBoundingClientRect(),a:el.dataset.a,p:el.dataset.p,dm:+el.dataset.dm||0}});
+ const sz={};document.querySelectorAll('#mat [data-a=deck]').forEach(el=>{z[el.dataset.p]=el.getBoundingClientRect()});document.querySelectorAll('#mat [data-a=sidez]').forEach(el=>{sz[el.dataset.p]=el.getBoundingClientRect()});return{m,z,s:sz}}
+function fly(html,a,b,o={}){const g=document.createElement('div');g.className='fl';g.style.cssText+=`left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px`;g.innerHTML=html;document.body.append(g);
+ A(g,[{transform:'translate(0,0) scale(1,1)',opacity:1},{transform:`translate(${b.left-a.left}px,${b.top-a.top}px) scale(${b.width/a.width},${b.height/a.height})`,opacity:o.fade?.15:1}],{duration:o.dur||480,delay:o.delay||0,easing:'ease-in-out',fill:'both'},()=>{g.remove();o.done&&o.done()})}
+const hideFly=(el,html,a,b,i)=>{el.style.visibility='hidden';fly(html,a,b,{delay:i*110,done:()=>{el.style.visibility=''}});setTimeout(()=>{el.style.visibility=''},2500)};
+function dnum(r,t,h,el){const g=document.createElement('div');g.className='dn'+(h?' hl':'');g.textContent=t;g.style.cssText+=`left:${r.left+r.width/2}px;top:${r.top+r.height/3}px;font-size:${Math.max(22,r.width*.42)}px`;document.body.append(g);
+ A(g,[{transform:'translate(-50%,0) scale(.5)',opacity:0},{transform:'translate(-50%,-10px) scale(1.3)',opacity:1,offset:.25},{transform:'translate(-50%,-60px) scale(1)',opacity:0}],{duration:1100,easing:'ease-out'},()=>g.remove());
+ if(!h&&el){A(el,[{transform:'translateX(0)'},{transform:'translateX(-9px)'},{transform:'translateX(9px)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:420});
+  const f=document.createElement('div');f.style.cssText='position:absolute;inset:0;background:#f00;opacity:.55;z-index:9;pointer-events:none';el.append(f);A(f,[{opacity:.6},{opacity:0}],{duration:500},()=>f.remove())}}
+function banner(t){const b=document.createElement('div');b.className='bn';b.textContent=t;document.body.append(b);
+ A(b,[{opacity:0,transform:'translate(-50%,-50%) scale(.6)'},{opacity:1,transform:'translate(-50%,-50%) scale(1.05)',offset:.2},{opacity:1,transform:'translate(-50%,-50%) scale(1)',offset:.75},{opacity:0,transform:'translate(-50%,-70%) scale(1)'}],{duration:1500,easing:'ease-out'},()=>b.remove())}
+function animate(pv,hc,sd){const CI={},LOC={};
+ P.forEach((p,i)=>{[...p.hand,...p.trash.slice(-1),...Object.values(p.piles).map(lastOf)].forEach(c=>c&&(CI[c.u]=c));for(const k in p.piles)p.piles[k].slice(0,-1).forEach(c=>{CI[c.u]=c;LOC[c.u]=[i,k]})});
+ const nw=snapDom().m;let d=0;
+ for(const u in nw){const n=nw[u],c=CI[u],el=document.querySelector(`#mat [data-u="${u}"]`);if(!c||!el)continue;let o=pv.m[u];
+  if(DROPR&&DROPR.u===u)o={...(o||{a:'hand'}),r:DROPR.r};
+  if(o){if(n.dm>o.dm)dnum(n.r,'-'+(n.dm-o.dm),0,el);else if(n.dm<o.dm&&o.a==='pile'&&n.a==='pile')dnum(n.r,'+'+(o.dm-n.dm),1);
+   if(o.a==='hand'&&n.a==='hand')continue;if(Math.abs(o.r.left-n.r.left)+Math.abs(o.r.top-n.r.top)<6)continue;hideFly(el,cardH(c),o.r,n.r,d++)}
+  else if(n.a==='hand'&&pv.z[n.p]){let src=pv.z[n.p];if(sd[n.p]>0&&pv.s[n.p]){sd[n.p]--;src=pv.s[n.p]}hideFly(el,back(),src,n.r,d++)}}
+ for(const u in pv.m){if(nw[u]||pv.m[u].a!=='hand'||!LOC[u])continue;const[i,k]=LOC[u],s=document.querySelector(`#mat [data-a="pile"][data-p="${i}"][data-k="${k}"]`);if(s)fly(cardH(CI[u]),pv.m[u].r,s.getBoundingClientRect(),{fade:1,delay:d++*90})}
+ const t=1-VW(),oh=document.querySelector('#mat .oh');for(let j=0;j<Math.min(3,hc[t]-LASTHC[t]);j++)if(oh&&pv.z[t]){const b=oh.getBoundingClientRect(),src=(sd[t]>0&&pv.s[t])?(sd[t]--,pv.s[t]):pv.z[t];fly(back(),src,{left:b.left+b.width/2-20,top:b.top,width:40,height:56},{delay:j*110,fade:1})}
+ DROPR=null}
+function render(){const hs=$('.hand'),sc=hs?hs.scrollLeft:0,pv=snapDom(),c0=VW();render0();const h2=$('.hand');if(h2)h2.scrollLeft=sc;
+ const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;netSend()}
+async function turnSwitch(){if(G.over)return;act(()=>{const a0=G.act===undefined?cur:G.act,nx=P[1-a0].phase==='play'?1-a0:a0;G.act=nx;G.turn++;G.drawn=1;cur=nx});
+ const lb=G.turn%2?'先攻'+(G.turn+1)/2:'後攻'+G.turn/2;banner(`${lb}ターン ｜ P${cur+1}の番`);await sleep(1100);
+ act(()=>{if(!draw1(me()))err('山札がありません');else log(`${lb}ターン：P${cur+1}が1枚引きました`)})}
+async function endTurn(){if(TE)return;TE=1;try{await turnSwitch()}finally{TE=0}}
+function ratioMenu(){menu(null,RATIOS.map(([n,v])=>[(RSEL===v?'● ':'')+n,()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render()}]),'画面比率を選択（現在：'+(RSEL?RSEL.toFixed(3):'自動')+'）')}
+addEventListener('resize',()=>{LASTCUR=-1;render()});
+/* ---------- CPU対戦（P2をプログラムが操作） ---------- */
+const isBas=c=>c.t==='pke'&&(!mi(c)||stageOf(c)==='たね'),knownBas=c=>c.t==='pke'&&mi(c)&&stageOf(c)==='たね';
+const remHp=pl=>{const t=lastOf(pl),h=hpOf(pl);return h?h-(t.dm||0):999},enCnt=(q,k)=>eunits(q.piles[k]);
+const candyOpts=p=>G.turn<=2?[]:p.hand.filter(y=>y.t==='pke'&&BASE2[nk(y.name)]).filter(y=>['battle',...BN].some(k=>p.piles[k].length&&nk(lastOf(p.piles[k]).name)===BASE2[nk(y.name)]&&stageOf(lastOf(p.piles[k]))==='たね'&&lastOf(p.piles[k]).pt!==G.turn&&lastOf(p.piles[k]).ev!==G.turn));
+function dmgVs(a,p,o,c,def){if(!def)return 0;const M=mi(c)||{},D=mi(def)||{},n=a.n;let b=parseInt(String(a.dt).replace(/[^\d]/g,''))||0;
+ if(n==='マシンガンコンボ')b=250;else if(n==='ストームエメラルダ')b=50*OWN(p).reduce((s,k)=>s+eunits(p.piles[k]),0);else if(n==='ユニオンビート')b=30*(OWN(p).length-1);
+ else if(n==='ぎゃっきょうテール')b=60*OWN(o).filter(k=>/ex$/.test(lastOf(o.piles[k]).name)).length;
+ else if(n==='きあいタックル'&&stageOf(def)==='1進化')b+=90;else if(n==='とうしのつばさ'&&/ex$/.test(def.name))b+=90;
+ if(b<=0)return 0;const drill=n==='ドリルブレイク';if(!drill&&(def.dg===G.turn||(def.sh===G.turn&&stageOf(c)==='たね'&&M.type!=='無')))return 0;
+ if(G.plus30===G.turn&&/(ex|V)$/.test(def.name))b+=30;if(D.weak&&D.weak===M.type)b*=2;if(D.res&&D.res===M.type)b-=30;return Math.max(0,b)}
+const estAtk=(a,p,o,c)=>dmgVs(a,p,o,c,lastOf(o.piles.battle));
+function ready(p,k){const q=P[1-P.indexOf(p)],pl=p.piles[k],t=lastOf(pl),M=mi(t);if(!M||!M.at)return 0;let b=0;
+ for(const a of M.at){if(canPay(a.cost,pl))b=Math.max(b,100+estAtk(a,p,q,t));else b=Math.max(b,60-Math.max(0,a.cost.length-eunits(pl))*12)}return b}
+function bestAttack(p,o){const pl=p.piles.battle,t=lastOf(pl),M=mi(t),d=lastOf(o.piles.battle);if(!t||!M||!M.at||!d||G.turn===1||t.na===G.turn)return null;let best=null;
+ for(const a of M.at){if(!canPay(a.cost,pl))continue;const x={p,o,c:t,msg:[],k:'battle'};if(a.chk&&a.chk(x))continue;const e=estAtk(a,p,o,t),ko=e>=remHp(o.piles.battle);
+  let sc=e+(ko?1000+prize(d)*300:0);if(a.n==='ファントムダイブ')sc+=60;if(a.n==='げきりゅうポンプ')sc+=20;if(a.n==='いれかわる'||a.n==='むかえにいく')sc-=200;if(a.n==='しっぽをまく')sc-=40;
+  if(!best||sc>best.sc)best={a,sc,ko,e}}
+ return best}
+function bossTarget(ks){const p=P[1],o=P[0],t=lastOf(p.piles.battle),M=mi(t);if(!t||!M||!M.at)return ks[0];let best=null,bs=-1e9;
+ for(const k of ks){const def=lastOf(o.piles[k]);let e=0;for(const a of M.at)if(canPay(a.cost,p.piles.battle)&&!(a.chk&&a.chk({p,o,c:t,msg:[],k:'battle'})))e=Math.max(e,dmgVs(a,p,o,t,def));
+  const r=remHp(o.piles[k]),sc=(e>=r?1000+prize(def)*100:0)+prize(def)*10-r/20;if(sc>bs){bs=sc;best=k}}return best}
+function bossKO(){const p=P[1],o=P[0],ks=BN.filter(k=>o.piles[k].length);if(!ks.length||G.turn===1)return 0;const k=bossTarget(ks),t=lastOf(p.piles.battle),M=mi(t);if(!k||!M||!M.at)return 0;
+ const def=lastOf(o.piles[k]);let e=0;for(const a of M.at)if(canPay(a.cost,p.piles.battle))e=Math.max(e,dmgVs(a,p,o,t,def));if(e<remHp(o.piles[k]))return 0;
+ const ba=bestAttack(p,o);if(ba&&ba.ko&&prize(lastOf(o.piles.battle))>=prize(def))return 0;return 96}
+function bestEnergyTarget(p,c){let bk=null,bs=0;const o=P[1-P.indexOf(p)];
+ for(const k of OWN(p)){const pl=p.piles[k],t=lastOf(pl),M=mi(t);if(!M||!M.at)continue;const sim=[c,...pl];let s=0;
+  for(const a of M.at){if(!canPay(a.cost,pl)&&canPay(a.cost,sim))s=Math.max(s,60+estAtk(a,p,o,t)/4+(k==='battle'?60:0))}
+  const mx=Math.max(...M.at.map(a=>a.cost.length),1);if(s===0&&eunits(pl)<mx)s=8+(k==='battle'?6:0);if(s>0&&/ex$/.test(t.name))s+=3;if(s>bs){bs=s;bk=k}}
+ return bk?{k:bk,s:bs}:null}
+function trScore(c){const p=P[1],o=P[0],T=G.turn,hs=p.hand.length,n=c.name.replace(/\(ACE SPEC\)$/,''),ba=bestAttack(p,o);
+ if(c.t==='sup'){if(T===1||G.sup===T)return 0;
+  switch(n){case'ボスの指令':return bossKO();
+   case'スグリ':{if(ba&&ba.ko)return 0;const sv=G.plus30;G.plus30=T;const b2=bestAttack(p,o);G.plus30=sv;if(b2&&b2.ko){CPU.sug=2;return 94}
+    const bk=BN.filter(k=>p.piles[k].length&&ready(p,k)>=100);if((!ba||ba.e<=0)&&bk.length){CPU.sug=1;return 74}return 0}
+   case'リーリエの決心':return Math.max(20,92-hs*13);case'博士の研究':return hs<=2?86:20;
+   case'ジャッジマン':return hs<=o.hand.length-3?(hs<=3?72:45):(hs<=2?50:10);
+   case'メイのはげまし':return(p.side.length>o.side.length&&OWN(p).some(k=>stageOf(lastOf(p.piles[k]))==='2進化')&&p.trash.some(isBE))?80:0;
+   case'シアノ':return p.deck.some(isEx)?78:15;case'アカマツ':return p.deck.some(isBE)?82:20;case'トウコ':return 72;case'ヒカリ':return 70;case'暗号マニアの解読':return hs<=3?58:30;default:return 50}}
+ if(c.t==='tr'){if(G.noGoods===T)return 0;
+  switch(n){case'なかよしポフィン':return room(p)>0&&p.deck.some(y=>y.t==='pke'&&mi(y)&&stageOf(y)==='たね'&&mi(y).hp<=70)?76:0;
+   case'ハイパーボール':return hs>=3&&p.deck.some(y=>y.t==='pke')?60:0;case'ポケパッド':return p.deck.some(y=>y.t==='pke'&&!isRule(y))?56:0;
+   case'ふしぎなアメ':return candyOpts(p).length?93:0;case'夜のタンカ':return p.trash.some(y=>y.t==='pke'||isBE(y))&&hs<=6?46:0;
+   case'アンフェアスタンプ':return p.koTurn===T-1?(o.hand.length>=5&&hs<=4?78:30):0;case'スペシャルレッドカード':return o.side.length<=3&&o.hand.length>=4?82:0;
+   case'クラッシュハンマー':return lastOf(o.piles.battle)&&o.piles.battle.some(y=>y.t==='ene')?52:0;case'ぼうけんのランタン':return p.deck.filter(isBE).length>=2?44:0;
+   case'ガラスのラッパ':return hasTera(p)&&BN.some(k=>p.piles[k].length)&&p.trash.some(isBE)?68:0;default:return 0}}
+ return 0}
+function cpuPick(){const p=P[1],o=P[0],T=G.turn,C=[],add=(key,score,run)=>{if(score>0&&!CPU.tried.has(key))C.push({key,score,run})},inPlay=OWN(p);
+ for(const k of inPlay){const t=lastOf(p.piles[k]),M=mi(t),A=M&&M.ab;if(!A||A.passive||A.onBench||abWhy(t,k,p))continue;const nm=A.n;let sc=60;
+  if(nm==='おつかいダッシュ'||nm==='ていさつしれい')sc=92;else if(nm==='さかてにとる')sc=93;else if(nm==='こんじきのほのお')sc=84;
+  else if(nm==='アドレナブレイン')sc=inPlay.some(z=>(lastOf(p.piles[z]).dm||0)>0)?68:0;
+  else if(nm==='カースドボム'){const n=nk(t.name)==='ヨノワール'?13:5,tg=OWN(o).filter(z=>remHp(o.piles[z])<=10*n);sc=tg.length&&prize(lastOf(o.piles[tg[0]]))>=prize(t)?89:0}
+  else if(nm==='にげあしドロー')sc=(k!=='battle'&&p.hand.length<=5)?50:0;
+  add('ab'+t.u,sc,()=>runAb(t,k))}
+ for(const c of p.hand){const M=mi(c),tk='c'+c.u;
+  if(M&&M.hab&&G.ab[c.u]!==T&&!M.hab.ok({p,o,c}))add('hab'+c.u,70,()=>runHab(c));
+  if(c.t==='pke'&&M&&stageOf(c)==='たね'){if(room(p)>0&&BN.filter(z=>p.piles[z].length).length<4)add(tk,72+(/ex$/.test(c.name)?5:0)+(M.ab&&M.ab.onBench?9:0),()=>playCard(c,freeBench(p),true))}
+  else if(c.t==='pke'&&M){for(const z of inPlay)if(evoCheck(p,c,z,false)===''&&EVO[nk(c.name)]&&nk(lastOf(p.piles[z]).name)===EVO[nk(c.name)])add(tk+z,88,()=>playCard(c,z,true))}
+  else if(c.t==='tool'&&/^ヒーローマント/.test(c.name)&&stadName()!=='ジャミングタワー'){const z=inPlay.find(k=>!p.piles[k].some(y=>y.t==='tool')&&mi(lastOf(p.piles[k])));if(z)add(tk,56,()=>playCard(c,z,true))}
+  else if(c.t==='sta'&&G.stp!==T&&stadName()!==c.name.replace(/\(ACE SPEC\)$/,'')){const n=c.name;let sc=0;if(n==='ゼロの大空洞')sc=hasTera(p)?74:0;else if(n==='危ない廃墟')sc=stadName()?0:34;else if(n==='ジャミングタワー')sc=OWN(o).some(z=>o.piles[z].some(y=>y.t==='tool'))?62:0;add(tk,sc,()=>playCard(c,null,true))}
+  else if(c.t==='tr'||c.t==='sup')add(tk,trScore(c),()=>{trScore(c);return playCard(c,null,true)})}
+ if(G.eat!==T){let best=null;for(const c of p.hand.filter(y=>y.t==='ene'&&(isBE(y)||/^ネオアッパー/.test(y.name)))){const r=bestEnergyTarget(p,c);if(r&&(!best||r.s>best.s))best={c,...r}}if(best)add('en'+best.c.u,86,()=>playCard(best.c,best.k,true))}
+ const at=lastOf(p.piles.battle);if(at&&at.nr!==T){const ba=bestAttack(p,o);if(!ba||ba.e<=0){if(BN.some(k=>p.piles[k].length&&ready(p,k)>=100))add('retreat',64,()=>retreat())}}
+ return C.sort((a,b)=>b.score-a.score)[0]}
+async function cpuTurn(){const p=P[1],o=P[0];CPU.tried=new Set();await sleep(CPU.d);
+ for(let it=0;it<40&&!G.over&&G.act===1&&p.piles.battle.length;it++){const a=cpuPick();if(!a)break;CPU.tried.add(a.key);try{await a.run()}catch(e){console.error(e)}await sleep(CPU.d*.8)}
+ if(G.over||G.act!==1)return;const ba=bestAttack(p,o);if(ba&&ba.sc>0){await sleep(CPU.d*.6);await useAttack(ba.a)}
+ if(!G.over&&G.act===1){await sleep(CPU.d*.5);await turnSwitch()}}
+function actScore(c){const M=mi(c);if(!M)return 0;const ch=Math.min(...(M.at||[{cost:[1,1,1]}]).map(a=>a.cost.length));return M.hp/10+(/ex$/.test(c.name)?-15:0)-ch*2+(M.ab&&M.ab.onBench?-10:0)}
+async function cpuSetup(){const p=P[1];await sleep(CPU.d);
+ for(let g=0;g<12&&!p.hand.some(isBas);g++){act(()=>{p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.mull=(p.mull||0)+1;log(`P2（CPU）がマリガン（${p.mull}回目）`)});await sleep(CPU.d)}
+ const bs=p.hand.filter(isBas).sort((a,b)=>actScore(b)-actScore(a));if(bs.length){act(()=>mv(bs[0].u,'battle'));await sleep(CPU.d*.6);
+  for(const c of bs.slice(1,5)){act(()=>mv(c.u,freeBench(p)));await sleep(CPU.d*.4)}}
+ act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';log('P2（CPU）がサイドをセットしました');finishSetup()})}
+function cardVal(c,p){if(c.t==='ene'){if(/^ネオ/.test(c.name))return 55;const t=(c.name.match(/^基本(.)/)||[])[1],need=OWN(p).some(k=>{const pl=p.piles[k],M=mi(lastOf(pl));return M&&M.at&&M.at.some(a=>a.cost.includes(t)&&!canPay(a.cost,pl))});return 30+(need?25:0)}
+ if(c.t==='pke'){const M=mi(c),inP=OWN(p).some(k=>nk(lastOf(p.piles[k]).name)===nk(c.name));return(M?M.hp/10:5)+(/ex$/.test(c.name)?12:0)+(M&&stageOf(c)!=='たね'?6:0)+(inP?-8:6)}
+ return c.t==='sup'?55:c.t==='tr'?42:34}
+function cpuPk(t,pool,n,min,ok){const p=P[1],v=x=>cardVal(x,p),disc=/トラッシュする手札|トラッシュするエネルギー|山札にもどすエネルギー|手札にもどすエネルギー/.test(t);
+ let s=pool.filter(ok).sort((a,b)=>disc?v(a)-v(b):v(b)-v(a));if(/タイプの異なる/.test(t)){const seen=new Set();s=s.filter(x=>!seen.has(x.name)&&seen.add(x.name))}
+ return s.slice(0,Math.max(Math.min(min,s.length),Math.min(n,s.length)))}
+function cpuAsk(ks,q,ttl,must){const p=P[1],own=P.indexOf(q)===1,rem=k=>remHp(q.piles[k]),pz=k=>prize(lastOf(q.piles[k]));
+ if(!own){if(/呼び出す/.test(ttl))return bossTarget(ks)||ks[0];if(/エネルギーをトラッシュ/.test(ttl))return ks.slice().sort((a,b)=>enCnt(q,b)-enCnt(q,a))[0];
+  const amt=/13個/.test(ttl)?130:/5個/.test(ttl)?50:/120ダメージ/.test(ttl)?120:/100ダメージ/.test(ttl)?100:/ベンチ/.test(ttl)?20:30;
+  const sc=k=>(rem(k)<=amt?1000+pz(k)*100:0)+pz(k)*20-rem(k)/10;return ks.slice().sort((a,b)=>sc(b)-sc(a))[0]}
+ if(/ダメカンを取る/.test(ttl))return ks.slice().sort((a,b)=>(lastOf(q.piles[b]).dm||0)-(lastOf(q.piles[a]).dm||0))[0];
+ if(/バトル場に出す|にげる|入れ替え/.test(ttl))return ks.slice().sort((a,b)=>ready(p,b)-ready(p,a)||rem(b)-rem(a))[0];
+ if(/つける|つけ替え先|進化/.test(ttl))return ks.slice().sort((a,b)=>ready(p,b)+(b==='battle'?20:0)-ready(p,a)-(a==='battle'?20:0))[0];
+ if(/元のポケモン/.test(ttl))return ks.slice().sort((a,b)=>(a==='battle')-(b==='battle')||enCnt(q,b)-enCnt(q,a))[0];
+ if(/トラッシュするポケモン/.test(ttl))return ks.slice().sort((a,b)=>rem(a)-rem(b))[0];
+ return ks[0]}
+const gekiryuOK=()=>BN.some(k=>P[0].piles[k].length&&(remHp(P[0].piles[k])<=120||/ex$/.test(lastOf(P[0].piles[k]).name)));
+function cpuMenu(items,ttl){const L=items.map(x=>x[0]);let i=0;
+ if(L.length===2&&L[0]==='はい')i=/120ダメージ/.test(ttl)?(gekiryuOK()?0:1):0;
+ else if(/効果を1つ選んで/.test(ttl))i=CPU.sug===1?0:1;
+ else if(/動かすダメカン/.test(ttl))i=L.length-1;
+ else if(L.some(x=>/ゆきにしずめる/.test(x)))i=(stadName()&&!(stadName()==='ゼロの大空洞'&&hasTera(P[1])))?0:1;
+ else if(L.some(x=>/特性「/.test(x)))i=Math.max(0,L.findIndex(x=>!/使わない/.test(x)));
+ else{i=L.findIndex(x=>!/使わない|ここまで|キャンセル|この中にない/.test(x));if(i<0)i=0}
+ items[i][1]()}
+function cpuCheck(){if(!CPU.on||CPU.busy||G.over||TE||NET.on||HOLD||SEL)return;if(CTRL()!==1)return;const ph=P[1].phase;if(ph!=='setup'&&!(ph==='play'&&G.act===1))return;CPU.busy=1;cur=1;cpuStep()}
+async function cpuStep(){try{if(P[1].phase==='setup')await cpuSetup();else await cpuTurn()}catch(e){console.error(e);log('CPUでエラー：'+e.message);try{if(G.act===1&&!G.over&&P[1].phase==='play')await turnSwitch()}catch(_){}}finally{CPU.busy=0;render()}}
+async function coinToss(){log('先攻・後攻をコインで決めます（オモテ：あなたが選ぶ／ウラ：CPUが選ぶ）');const h=await coin();let first;
+ if(h)first=await new Promise(r=>menu(null,[['先攻にする',()=>r(0)],['後攻にする',()=>r(1)]],'コインはオモテ！先攻・後攻を選んでください',1));
+ else{first=0;log('コインはウラ：CPUは後攻を選びました')}
+ G.fp=first;log(`先攻：P${first+1}${first?'（CPU）':'（あなた）'}`)}
+async function cpuBegin(code){cur=0;if(code){let d=null;try{d=JSON.parse(localStorage['dk2_'+code])}catch(_){}if(!d)return err('そのデッキのデータがありません');P[1].cards=d;P[1].code=code}
+ if(!P[1].cards.length)return err('CPUのデッキがありません');CPU.on=1;NET.on=0;G.mode='play';HS=[];await askVars();
+ [0,1].forEach(z=>{cur=z;start()});cur=0;G.mode='play';render();await showMissing([1]);await coinToss();
+ clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
+function cpuStart(){if(!P[0].cards.length)return err('先に、あなた（P1）のデッキを読み込んでください');
+ const items=hist().filter(x=>{try{return!!localStorage['dk2_'+x.c]}catch(_){return false}}).map(x=>[x.n,()=>cpuBegin(x.c)]);
+ if(P[1].cards.length)items.unshift(['P2に読み込み済みのデッキを使う',()=>cpuBegin(null)]);
+ if(!items.length)return err('CPUのデッキがありません（デッキ読込でP2に読み込むか、保存済みのデッキを用意してください）');
+ menu(null,items,'CPUのデッキを選択（保存済みのものが表示されます）')}
+function surrender(){if(G.over)return;if(!confirm('投了しますか？'))return;const m=MYS();G.over=1;log(`P${m+1}が投了。P${2-m}の勝利！`);banner(`P${2-m}の勝利！`);if(NET.on)sendMsg({t:'sur',i:m});render()}
+/* ---------- events ---------- */
+$('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;
+ if(SEL){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,r=SEL.r;
+  if(a==='selc'){SEL=null;render();r(null)}else if(a==='pile'&&+t.dataset.p===SEL.i&&SEL.ks.includes(t.dataset.k)){SEL=null;render();r(t.dataset.k)}else if(a==='logs')openLog();return}
+if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='hand')detail(me().hand.find(x=>x.u===t.dataset.u));else if(t.dataset.a==='pile'){const c=lastOf(P[+t.dataset.p].piles[t.dataset.k]);if(c)menu(c,[])}
+  else if(t.dataset.a==='trash'){const q=P[+t.dataset.p];list(`トラッシュ ${q.trash.length}枚（新しい順）`,q.trash.slice().reverse(),c=>menu(c,[]),[],0,null,()=>{$('#ov5').className=''},0,'#ov5')}return}
+ if(MP()&&(NET.wait||!canAct())){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,my=P[MYS()];
+  if(a==='sur'){surrender();return}if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render();return}
+  if(a==='hand'){const c=my.hand.find(x=>x.u===t.dataset.u);if(c)menu(c,[])}
+  else if(a==='pile'||a==='stad'){const q=P[+t.dataset.p],c=a==='pile'?lastOf(q.piles[t.dataset.k]):lastOf(q.piles.stadium);if(c)menu(c,[])}
+  else if(a==='trash')openTrash(+t.dataset.p);else if(a==='logs')openLog();
+  else if(a==='hall')list(`手札 ${my.hand.length}枚`,my.hand,c=>menu(c,[]));
+  else if(a==='hsort'){my.hand=dl(my,my.hand);render()}else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
+  return}
+ if(TE)return;const t=ev.target.closest('[data-a]');if(!t)return;const d=t.dataset,a=d.a,ed=G.mode==='edit',p=me(),i=+d.p,own=isNaN(i)||i===cur;
+ if(a==='mode')act(()=>{G.mode=ed?'play':'edit'});
+ else if(a==='swap'){if(ed){cur=1-cur;render()}}
+ else if(a==='undo'){if(HS.length){[P,G,cur]=JSON.parse(HS.pop());render()}}
+ else if(a==='rst'){if(P.some(x=>x.cards.length)&&confirm('双方の盤面をリセットし、ログも消去します。よろしいですか？')){LGS.length=0;HS=[];G.plus30=0;G.noGoods=0;[0,1].forEach(z=>{if(P[z].cards.length){cur=z;start()}});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));render();log('盤面をリセットしました')}}
+ else if(a==='load'){renderHist();$('#ov3').className='on'}
+ else if(a==='mull'){if(p.phase!=='setup')return;if(OWN(p).length)return err('場にポケモンを出した後はマリガンできません');
+  act(()=>{p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.mull=(p.mull||0)+1;log(`P${cur+1}がマリガン（${p.mull}回目）`)})}
+ else if(a==='side'){if(p.phase!=='setup')return;if(!p.piles.battle.length)return err('バトル場にたねポケモンを出してください');
+  act(()=>{p.side=p.deck.splice(0,6);p.phase='wait';log(`P${cur+1}がサイドをセットしました`);finishSetup()})}
+ else if(a==='tstart')act(()=>{G.drawn=1;if(!draw1(p))err('山札がありません')});
+ else if(a==='tend')endTurn();
+ else if(a==='draw')act(()=>draw1(p));
+ else if(a==='sdraw')act(()=>{if(p.side.length)p.hand.push(p.side.shift())});
+ else if(a==='shuf')act(()=>shuffle(p.deck));
+ else if(a==='logs')openLog();
+ else if(a==='net')$('#ovn').className='on';
+ else if(a==='cpu')cpuStart();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
+ else if(a==='nstart'){if(NET.me!==0||!P[0].cards.length||!P[1].cards.length)return;HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));log('対戦開始！');render()}
+ else if(a==='ratio')ratioMenu();
+ else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
+ else if(a==='hsort')act(()=>{p.hand=dl(p,p.hand)});
+ else if(a==='hall')list(`手札 ${p.hand.length}枚（タップで拡大）`,p.hand,c=>detail(c,1));
+ else if(a==='deck'){if(ed&&own)openDeck()}
+ else if(a==='trash')openTrash(i);
+ else if(a==='stad')stadMenu(i);
+ else if(a==='hand'){if(own)ed?handMenu(d.u):detail(p.hand.find(x=>x.u===d.u),1)}
+ else if(a==='pile'){if(own)ed?pileMenu(d.k):playPile(d.k);else if(ed)err('相手側の編集は「視点」で切り替えてください');else{const oc=lastOf(P[i].piles[d.k]);if(oc)menu(oc,[])}}};
+/* ---------- deck loading ---------- */
+const lm=h=>$('#msg').innerHTML=h;
+function ok(cards,code){CPU.on=0;if(NET.on){if(P[NET.me].phase!=='none')return err('対戦中はデッキを変更できません');const q=P[NET.me];q.cards=cards;q.code=code||'';sendMsg({t:'deck',i:NET.me,cards,code:code||'',vm:VMAP});closeAll();render();log(`P${NET.me+1}のデッキを読み込みました`);askVars().then(()=>showMissing([NET.me]));return}const lt=+$('#lt').value;cur=lt;const p=P[lt];p.cards=cards;p.code=code||'';HS=[];[0,1].forEach(z=>{if(P[z].cards.length){cur=z;start()}});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));closeAll();render();
+ const n=cards.reduce((s,c)=>s+c.n,0);log(n===60?`P${lt+1}のデッキを読み込みました`:`注意：合計${n}枚です`);askVars().then(()=>showMissing([lt]))}
+function parse(h){const img={},nm={},H0='https://www.pokemon-card.com';
+ for(const m of h.matchAll(/searchItemCardPict\[(\d+)\]\s*=\s*['"]([^'"]+)['"]/g))img[m[1]]=m[2];
+ for(const m of h.matchAll(/searchItemName(?:Alt)?\[(\d+)\]\s*=\s*['"]([^'"]*)['"]/g))nm[m[1]]=m[2];
+ const fu={};for(const m of h.matchAll(/searchItemName\[(\d+)\]\s*=\s*['"]([^'"]*)['"]/g))fu[m[1]]=m[2];
+ for(const m of h.matchAll(/(\/assets\/images\/card_images\/(?:large|small)\/[^"'\s)]*?\/(\d{6})_[^"'\s)]+?\.jpg)/g)){const id=String(+m[2]);if(!img[id])img[id]=m[1].replace('/small/','/large/')}
+ const T={pke:'pke',ene:'ene',tool:'tool',sta:'sta',gds:'tr',sup:'sup'},map=new Map();
+ for(const m of h.matchAll(/<input[^>]*>/g)){const tg=m[0],n=(tg.match(/(?:name|id)=["']deck_(\w+)["']/)||[])[1],v=(tg.match(/value=["']([^"']*)["']/)||[])[1];
+  if(!T[n]||!v)continue;const ps=v.split('-').map(s=>s.split('_'));if(!ps.every(x=>/^\d+$/.test(x[0])&&/^\d+$/.test(x[1]||'')))continue;
+  for(const[id,c]of ps){const o=map.get(id);if(o)o.n+=+c;else{let im=img[id]||'';if(im[0]==='/')im=H0+im;
+   map.set(id,{id,n:+c,t:T[n],img:im,full:fu[id]||'',name:nm[id]||im.split('/').pop().replace(/\.jpg$/,'').replace(/^\d+_\w_/,'')||'ID '+id})}}}
+ return[...map.values()]}
+async function fetchDeck(code){const ps=[`https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/`,`https://www.pokemon-card.com/deck/deckView.php/deckID/${code}`];
+ const ws=[u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
+ for(const w of ws)for(const u of ps){try{const r=await fetch(w(u));if(!r.ok)continue;const c=parse(await r.text());if(c.length)return c}catch(_){}}return null}
+const HK='dkl',DEF=[{n:'メガレックウザ',c:'kvwbdF-zcJSFF-VVVFFk'},{n:'AGドラパ',c:'M3Sypp-6vqqSt-yMMRSX'},{n:'クラハンドラパ',c:'69ngnL-P4hfGh-Ngg6QQ'}];
+const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv(h)}DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)){h.push({...d});hsv(h)}});return h},hsv=h=>{try{localStorage[HK]=JSON.stringify(h)}catch(_){}};
+function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forEach((x,i)=>{let ca=false;try{ca=!!localStorage['dk2_'+x.c]}catch(_){}
+ const r=document.createElement('div');r.className='hr';const bt=document.createElement('button');bt.className='hn';bt.innerHTML=`${e(x.n)}${ca?' ✓':''}<small>${e(x.c)}${ca?'':'（初回はソース貼り付けが必要）'}</small>`;
+ bt.onclick=()=>{$('#code').value=x.c;$('#go').click()};
+ const ed=document.createElement('button');ed.className='hs';ed.textContent='✎';ed.onclick=()=>{const n=prompt('デッキの名前',x.n);if(n===null)return;const c=prompt('デッキコード',x.c);if(c===null)return;const m=c.match(RX);if(!m){lm('コードの形式が違います（例: kvwbdF-zcJSFF-VVVFFk）');return}const h=hist();h[i].n=n||x.n;h[i].c=m[0];hsv(h);renderHist()};
+ const dl=document.createElement('button');dl.className='hs';dl.textContent='✕';dl.onclick=()=>{if(confirm(`「${x.n}」を一覧から削除しますか？`)){const h=hist();h.splice(i,1);hsv(h);renderHist()}};
+ const a1=document.createElement('button'),a2=document.createElement('button');a1.className=a2.className='hs';a1.textContent='→1';a2.textContent='→2';a1.onclick=()=>{$('#c1').value=x.c};a2.onclick=()=>{$('#c2').value=x.c};
+ r.append(bt,a1,a2,ed,dl);b.append(r)})}
+const save=(code,c)=>{if(!code)return;try{localStorage['dk2_'+code]=JSON.stringify(c)}catch(_){}const h=hist();if(!h.some(x=>x.c===code)){h.push({n:code,c:code});hsv(h)}};
+function okBoth(cs,codes){if(NET.on)return err('オンライン中は使えません');CPU.on=0;[0,1].forEach(i=>{P[i].cards=cs[i];P[i].code=codes[i]});HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));closeAll();render();log('P1・P2のデッキを読み込みました');askVars().then(()=>showMissing())}
+$('#gob').onclick=async()=>{const cd=[$('#c1').value,$('#c2').value].map(v=>(v.match(RX)||[])[0]);if(!cd[0]||!cd[1])return lm('P1・P2それぞれのデッキコードを入力してください');lm('読込中…');const cs=[];
+ for(const c of cd){let d=null;try{d=JSON.parse(localStorage['dk2_'+c])}catch(_){}if(!d)d=await fetchDeck(c);if(!d)return lm(`${c} を取得できませんでした。先にそのデッキを1つずつ「読込」→ソース貼り付けで読み込んでください。`);cs.push(d)}
+ cd.forEach((c,i)=>save(c,cs[i]));okBoth(cs,cd)};
+$('#go').onclick=async()=>{const code=($('#code').value.match(RX)||[])[0];if(!code)return lm('コードの形式が違います');
+ let c=null;try{c=JSON.parse(localStorage['dk2_'+code])}catch(_){}
+ if(!c){lm('読込中…');c=await fetchDeck(code)}
+ if(c){save(code,c);ok(c,code)}
+ else lm(`自動取得に失敗しました（公式サイトが外部からの取得を許可していません）。<a style="color:#9df" target="_blank" href="https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/">このページ</a>を開いてソースを全コピー→下に貼り付けてください。`)};
+$('#gosrc').onclick=()=>{const s=$('#src').value,c=parse(s),m=s.match(/copyDeckID"[^>]*value="([^"]+)"/),code=m?m[1]:(s.match(RX)||[])[0];
+ if(c.length){save(code,c);ok(c,code)}else lm('カード情報を読み取れませんでした')};
+$('#demo').onclick=()=>ok([['たねポケモンA',4,'pke'],['たねポケモンB',4,'pke'],['1進化ポケモン',3,'pke'],['ポケモンex',2,'pke'],['ハイパーボール',4,'tr'],['リーリエの決心',4,'sup'],['ボスの指令',3,'sup'],['ポケモンのどうぐ',3,'tool'],['スタジアム',3,'sta'],['基本草エネルギー',15,'ene'],['基本炎エネルギー',15,'ene']].map(([name,n,t],i)=>({id:'d'+i,name,n,t,img:''})),'');
+$('#cl').onclick=closeAll;
+/* WebRTC（手動でコードを交換）。STUNのみ使用 */
+const RTC={iceServers:[{urls:'stun:stun.l.google.com:19302'}]},enc=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))),dec=t=>JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+const gather=pc=>new Promise(r=>{if(pc.iceGatheringState==='complete')return r();const f=()=>{if(pc.iceGatheringState==='complete'){pc.removeEventListener('icegatheringstatechange',f);r()}};pc.addEventListener('icegatheringstatechange',f);setTimeout(r,5000)});
+const nst=t=>{$('#nst').textContent=t};
+function wire(ch){NET.ch=ch;ch.onmessage=onRaw;
+ ch.onopen=()=>{const cs=P[NET.me].cards,cd=P[NET.me].code;P=[newP(),newP()];P[NET.me].cards=cs;P[NET.me].code=cd;G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0};LGS.length=0;NET.on=1;
+  nst(`接続しました。あなたは P${NET.me+1}（${NET.me?'後攻':'先攻'}）です。デッキを読み込んでください。`);if(cs.length)sendMsg({t:'deck',i:NET.me,cards:cs,code:cd,vm:VMAP});
+  $('#ovn').className='';log(`オンライン接続：あなたは P${NET.me+1}`);render()};
+ ch.onclose=()=>{if(NET.on){NET.on=0;err('接続が切れました');render()}}}
+const cp=id=>{const t=$(id);t.select();try{navigator.clipboard.writeText(t.value)}catch(_){document.execCommand('copy')}};
+$('#ncl').onclick=()=>{$('#ovn').className=''};$('#ncopy1').onclick=()=>cp('#noffer');$('#ncopy2').onclick=()=>cp('#nresp');
+$('#nhost').onclick=async()=>{try{NET.me=0;$('#n0').style.display='none';$('#nh').style.display='block';nst('招待コードを作成中…');const pc=NET.pc=new RTCPeerConnection(RTC);wire(pc.createDataChannel('g'));
+ await pc.setLocalDescription(await pc.createOffer());await gather(pc);$('#noffer').value=enc(pc.localDescription);nst('招待コードができました。相手に送ってください。')}catch(x){nst('エラー：'+x.message)}};
+$('#nconn').onclick=async()=>{try{await NET.pc.setRemoteDescription(dec($('#nans').value));nst('接続中…')}catch(x){nst('返答コードが正しくありません')}};
+$('#njoin').onclick=()=>{NET.me=1;$('#n0').style.display='none';$('#ng').style.display='block';nst('ホストの招待コードを貼り付けてください。')};
+$('#nmk').onclick=async()=>{try{const pc=NET.pc=new RTCPeerConnection(RTC);pc.ondatachannel=e=>wire(e.channel);await pc.setRemoteDescription(dec($('#ninv').value));
+ await pc.setLocalDescription(await pc.createAnswer());await gather(pc);$('#nresp').value=enc(pc.localDescription);nst('返答コードができました。ホストに送ってください。')}catch(x){nst('招待コードが正しくありません')}};
+addEventListener('beforeunload',ev=>{if(P.some(p=>p.cards.length)){ev.preventDefault();ev.returnValue=''}});
+render();
+</script></body></html>
