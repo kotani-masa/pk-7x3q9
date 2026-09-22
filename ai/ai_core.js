@@ -29,8 +29,8 @@
   const SCALE = new Set(['ストームエメラルダ']), NOM = { 'マシンガンコンボ': 250, 'ストームエメラルダ': 250, 'ユニオンビート': 120, 'ぎゃっきょうテール': 120, 'きあいタックル': 120, 'とうしのつばさ': 60 };   // 数値で表せない技の目安ダメージ   // ダメージが盤面のエネルギー総数に比例する技
   const FORM = {
     'マシンガンコンボ': () => 250, 'ストームエメラルダ': (cx, sb) => 50 * (sumEu(sb) + cx._xe),
-    'ユニオンビート': (cx, sb) => 30 * (Object.keys(sb).length - 1), 'ぎゃっきょうテール': (cx, sb, db) => 60 * cnt(Object.values(db), p => isEx(p.name)),
-    'きあいタックル': (cx, sb, db, dk) => 90 + (cx.stage(db[dk]) === '1進化' ? 90 : 0), 'とうしのつばさ': (cx, sb, db, dk) => 20 + (isEx(db[dk].name) ? 90 : 0),
+    'ユニオンビート': (cx, sb) => 30 * (Object.keys(sb).length - 1), 'ぎゃっきょうテール': (cx, sb, k, db) => 60 * cnt(Object.values(db), p => isEx(p.name)),
+    'きあいタックル': (cx, sb, k, db, dk) => 90 + (cx.stage(db[dk]) === '1進化' ? 90 : 0), 'とうしのつばさ': (cx, sb, k, db, dk) => 20 + (isEx(db[dk].name) ? 90 : 0),
   };
   R.util = { SCALE, nrm, isEx, prizeOf, BE, payable, short, rng, sumEu, cnt, best, FORM };
 
@@ -115,7 +115,9 @@
         else if (g.cur) { v = used * P.aProg; r.prog = Math.max(r.prog, v); } else { v = P.aLine; r.line = Math.max(r.line, v); }
         if (v > bv) { bv = v; r.over = over; } }
       if (this.scaling()) r.scale = P.aScale;                                                                                                        // 盤面のエネルギー数に比例する技がある
-      const d0 = this.D(p); if (k === 'battle' && d0 && p.eu.length < d0.rc && this.bench().some(b => this.myBest(b).d > 0) && !this.myBest('battle').d) r.ret = P.aRetreat; // にげるのに必要
+      const d0 = this.D(p); const wantOut = k === 'battle' && d0 && p.eu.length < d0.rc && !this.myBest('battle').d;
+      if (wantOut && this.bench().some(b => this.myBest(b).d > 0)) r.ret = P.aRetreat;                                    // にげるのに必要（ベンチに今すぐ攻撃できる子がいる）
+      else if (wantOut && stuck(this)) r.ret = P.aRetreatStuck === undefined ? 15 : P.aRetreatStuck;                       // 今の技が見込み薄なら、攻撃できる控えがいなくても、いちおう逃げられるようにしておく
       return r;
     }
     /* ボスの指令：相手ベンチのどれを呼ぶと今のバトルポケモンで倒せるか */
@@ -140,6 +142,7 @@
         me.hand.length / 10, op.handN / 10, me.deckN <= 5 ? 1 : 0, me.deckN / 40, T / 20, this.first() ? 1 : 0,
         this.bench().reduce((s, k) => s + this.pz(mb[k]), 0) / 6, Object.keys(ob).filter(k => k !== 'battle').reduce((s, k) => s + this.pz(ob[k]), 0) / 6,
         this.v.oppType === 'rayquaza' ? 1 : 0, this.v.oppType === 'dragapult' ? 1 : 0);
+      if (this.st.extraFeatures) f.push(...this.st.extraFeatures(this));   // デッキ固有の観点（立ち回りの知識を特徴量にする）
       return f;
     }
     /* 今の技で相手バトルポケモンを倒せるか */
@@ -243,7 +246,7 @@
     }
     if (be && !cx.wide) push('en' + be.u, be.s, { t: 'play', u: be.u, k: be.k });
     for (const c of cx.hand) if (c.t === 'tool' && lg.att[c.u]) { let bt = null; for (const k of lg.att[c.u]) { const s = st.toolScore ? st.toolScore(cx, c, k) : 0; if (!bt || s > bt.s) bt = { s, k }; } if (bt) push('tl' + c.u, bt.s, { t: 'play', u: c.u, k: bt.k }); }
-    if (lg.retreat) { const s = retreatScore(cx); push('retreat', s, { t: 'retreat' }); }
+    if (lg.retreat) { const s = retreatScore(cx); if (globalThis.__DBG) console.log('RETREAT dbg', JSON.stringify({s,note:cx.C.note.retreatTo,readiness:cx.readiness('battle'),stuck:stuck(cx),benchR:cx.bench().map(k=>[k,cx.readiness(k)])})); push('retreat', s, { t: 'retreat' }); }
     if (st.extra) st.extra(cx, C, push);
   }
   /* エネルギーを付ける基本評価：その技が打てるようになるか、あと何個か */
@@ -258,11 +261,19 @@
     const th = cx.threat(k); if (th.act >= cx.rem(p) && k === 'battle' && !cx.myBest('battle').d) s -= P.aDoomed;
     return s;
   }
+  /* 「バトル場のポケモンが、今後も攻撃できる見込みがほぼ無い」かどうか（例：必要な色のエネルギーがデッキにほぼ入っていない）。
+     この場合は、攻撃可能な控えがまだいなくても、いちばん見込みのあるベンチへ逃がす（ただ突っ立ってダメージを受け続けるのを避ける） */
+  function stuck(cx) {
+    const p = cx.myB.battle; if (!p) return false; if (cx.readiness('battle') >= 55) return false;
+    for (const a of cx.atks(p)) { let ok = true; for (const t of a.cost) { if (t === '無') continue; const need = a.cost.filter(x => x === t).length - p.eu.filter(x => x === t).length; if (need <= 0) continue; if (cx.expDeck('基本' + t + 'エネルギー') >= 0.5) { ok = false; break; } }   // 見込み(期待値)が薄い色は「そろえられない」とみなす
+      if (ok) return false; }   // 少なくとも1つの技は、理論上そろえられる
+    return true;
+  }
   function retreatScore(cx) {
     const P = cx.P, lg = cx.lg, at = cx.myB.battle; if (!at || !lg.retreat) return 0; if (cx.st.retreatScore) { const s = cx.st.retreatScore(cx); if (s !== undefined) return s; }
-    const nowD = cx.canAtkNow('battle') && cx.T !== 1 ? cx.myBest('battle').d : 0; let bk = null, bs = 0;
-    for (const k of lg.retreat.ks) { const b = cx.myBest(k).d; const sc = b - nowD - lg.retreat.cost * P.rEnergy; if (b > 0 && sc > bs) { bs = sc; bk = k; } }
-    cx.C.note.retreatTo = bk; return bk && bs >= P.rMargin ? P.sRetreat + bs / 10 : 0;
+    const nowD = cx.canAtkNow('battle') && cx.T !== 1 ? cx.myBest('battle').d : 0, hopeless = stuck(cx); let bk = null, bs = 0;
+    for (const k of lg.retreat.ks) { const b = cx.myBest(k).d, r = cx.readiness(k); const sc = hopeless ? r - nowD : b - nowD - lg.retreat.cost * P.rEnergy; if (globalThis.__DBG) console.log('  cand',k,{b,r,sc}); if ((b > 0 || (hopeless && r > 0)) && sc > bs) { bs = sc; bk = k; } }
+    cx.C.note.retreatTo = bk; return bk && bs >= (hopeless ? P.rMargin * 0.3 : P.rMargin) ? P.sRetreat + bs / 10 : 0;
   }
   /* ---------- 共通トレーナー ---------- */
   function coreTrainer(cx, c) {

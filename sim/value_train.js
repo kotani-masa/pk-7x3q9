@@ -23,7 +23,7 @@ const pred=(m,x)=>{let s=m.b;for(let j=0;j<x.length;j++)s+=m.w[j]*(x[j]-m.mu[j])
 function auc(ps,ys){const a=ps.map((p,i)=>[p,ys[i]]).sort((u,v)=>u[0]-v[0]);let r=0,np=0,nn=0;const rk=[];for(let i=0;i<a.length;){let j=i;while(j<a.length&&a[j][0]===a[i][0])j++;const mr=(i+j+1)/2;for(let k=i;k<j;k++)rk.push(mr);i=j}
  a.forEach((x,i)=>{if(x[1]>0.75){r+=rk[i];np++}else if(x[1]<0.25)nn++});return(r-np*(np+1)/2)/(np*nn)}
 const ll=(ps,ys)=>-ps.reduce((s,p,i)=>s+ys[i]*Math.log(Math.max(1e-9,p))+(1-ys[i])*Math.log(Math.max(1e-9,1-p)),0)/ps.length;
-if(require.main===module){const [tr,te]=[process.argv[2],process.argv[3]];const A=load(tr),B=load(te);const out={};
+if(require.main===module){const [tr,te]=[process.argv[2],process.argv[3]];const A=load(tr),B=load(te);const out={};if(process.env.BASE36){for(const r of A.concat(B))r[2]=r[2].slice(0,36)}
  for(const ty of['dragapult','rayquaza']){const a=A.filter(r=>r[0]===ty),b=B.filter(r=>r[0]===ty);
   const m=fit(a.map(r=>expand(r[2])),a.map(r=>r[3]),10),ps=b.map(r=>pred(m,expand(r[2]))),ys=b.map(r=>r[3]);
   const base=ys.reduce((s,y)=>s+y,0)/ys.length;const pm=ps.map(()=>base);

@@ -4,7 +4,7 @@
    ※ 数値の閾値は defaults にまとめてあり、sim/optimize.js の自己対戦で調整する（ai/params_dragapult.js に出力）。 */
 (function (root) {
   'use strict';
-  const R = root.CPUAI, U = R.util, nrm = U.nrm, payable = U.payable, C = R.core;
+  const R = root.CPUAI, U = R.util, nrm = U.nrm, payable = U.payable, cnt = U.cnt, C = R.core;
   const DR = 'ドラメシヤ', DK = 'ドロンチ', DP = 'ドラパルトex', YM = 'ヨマワル', SM = 'サマヨール', YN = 'ヨノワール', BU = 'スボミー', MU = 'マシマシラ', FZ = 'キチキギスex', MW = 'ニャースex', NK = 'ノコッチ', NN = 'ノココッチ';
   const ip = (cx, n) => cx.inPlayN(n), ih = (cx, n) => cx.n(n), have = (cx, n) => ip(cx, n) + ih(cx, n);
   const ITEMLOCK_OPP = { rayquaza: 1, dragapult: 1 };
@@ -14,7 +14,7 @@
     sRetreat: 64, rEnergy: 15, rMargin: 40, sBoss: 96, sJudge: 55, judgeMine: 2, judgeOpp: 5, sLillie: 92, lillieHand: 12, sHyper: 66, sRed: 82, cyanoMin: 20,
     pReady: 1, pRisk: 60, pHp: 20, sPoffin: 82, sPad: 58, sEvoDk: 90, sEvoDp: 95, sEvoSm: 58, sEvoYn: 62, sEvoNn: 48, sBenchDr: 78, dreepyTarget: 3, sBenchDusk: 66, duskTarget: 2,
     sBenchBudew: 60, sBenchMuni: 52, sDrakloak: 92, sCurse: 90, curseNet: 150, curseLoss: 100, sAdren: 45, sDudu: 52, sHammer: 52, sStamp: 86, sAka: 76, sCandy: 96, sTanka: 46,
-    sLock: 110, spreadW: 1, sJam: 60, sRuins: 12, setupBudew: 60, sHikari: 70, sMay: 82, budewSpare: 0, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
+    sLock: 110, spreadW: 1, sJam: 60, sRuins: 35, setupBudew: 60, sHikari: 70, sMay: 82, budewSpare: 0, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
   };
   /* 探索空間（optimize.js が使う）：[下限, 上限] */
   const space = {
@@ -24,6 +24,15 @@
     sLock: [40, 200], spreadW: [0.3, 2], sJam: [20, 80], sRuins: [0, 60], setupBudew: [20, 90], pRisk: [20, 120], aLillie: [40, 80], sHikari: [40, 85], sMay: [50, 95],
   };
 
+  /* クラッシュハンマー：エネルギー1個を外したときの「相手の攻撃力の低下」（攻撃が打てなくなるなら大きい） */
+  const NOMD = { 'ストームエメラルダ': 250, 'マシンガンコンボ': 250, 'ユニオンビート': 120, 'ぎゃっきょうテール': 120, 'きあいタックル': 120, 'とうしのつばさ': 110 };
+  function hammerLoss(cx, p, enName) {
+    const d = cx.D(p); if (!d || !d.at) return 0; const eu = p.eu.slice(), t = (String(enName).match(U.BE) || [, '*'])[1], i = eu.indexOf(t); eu.splice(i >= 0 ? i : 0, 1);
+    const nom = a => NOMD[a.n] || parseInt(String(a.dt).replace(/[^\d]/g, '')) || 0; let b0 = 0, b1 = 0;
+    for (const a of d.at) { if (payable(a.cost, p.eu)) b0 = Math.max(b0, nom(a)); if (payable(a.cost, eu)) b1 = Math.max(b1, nom(a)); }
+    if (nrm(p.name) === MU && t === '悪') b0 = Math.max(b0, 30);   // アドレナブレインを止める
+    return b0 - b1;
+  }
   /* --- 状況の見立て --- */
   const curseMax = cx => cx.keys().some(k => nrm(cx.myB[k].name) === YN) ? 130 : cx.keys().some(k => nrm(cx.myB[k].name) === SM) ? 50 : 0;
   function need(cx) { // 「いま最優先で欲しい進化ライン」度 0〜1
@@ -43,7 +52,8 @@
     let bk = null, bs = -1e9; const pot = curseMax(cx);
     for (const k of ks) { const p = cx.opB[k], r = rem ? rem[k] : cx.rem(p), nd = Math.ceil(r / 10); let sc;
       if (r <= 0) continue;
-      if (nd <= left) sc = 1000 + cx.pz(p) * 100 / nd; else { const gap = r - 10 * left; sc = cx.pz(p) * 30 - Math.max(0, gap - pot) / 5 + (pot > 0 && gap <= pot ? 200 : 0); }
+      const ln = /^(ドロンチ|マシマシラ)$/.test(nrm(p.name)) ? 40 : 0;   // ラインを崩す価値
+      if (nd <= left) sc = 1000 + cx.pz(p) * 100 / nd + ln; else { const gap = r - 10 * left; sc = cx.pz(p) * 30 + ln / 2 - Math.max(0, gap - pot) / 5 + (pot > 0 && gap <= pot ? 200 : 0); }
       if (sc > bs) { bs = sc; bk = k; } }
     return bk;
   }
@@ -64,19 +74,20 @@
     label: 'クラハンドラパ', defaults, space,
     detect: cards => cards.some(c => nrm(c.name) === DP),
     setup(cx, bs) {
-      const P = cx.P, sc = c => { const n = nrm(c.name); return n === BU ? P.setupBudew : n === NK ? 50 : n === YM ? 45 : n === DR ? 40 : n === MU ? 20 : n === FZ ? 12 : n === MW ? 10 : 25; };
+      const P = cx.P, sc = c => { const n = nrm(c.name); return n === BU ? P.setupBudew + 15 : n === NK ? 55 : n === YM ? 45 : n === DR ? 40 : n === MU ? 20 : n === FZ ? 12 : n === MW ? 10 : 25; };
       const s = bs.slice().sort((a, b) => sc(b) - sc(a)), act = s[0], bench = []; let d = 0, y = 0, k = 0;
       for (const c of s.slice(1)) { const n = nrm(c.name); if (n === DR && d < 3) { bench.push(c.u); d++; } else if (n === YM && y < 2) { bench.push(c.u); y++; } else if ((n === NK || n === BU) && k < 1) { bench.push(c.u); k++; } }
       return { active: act.u, bench };
     },
-    evoScore(cx, c, k) { const n = nrm(c.name), P = cx.P; return n === DK ? P.sEvoDk : n === DP ? P.sEvoDp : n === SM ? P.sEvoSm : n === YN ? P.sEvoYn : n === NN ? P.sEvoNn : P.sEvo; },
+    evoScore(cx, c, k) { const n = nrm(c.name), P = cx.P; if (n === 'ノココッチex') return Object.values(cx.opB).filter(p => /ex$/.test(p.name)).length >= 3 ? 85 : 30; return n === DK ? P.sEvoDk : n === DP ? P.sEvoDp : n === SM ? P.sEvoSm : n === YN ? P.sEvoYn : n === NN ? P.sEvoNn : P.sEvo; },
     benchScore(cx, c) {
       const n = nrm(c.name), P = cx.P;
       switch (n) {
         case DR: return ip(cx, DR) + ip(cx, DK) + ip(cx, DP) < P.dreepyTarget ? P.sBenchDr : P.sBenchDr - 40;
         case YM: return ip(cx, YM) + ip(cx, SM) + ip(cx, YN) < P.duskTarget ? P.sBenchDusk : 0;
         case BU: return ip(cx, BU) < 1 ? P.sBenchBudew : 0;
-        case NK: return ip(cx, NK) + ip(cx, NN) < 1 ? 45 : 0;
+        case NK: return ip(cx, NK) + ip(cx, NN) + ip(cx, 'ノココッチex') < 1 ? (cx.v.oppType === 'rayquaza' ? 66 : 45) : 0;   // 場にいるだけで相手はexを並べにくい
+        case 'ファイヤー': return cx.v.oppType === 'rayquaza' && !ip(cx, 'ファイヤー') ? 50 : 0;   // 対exの単発アタッカー
         case MU: return ip(cx, MU) < 1 ? P.sBenchMuni : 0;
         case FZ: return cx.me.koTurn === cx.T - 1 && cx.me.deckN > 10 ? 90 : 0;
         case MW: return !cx.fl.sup && cx.lg.sup && !cx.hand.some(h => h.t === 'sup') ? 85 : 25;
@@ -117,11 +128,11 @@
       if (n === '危ない廃墟') return cx.v.stadium ? 0 : P.sRuins; return 0;
     },
     attachScore(cx, c, k, base) {
-      const p = cx.myB[k], n = nrm(p.name);
-      if (n === MU && p.en.length === 0) return Math.max(base, 24) + 10;   // アドレナブレインは「エネルギーが1個ついている」ことが条件
-      if (base <= 0) return base;                                        // 役に立たない付け先には付けない（用途判定は ai_core の attachUse）
+      const p = cx.myB[k], n = nrm(p.name), dark = /悪/.test(c.name);
+      if (n === MU) { if (dark) return Math.max(base, 60) + (p.en.length === 0 ? 20 : 0); return p.en.length === 0 ? Math.max(base, 8) : base * 0.3; }   // 悪エネルギー付きのマシマシラが要（他のエネルギーを付けるとドラパルトの育成が遅れる）
+      if (dark) { const d0 = cx.D(p); return k === 'battle' && d0 && p.eu.length < d0.rc ? base : 0; }                                                          // 悪エネルギーはマシマシラ専用（にげる目的のみ例外）
+      if (base <= 0) return base;
       if (n === BU || n === NK || n === NN || n === FZ || n === MW) return base * 0.5;
-      if (n === YM || n === SM || n === YN) return base * 0.6;
       return base;
     },
     attackScore(cx, a, x) {
@@ -130,6 +141,7 @@
       if (a.n === 'むずむずかふん') s += ITEMLOCK_OPP[cx.v.oppType] || cx.op.handN > 4 ? P.sLock : P.sLock * 0.3;
       if (a.n === 'むかえにいく') { const dz = cx.v.self.trash.filter(t => nrm(t.name) === YM).length; s = dz && cx.lg.room ? 40 + 15 * Math.min(dz, cx.lg.room, 3) : -50; }
       if (a.n === 'いれかわる') s = 5;
+      if (a.n === 'クルーエルアロー') { let b = 0; for (const k of Object.keys(cx.opB)) { const p = cx.opB[k], kill = cx.rem(p) <= 100, line = /^(ドロンチ|ドラメシヤ|マシマシラ)$/.test(nrm(p.name)) ? 60 : 0; b = Math.max(b, (kill ? 1000 + cx.pz(p) * 300 : cx.pz(p) * 15) + (kill ? line : 0)); } s = b; }   // 100ダメージを好きな相手に。ドロンチを倒せると大きい
       return s;
     },
     promoteAdj(cx, k, p) { const n = nrm(p.name); return n === DP ? 25 : n === BU ? 10 : (n === DR || n === YM) ? -5 : 0; },
@@ -159,6 +171,16 @@
       if (n === 'ボスの指令') return 60; if (n === 'リーリエの決心') return 50; if (n === 'ふしぎなアメ') return 68; if (c.t === 'sta') return 12; if (n === FZ || n === MW) return 22; if (n === YN) return 40;
       return 26;
     },
+    /* 価値関数への追加特徴量（記事の観点）：ドロンチの数、悪エネルギー付きマシマシラ、スボミー戦、ダメカン蓄積で次に落とせる相手、手札のキーカード */
+    extraFeatures(cx) {
+      const mb = cx.myB, ob = cx.opB, ln = (b, names) => cnt(Object.values(b), p => names.includes(nrm(p.name))), H = n => cx.hand.some(c => nrm(c.name) === n) ? 1 : 0;
+      const dpReady = Object.values(mb).some(p => nrm(p.name) === DP && payable(['炎', '超'], p.eu)) ? 1 : 0, mu = Object.values(mb).filter(p => nrm(p.name) === MU);
+      const muDark = mu.some(p => p.en.some(n => /悪/.test(n))) ? 1 : 0, fuel = muDark * Object.values(mb).reduce((s, p) => s + p.dm, 0) / 300;
+      const bench = Object.keys(ob).filter(k => k !== 'battle').map(k => ob[k]), one = bench.filter(p => cx.rem(p) <= 60), two = bench.filter(p => cx.rem(p) <= 120);
+      return [ln(mb, [DK, DP]) / 4, ln(mb, [DR]) / 4, ln(mb, [DP]) / 3, dpReady, ln(mb, [BU]) ? 1 : 0, mb.battle && nrm(mb.battle.name) === BU ? 1 : 0, ln(ob, [BU]) ? 1 : 0, ob.battle && nrm(ob.battle.name) === BU ? 1 : 0,
+        muDark, mu.some(p => p.en.length) ? 1 : 0, fuel, one.length / 3, one.reduce((s, p) => s + cx.pz(p), 0) / 6, two.length / 3, H('ボスの指令'), H('クラッシュハンマー'), H('アンフェアスタンプ'), H('アカマツ'),
+        cx.eneHand.length / 4, ln(ob, [DK, DP]) / 4, ln(ob, [DR]) / 4, ln(mb, [NK, NN, 'ノココッチex']) ? 1 : 0, cnt(Object.values(ob), p => /ex$/.test(p.name)) / 4];
+    },
     pkH: {
       top2: (cx, q) => C.topBy(C.pool(q), c => R.strategies.dragapult.want(cx, c), 1).map(c => c.u),
       revive: (cx, q) => C.pool(q).slice(0, Math.min(3, cx.lg ? cx.lg.room : 3, q.n)).map(c => c.u),
@@ -169,9 +191,10 @@
       toukoEvo: (cx, q) => C.topBy(C.pool(q), c => R.strategies.dragapult.want(cx, c), 1).map(c => c.u),
       toukoEne: (cx, q) => C.topBy(C.pool(q), c => R.strategies.dragapult.want(cx, c), 1).map(c => c.u),
       mayEne: (cx, q) => C.pool(q).slice(0, 2).map(c => c.u),
-      hammerEne: (cx, q) => { const cnt = {}; q.pool.forEach(c => cnt[c.name] = (cnt[c.name] || 0) + 1); return C.topBy(C.pool(q), c => -cnt[c.name], 1).map(c => c.u); },
+      hammerEne: (cx, q) => { const k = cx.C.note.hammerK, p = k && cx.opB[k]; return C.topBy(C.pool(q), c => p ? hammerLoss(cx, p, c.name) : 0, 1).map(c => c.u); },
     },
     askH: {
+      hammerTgt: (cx, q) => { let bk = q.ks[0], bs = -1e9; for (const k of q.ks) { const p = cx.opB[k]; let s = 0; for (const e of new Set(p.en)) s = Math.max(s, hammerLoss(cx, p, e)); s += (k === 'battle' ? 25 : 0) + p.en.length * 3; if (s > bs) { bs = s; bk = k; } } cx.C.note.hammerK = bk; return bk; },
       spread: (cx, q) => { const m = q.title.match(/残り(\d+)個/), left = m ? +m[1] : 1; return spreadPick(cx, q.ks, left, null) || q.ks[0]; },
       curse: (cx, q) => { const m = q.title.match(/ダメカン(\d+)個/), n = m ? +m[1] : 5, r = curseBest(cx, n, null); return r && q.ks.includes(r.k) ? r.k : q.ks[0]; },
       adrenSrc: (cx, q) => C.topBy(q.ks, k => cx.myB[k].dm, 1)[0],

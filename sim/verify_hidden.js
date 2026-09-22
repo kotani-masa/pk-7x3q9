@@ -2,8 +2,8 @@
 /* 隠れた情報の不変性テスト：相手の手札・山札・サイドの「並び」を入れ替えても、先読み（段階2：相手の手札を仮定して2ターン先まで）の評価が変わらないことを確認する */
 const {Sim}=require('./headless');const D=require('./decks');
 (async()=>{const s=new Sim();let same=0,diff=0,tot=0;const ex=[];
- for(let k=0;k<8;k++){const [a,b]=[['dragapult','rayquaza'],['rayquaza','dragapult'],['dragapult','dragapult'],['rayquaza','rayquaza']][k%4];
-  await s.play({decks:[D[a],D[b]],opt:[{},{}],seed:700+k,maxTurn:6+k%3});const d=s.ctx.__dbg;
+ for(let k=0;k<(+process.env.NC||8);k++){const [a,b]=[['dragapult','rayquaza'],['rayquaza','dragapult'],['dragapult','dragapult'],['rayquaza','rayquaza']][k%4];
+  await s.play({decks:[D[a],D[b]],opt:[{},{}],seed:(+process.env.SB||700)+k,maxTurn:6+k%3});const d=s.ctx.__dbg;
   d("G.over=0;G.win=undefined");const i=d("G.act");
   const run=async tag=>JSON.parse(await d(`(async()=>{const i=${i};const C=CPUX.ctl[i].candidates(cj(cpuView(i,'turn')),5);const a=await cpuSearchPick(i,C,{K:5,S:3,S2:4,T:3,prior:2});return JSON.stringify(C.map(c=>[c.key,c.v===undefined?null:+c.v.toFixed(4),c.v2===undefined?null:+c.v2.toFixed(4)]))})()`));
   const r1=await run();

@@ -19,7 +19,7 @@ ATTACHHOOK=(i,c,k)=>{if(c.t!=='ene')return;const pl=P[i].piles[k],t=lastOf(pl),n
 window.__REC=null;
 TURNEND=(i)=>{if(!window.__REC)return;const c=CPUX.ctl[i];if(c&&c.features&&P[i].phase==='play')__REC.push([i,c.features(cj(cpuView(i,'turn'))),G.turn])};
 window.__run=async function(cfg){window.__REC=cfg.rec?[]:null;
-  CPU.on=1;CPU.who=[1,1];CPU.srch=0;NET.on=0;G.mode='play';CPU.d=0;HS={push(){},pop(){},shift(){},length:0};
+  CPU.on=1;CPU.who=[1,1];CPU.srch=cfg.srch?1:0;NET.on=0;G.mode='play';CPU.d=cfg.simD!==undefined?cfg.simD:0;HS={push(){},pop(){},shift(){},length:0};
   P[0].cards=cfg.decks[0];P[1].cards=cfg.decks[1];
   for(const d of cfg.decks)for(const c of d)if(c.var!==undefined)VMAP[c.id]=c.var;
   CPUX.opt=cfg.opt||[{},{}];
@@ -78,7 +78,7 @@ class Sim {
         return {setup:v=>call('setup',v),decide:v=>call('decide',v),pk:(v,q)=>call('pk',v,q),ask:(v,q)=>call('ask',v,q),menu:(v,q)=>call('menu',v,q),order:v=>call('order',v),result:(a,ok,e)=>call('result',a,ok,e),features:v=>call('features',v),value:v=>call('value',v),candidates:(v,K)=>call('candidates',v,K),commit:a=>call('commit',a),hasValue:()=>call('hasValue')}}}` : 'undefined'};`, ctx);
     this.engine.runInContext(ctx);
     this.ctx = ctx;
-    const r = await ctx.__run({ decks: cfg.decks, opt: cfg.opt, maxTurn: cfg.maxTurn, log: cfg.log, rec: cfg.rec });
+    const r = await ctx.__run({ decks: cfg.decks, opt: cfg.opt, maxTurn: cfg.maxTurn, log: cfg.log, rec: cfg.rec, srch: cfg.srch, simD: cfg.simD });
     return JSON.parse(JSON.stringify(r));
   }
 }

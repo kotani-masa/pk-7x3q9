@@ -154,7 +154,7 @@ const EI={"NEO": "data:image/webp;base64,UklGRlQKAABXRUJQVlA4WAoAAAAQAAAARwAARwA
 const BK='https://www.pokemon-card.com/assets/images/noimage/poke_ura.jpg',RX=/[A-Za-z0-9]{6}-[A-Za-z0-9]{6}-[A-Za-z0-9]{6}/;
 const newP=()=>({code:'',cards:[],deck:[],hand:[],side:[],trash:[],phase:'none',piles:{battle:[],b0:[],b1:[],b2:[],b3:[],b4:[],b5:[],b6:[],b7:[],stadium:[],staging:[]}});
 let P=[newP(),newP()],G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0},cur=0,HS=[],LG='';const me=()=>P[cur],lastOf=a=>a[a.length-1];
-const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
+const shuffle=a=>{knownReset(a);for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}};
 const back=()=>`<div class="card back"><img src="${BK}" referrerpolicy="no-referrer" onerror="this.remove()"></div>`;
 const cardH=c=>`<div class="card t-${c.t}"><span class="nm">${e(c.name)}</span>${c.img?`<img src="${e(c.img)}" referrerpolicy="no-referrer" onerror="this.remove()">`:''}</div>`;
 const LGS=[];let ERR='',ERT=0;
@@ -221,7 +221,7 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  return`<div id="hud">${h}<div id="err">${e(ERR)}</div></div><div id="log" data-a="logs" style="position:absolute;z-index:3;color:#111;${at(6,945,340,false)}">${lgH()}</div>`}
 function render0(){applyRatio();P.forEach((q,z)=>{if(q.phase!=='none'&&benchMax(z)===8)q.b8=1});const V=VW();if(AS)P.forEach((q,z)=>{if((!MP()||z===MYS())&&q.cards.length&&q.hand.length>1)q.hand=dl(q,q.hand)});if(G.mode==='play'&&!MP()){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0)cur=pd}const si=P[V].piles.stadium.length?V:1-V,st=lastOf(P[si].piles.stadium);
  $('#mat').innerHTML=board(1-V,true)+board(V,false)+
- `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`+(CPU.on?`<button data-a="cpuspd">速度：${CPUSPD[CPULV][0]}</button><button data-a="cpusrch">先読み：${CPU.srch?'ON':'OFF'}</button>`:'')):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+stgSlot()+hud();setTimeout(fixBench,0)}
+ `<div class="slot ${st?'f':''}" style="${at(165,715,160,false)}" data-a="stad" data-p="${si}" data-u="${st?st.u:''}">${st?cardH(st):''}</div>`+(()=>{const lb=(!MP()&&G.mode==='edit')?`<button data-a="net">オンライン</button><button data-a="cpu">CPU戦</button>`:(MP()&&P[V].phase!=='none'?(G.over?(CPU.on?`<button data-a="cpuend">対戦終了</button>`:''):`<button data-a="sur">投了</button>`+(CPU.on?`<button data-a="cpuspd">速度：${CPUSPD[CPULV][0]}</button>`:'')):'');return lb?`<div class="lbtn" style="${at(6,715,150,false)}">${lb}</div>`:''})()+stgSlot()+hud();setTimeout(fixBench,0)}
 /* ---------- overlays ---------- */
 const btn=(l,f,c)=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;if(c)b.className=c;return b};
 const closeAll=()=>{for(const s of['#ov','#ov2','#ov3','#ov5'])$(s).className='';HOLD=0;$('#hold').style.display='none'};
@@ -337,7 +337,7 @@ const FX={
   const k=await ask(c,ks,o,'呼び出す相手のベンチポケモンを選択');if(!k)return;fin(c,()=>{const q=o.piles;[q.battle,q[k]]=[q[k],q.battle]});log('ボスの指令：相手のポケモンを入れ替えました')},
  'ジャッジマン':c=>{fin(c,()=>P.forEach(x=>{if(x.phase!=='none'){x.deck.push(...x.hand.splice(0));shuffle(x.deck);for(let i=0;i<4;i++)draw1(x)}}));log('ジャッジマン：お互い手札を山札に戻して切り、4枚引く')},
  'リーリエの決心':c=>{fin(c,()=>{const p=me(),n=p.side.length===6?8:6;p.deck.push(...p.hand.splice(0));shuffle(p.deck);for(let i=0;i<n;i++)draw1(p)});log('リーリエの決心を使用')},
- '暗号マニアの解読':async c=>{const p=me(),t=await pk('山札から2枚選ぶ',p.deck,2,2);if(!t)return;
+ '暗号マニアの解読':async c=>{const p=me();if(p.deck.length<2)return err('山札が2枚未満のため使えません');const t=await pk('山札から2枚選ぶ',p.deck,2,2);if(!t||t.length<2)return;
   const f=await new Promise(r=>menu(null,t.map(x=>[x.name,()=>r(x)]),'山札の一番上にするカードを選んでください（もう1枚が2番目）',1)),s2=t.find(x=>x!==f);
   fin(c,()=>{t.forEach(x=>find(p,x.u));shuffle(p.deck);p.deck.unshift(f,s2)});log(`暗号マニアの解読：山札の上に ${f.name}（1番目）、${s2.name}（2番目）`)},
  'スグリ':async c=>{const p=me();
@@ -436,6 +436,9 @@ mon('ラティアスex',{hp:210,type:'超',rc:2,weak:'悪',res:'闘',
 mon('パルデア ケンタロス',{hp:130,type:'炎',rc:2,weak:'水',
  at:[{n:'うしろげり',dt:'30',cost:['炎'],run:async x=>{hit(x,'battle',30)}},
   {n:'きあいタックル',dt:'90＋',cost:[...'炎無無'],run:async x=>{const d=lastOf(x.o.piles.battle),b=d&&stageOf(d)==='1進化';if(b)x.msg.push('相手は1進化：+90');hit(x,'battle',90+(b?90:0))}}]});
+mon('ガチグマ アカツキex',{hp:260,type:'無',rc:3,weak:'闘',
+ ab:{n:'ろうれんのわざ',passive:1,tx:'相手が取ったサイドの枚数ぶん「ブラッドムーン」のコストが減る（コスト計算全体に影響するため未実装。常にエネルギー5個で扱います）'},
+ at:[{n:'ブラッドムーン',dt:'240',cost:[...'無無無無無'],run:async x=>{hit(x,'battle',240);x.c.na=G.turn+(P[1-cur].phase==='play'?2:1)}}]});
 mon('パオジアン',{hp:120,type:'水',rc:1,weak:'鋼',
  ab:{n:'ゆきにしずめる',onBench:1,ok:()=>stadName()?null:'場にスタジアムがありません',run:x=>{P.forEach(q=>q.trash.push(...q.piles.stadium.splice(0)))}},
  at:[{n:'アイシクルループ',dt:'120',cost:[...'水無無'],run:async x=>{hit(x,'battle',120);const en=ens(x.p.piles.battle);if(en.length){const s=await pk('手札にもどすエネルギーを1個選択',en,1);if(s&&s[0])mv(s[0].u,'hand')}}}]});
@@ -848,8 +851,7 @@ function showMull(){if(!MULLQ.length||$('#ov').className==='on')return;const m=M
 /* CPUの動作速度（2段階）。立て続けに処理せず、行動の間に間を入れる */
 const CPUSPD=[['ゆっくり',2000],['ふつう',1100]];let CPULV=0;try{CPULV=+localStorage.cpulv||0}catch(_){}
 const cpuSpd=()=>{CPU.d=CPUSPD[CPULV][1]};
-try{CPU.srch=localStorage.cpusrch==='0'?0:1}catch(_){CPU.srch=1}   // 先読み探索（既定ON。価値関数ファイルが無ければ自動で無効）
-function cpuSrchToggle(){CPU.srch=CPU.srch?0:1;try{localStorage.cpusrch=CPU.srch}catch(_){}render()}
+CPU.srch=1;   // 先読み探索は標準の動作（切り替え不可）。ai/value_model.js が無いデッキでは、AI側が自動的に先読みなしにフォールバックする   // 先読み探索は標準の動作（切り替え不可）。ai/value_model.js が無いデッキでは、AI側が自動的に先読みなしにフォールバックする
 function cpuSpdToggle(){CPULV=(CPULV+1)%CPUSPD.length;try{localStorage.cpulv=CPULV}catch(_){}cpuSpd();render()}
 /* 使用待機スロット。枠・背景は付けない（盤面と同化させる）。
    ひとり回し（視点が手番に反転する）／自分の番：ターン終了ボタンの下。CPU・オンライン戦で相手の番：ボタンは出さず、相手盤面寄りの上側に置く */
@@ -861,6 +863,7 @@ const stgSlot=()=>{const i=P.findIndex(x=>x.piles.staging&&x.piles.staging.lengt
    ・相手（CPU/オンライン）が手札から出したカード・付けたエネルギーは、手札の位置から飛んでいくモーションで見せる */
 let REVSEEN=0,NOFLY=0,LS={loc:{},tr:new Set()};
 const revPending=t=>!!(G.revEv&&G.revEv.n!==REVSEEN&&G.revEv.p===t);
+function knownReset(a){P.forEach((p,i)=>{if(p&&p.deck===a){const s=new Set(a.map(c=>c.u));CPUX.kn[i]=CPUX.kn[i].filter(u=>!s.has(u))}})}   // 山札に混ざったカードは「公開済み」でなくなる
 function onSearch(i,c){CPUX.kn[i].push(c.u);if(!MP()||i===VW())return;const o={name:c.name,t:c.t,img:c.img},e=G.revEv;
  if(e&&e.n!==REVSEEN&&e.p===i){if(e.cs.length<6)e.cs.push(o)}else G.revEv={n:(G.revN=(G.revN||0)+1),p:i,cs:[o]}}
 function snapLoc(){const loc={},tr=new Set();P.forEach((p,i)=>{for(const k of['battle',...BN])p.piles[k].slice(0,-1).forEach(c=>{loc[i+':'+c.u]=k});p.trash.forEach(c=>tr.add(i+':'+c.u))});return{loc,tr}}
@@ -891,7 +894,12 @@ function oppAttachFly(pv,hc,d){if(!MP())return;const i=1-VW(),oh=document.queryS
    ・隠れた情報は使わない：自分の山札・サイドは混ぜ直す。相手の手札・山札・サイドは、デッキタイプの標準リスト
      （− 場・トラッシュ・公開済みのカード）から仮定して作り直す（実際の中身は見ない）。標準リストが無いタイプは段階1のみ */
 const prngF=seed=>{let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
-function cpuSearchCfg(i,c){if(SIMQ||!c||!c.candidates||!c.hasValue||!c.hasValue())return null;const o=CPUX.opt[i]&&CPUX.opt[i].search;if(o)return o;return CPU.srch?{K:5,S:3,S2:4,T:3,prior:2}:null}
+let DEEPN=0,DEEPT=-1;
+function cpuSearchCfg(i,c){if(SIMQ||!c||!c.candidates||!c.hasValue||!c.hasValue())return null;const o=CPUX.opt[i]&&CPUX.opt[i].search;if(o)return o;if(!CPU.srch)return null;
+ if(G.turn!==DEEPT){DEEPT=G.turn;DEEPN=0}   // 番が変わったらカウントをリセット
+ if(DEEPN++<3)return{K:6,S:4,S2:6,T:4,prior:2};   // 1つの番で「2ターン先まで読む」深い探索は、最初の数回の判断だけ（技を選ぶ・主軸を決める場面）
+ return{K:6,S:4,prior:2};   // それ以降の細かい判断（進化・ベンチ配置など）は、この番の終わりまでの浅い探索にする（体感速度のため）
+}
 async function simTurn(i,ctl,forced){
  for(let it=0;it<60&&!G.over&&G.act===i&&!SIMEND&&P[i].piles.battle.length;it++){
   let a;if(forced){a=forced;forced=null}else a=ctl.decide(cj(cpuView(i,'turn')));
@@ -943,7 +951,7 @@ $('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;
 if(HOLD){const t=ev.target.closest('[data-a]');if(!t)return;if(t.dataset.a==='hand')detail(me().hand.find(x=>x.u===t.dataset.u));else if(t.dataset.a==='pile'){const c=lastOf(P[+t.dataset.p].piles[t.dataset.k]);if(c)menu(c,[])}
   else if(t.dataset.a==='trash'){const q=P[+t.dataset.p];list(`トラッシュ ${q.trash.length}枚（新しい順）`,q.trash.slice().reverse(),c=>menu(c,[]),[],0,null,()=>{$('#ov5').className=''},0,'#ov5')}return}
  if(MP()&&(NET.wait||!canAct())){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,my=P[MYS()];
-  if(a==='cpuspd'){cpuSpdToggle();return}if(a==='cpusrch'){cpuSrchToggle();return}if(a==='sur'){surrender();return}if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render();return}
+  if(a==='cpuspd'){cpuSpdToggle();return}if(a==='sur'){surrender();return}if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render();return}
   if(a==='hand'){const c=my.hand.find(x=>x.u===t.dataset.u);if(c)menu(c,[])}
   else if(a==='pile'||a==='stad'){const q=P[+t.dataset.p],c=a==='pile'?lastOf(q.piles[t.dataset.k]):lastOf(q.piles.stadium);if(c)menu(c,[])}
   else if(a==='stg'){const z=lastOf(P[+t.dataset.p].piles.staging);if(z)menu(z,[])}
@@ -967,7 +975,7 @@ else if(a==='trash')openTrash(+t.dataset.p);else if(a==='logs')openLog();
  else if(a==='shuf')act(()=>shuffle(p.deck));
  else if(a==='logs')openLog();
  else if(a==='net')$('#ovn').className='on';
- else if(a==='cpu')cpuStart();else if(a==='cpuspd')cpuSpdToggle();else if(a==='cpusrch')cpuSrchToggle();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
+ else if(a==='cpu')cpuStart();else if(a==='cpuspd')cpuSpdToggle();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
  else if(a==='nstart'){if(NET.me!==0||!P[0].cards.length||!P[1].cards.length)return;HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));log('対戦開始！');render()}
  else if(a==='ratio')ratioMenu();
  else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
@@ -997,7 +1005,7 @@ function parse(h){const img={},nm={},H0='https://www.pokemon-card.com';
 async function fetchDeck(code){const ps=[`https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/`,`https://www.pokemon-card.com/deck/deckView.php/deckID/${code}`];
  const ws=[u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
  for(const w of ws)for(const u of ps){try{const r=await fetch(w(u));if(!r.ok)continue;const c=parse(await r.text());if(c.length)return c}catch(_){}}return null}
-const HK='dkl',DEF=[{n:'メガレックウザ',c:'kvwbdF-zcJSFF-VVVFFk'},{n:'AGドラパ',c:'M3Sypp-6vqqSt-yMMRSX'},{n:'クラハンドラパ',c:'pyM2pS-qYkBSM-Rypp3y'},{n:'メガレックウザ（テツノイバラ型）',c:'pyRp3M-j9Hi4H-ypyy3p'},{n:'カミツオロチexデッキ',c:'6LNNnn-BgpA6l-nn9gLQ'}];
+const HK='dkl',DEF=[{n:'メガレックウザ',c:'8cK8GK-AACWUC-8D8Gcx'},{n:'AGドラパ',c:'M3Sypp-6vqqSt-yMMRSX'},{n:'クラハンドラパ',c:'pyM2pS-qYkBSM-Rypp3y'},{n:'メガレックウザ（テツノイバラ型）',c:'pyRp3M-j9Hi4H-ypyy3p'},{n:'カミツオロチexデッキ',c:'6LNNnn-BgpA6l-nn9gLQ'}];
 const HMEM={};
 const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){h=HMEM.h||null}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv(h)}h.forEach(x=>{if(x.c==='69ngnL-P4hfGh-Ngg6QQ'){x.c='pyM2pS-qYkBSM-Rypp3y';hsv(h)}});DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)){h.push({...d});hsv(h)}});return h},hsv=h=>{HMEM.h=h;try{localStorage[HK]=JSON.stringify(h)}catch(_){}};
 function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forEach((x,i)=>{const ca=!!getDeck(x.c);
