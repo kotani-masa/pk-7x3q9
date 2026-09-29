@@ -126,7 +126,10 @@ html,body{overscroll-behavior:none;overflow:hidden}
 .hbtn{position:absolute;z-index:6;display:flex;flex-wrap:wrap;gap:calc(1.2*var(--u));width:calc(27*var(--u))}
 .hbtn button{flex:1 1 0;height:calc(7.2*var(--u));padding:0 calc(1.2*var(--u));font-size:calc(3.2*var(--u));white-space:nowrap}.hbtn button.au{flex:1 1 100%;height:calc(6*var(--u));font-size:calc(2.9*var(--u))}
 
-.nroom{font-size:40px;font-weight:900;letter-spacing:.18em;color:#ffd23f;margin:4px 0 8px;font-family:ui-monospace,monospace}
+.nroom{font-size:44px;font-weight:800;letter-spacing:.12em;color:#ffd23f;margin:6px 0 12px;font-variant-numeric:tabular-nums}#nst:empty{display:none}
+#ovr{display:none;position:fixed;inset:0;background:#000b;z-index:70;align-items:center;justify-content:center}#ovr.on{display:flex}
+#ovr .rs{display:flex;flex-direction:column;gap:10px;min-width:260px;max-width:90vw;text-align:center;padding:22px 20px}
+#ovr .rst{font-size:28px;font-weight:900;color:#fff}#ovr .rst.win{color:#ffd23f}#ovr .rst.lose{color:#9fbcc0}#ovr .rsw{font-size:13px;opacity:.8;margin-top:-4px}#ovr button{padding:13px;font-size:16px;font-weight:700}
 #ovn{display:none;position:fixed;inset:0;background:#000a;z-index:35;align-items:flex-start;justify-content:center}
 #ovst{display:none;position:fixed;inset:0;background:#000a;z-index:36;align-items:flex-start;justify-content:center}
 .sheet>button.ab{border:1px solid #e33}.sheet>button.ab.used{opacity:.4;border-color:#666}
@@ -253,21 +256,21 @@ html,body{overscroll-behavior:none;overflow:hidden}
 <input id="edq" placeholder="カード名で絞り込み" style="width:100%;margin-bottom:6px">
 <div id="edp"></div>
 </div></div>
+<div id="ovr"></div>
 <div id="ovn"><div class="sheet lp">
 <div class="mnbar"><button id="ncl">✕</button><b>オンライン対戦</b><span style="width:1.6em"></span></div>
-<div id="nst" style="font-size:13px;color:#ffd23f;margin-bottom:6px">未接続。部屋を作る（先攻P1）か、参加する（後攻P2）を選んでください。</div>
+<div id="nst" style="font-size:13px;color:#ffd23f;margin-bottom:6px"></div>
 <div id="n0" class="bar"><button id="nhost" class="pri" style="flex:1">部屋を作る（先攻 P1）</button><button id="njoin" style="flex:1">参加する（後攻 P2）</button></div>
-<div id="nr" style="display:none;text-align:center"><div style="font-size:13px">部屋番号</div><div id="nroom" class="nroom">------</div>
+<div id="nr" style="display:none;text-align:center"><div id="nroom" class="nroom">------</div>
 <div class="bar" style="justify-content:center"><button id="nrcopy">番号をコピー</button><button id="nrshare" class="pri">招待リンクを送る</button></div>
-<div style="font-size:12px;opacity:.85">相手がこの番号を入力するか、招待リンクを開くと自動でつながります。つながるまでこの画面を開いたままにしてください。</div></div>
-<div id="nj" style="display:none"><div style="font-size:13px">ホストから聞いた6けたの部屋番号を入力</div><div class="bar"><input id="nrin" inputmode="numeric" maxlength="6" placeholder="例：123456" style="flex:1;font-size:20px;letter-spacing:.2em;text-align:center"><button id="nrgo" class="pri">参加</button></div></div>
-<details id="nman" style="margin-top:10px"><summary style="font-size:12px;opacity:.8">うまくつながらないとき：手動コード方式（旧方式）</summary><div class="bar"><button id="nhostM" style="flex:1">手動で部屋を作る</button><button id="njoinM" style="flex:1">手動で参加する</button></div>
+</div>
+<div id="nj" style="display:none"><div class="bar"><input id="nrin" inputmode="numeric" maxlength="6" placeholder="例：123456" style="flex:1;font-size:20px;letter-spacing:.2em;text-align:center"><button id="nrgo" class="pri">参加</button></div></div>
+<details id="nman" style="margin-top:10px"><summary style="font-size:12px;opacity:.6">手動で接続（旧方式）</summary><div class="bar"><button id="nhostM" style="flex:1">手動で部屋を作る</button><button id="njoinM" style="flex:1">手動で参加する</button></div>
 <div id="nh" style="display:none"><div style="font-size:13px">① この招待コードを相手に送る</div><textarea id="noffer" readonly rows="4" style="width:100%"></textarea><button id="ncopy1" class="sm">コピー</button>
 <div style="font-size:13px;margin-top:8px">② 相手から届いた返答コードを貼り付ける</div><textarea id="nans" rows="4" style="width:100%"></textarea><button id="nconn" class="pri">接続する</button></div>
 <div id="ng" style="display:none"><div style="font-size:13px">① ホストから届いた招待コードを貼り付ける</div><textarea id="ninv" rows="4" style="width:100%"></textarea><button id="nmk" class="pri">返答コードを作る</button>
 <div style="font-size:13px;margin-top:8px">② この返答コードをホストに送る（送ったら、ホストが接続するのを待つ）</div><textarea id="nresp" readonly rows="4" style="width:100%"></textarea><button id="ncopy2" class="sm">コピー</button></div>
 </details>
-<div style="font-size:11px;opacity:.75;margin-top:10px">部屋番号方式は、インターネット上の公開の中継サーバー（MQTT）を通してやりとりします。おたがいがこのページを開いて部屋番号を合わせるだけでつながり、スマホの回線どうし・別々のWi-Fiどうしでも使えます。部屋番号を知っている人には通信内容が見える可能性があるので、友人同士で遊ぶ用途にしてください。</div>
 </div></div>
 <div id="ovm"><div class="mnpanel">
 <div class="mnbar"><button id="mncl">✕</button><b>メニュー</b><span style="width:1.6em"></span></div>
@@ -327,7 +330,7 @@ function openLog(){const o=$('#ov'),z=document.createElement('div'),b=document.c
 let ACTN=0,DIRTY=0;function act(fn,re){ACTN++;HS.push(JSON.stringify([P,G,cur]));if(HS.length>200)HS.shift();fn();if(NET.on&&!NET.applying)DIRTY=1;render();re&&re()}   // DIRTY：この端末で盤面を変えた→相手に送る（自分の番でなくても。ターン開始のドロー等）
 const draw1=p=>{if(p.deck.length){p.hand.push(p.deck.shift());return 1}};
 function start(){const p=me();p.deck=p.cards.flatMap(c=>Array.from({length:c.n},(_,i)=>({u:c.id+'_'+i,id:c.id,name:c.name,img:/^伝説の溶岩洞/.test(c.name)?(i%2?'lava:R':'lava:L'):c.img,t:c.t,half:/^伝説の溶岩洞/.test(c.name)?(i%2?'R':'L'):undefined})));
- p.side=[];p.trash=[];p.lost=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.myTurn=0;p.b8=0;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.revEv=undefined;G.revN=0;REVSEEN=0;G.sup=0;G.eat=0;delete G.act;delete G.fp;autoMull(p,cur)}
+ p.side=[];p.trash=[];p.lost=[];for(const k in p.piles)p.piles[k]=[];shuffle(p.deck);p.hand=p.deck.splice(0,7);p.phase='setup';p.koTurn=-9;p.myTurn=0;p.b8=0;p.mull=0;p.dko=0;G.turn=1;G.drawn=0;G.ab={};G.nm={};G.atk=0;G.stp=0;G.over=0;G.win=undefined;G.why=undefined;G.defer=0;G.revEv=undefined;G.revN=0;REVSEEN=0;G.sup=0;G.eat=0;G.mdraw=null;G.mdDone=0;delete G.act;delete G.fp;p.mrev=null;p.sv=0;if(!p.hand.some(isBas))p.phase='mull'}   // たねポケモンがいなければ、相手のサイドセットを待ってからマリガン（mullCheck）
 function find(p,u){for(const k of['hand','deck','side','trash']){const i=p[k].findIndex(c=>c.u===u);if(i>=0)return p[k].splice(i,1)[0]}
  for(const k in p.piles){const i=p.piles[k].findIndex(c=>c.u===u);if(i>=0)return p.piles[k].splice(i,1)[0]}}
 function mv(u,d,nr){const p=me(),wd=d==='hand'&&p.deck.some(x=>x.u===u),c=find(p,u);if(!c)return;if(wd&&!nr)onSearch(P.indexOf(p),c);   // nr=1：効果文に「相手に見せて」が無いサーチは公開しない
@@ -369,7 +372,7 @@ const hpOf=pl=>{const h=(mi(lastOf(pl))||{}).hp;return h?h+(stadName()==='ジャ
 const stMarks=t=>(t.psn||t.brn?`<div class="stw">${t.psn?`<img class="stmk psn" src="${ST.PSN}" title="どく">`:''}${t.brn?`<img class="stmk brn" src="${ST.BRN}" title="やけど">`:''}</div>`:'');
 const dmB=(t,pl)=>{const h=hpOf(pl),d=t.dm||0;if(!h)return(d?`<span class="dm">-${d}</span>`:'')+stMarks(t);const r=Math.max(0,h-d),pc=Math.max(0,Math.min(100,r/h*100)),c=pc>=50?'g':pc>=20?'y':'r';
  return`<div class="hpb"><i class="${c}" style="width:${pc}%"></i></div><span class="dm ${c}">${r}/${h}</span>`+stMarks(t)};
-function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>x.phase==='setup'||x.phase==='wait'),cn=n=>`<span class="cnt">${n}</span>`;
+function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>x.phase==='setup'||x.phase==='wait'||x.phase==='mull'),cn=n=>`<span class="cnt">${n}</span>`;
  const sl=(x,y,w,a,inn)=>o.push(`<div class="slot ${inn?'f':''}" style="${at(x,y,w,f)}" ${a}>${inn}</div>`);
  const w8=benchMax(i)===8||p.b8,L=PCM()?(w8?PXPC8:PXPC):(w8?PX8:PX);for(const k in L){const pl=p.piles[k],t=lastOf(pl);sl(...L[k],`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" data-st="${t&&!hid&&k==='battle'?scOf(t):''}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
  sl(...LY([w8?-6:8,1300,w8?140:150],[150,755,115]),`data-a="sidez" data-p="${i}"`,p.side.length&&!(SIDEFLY&&SIDEFLY.p===i&&Date.now()<SIDEFLY.until)?(PCM()?`<div class="fan">${p.side.map((_,j)=>`<div style="left:${j*13}%">${back()}</div>`).join('')}</div>`:back())+cn(p.side.length):'');
@@ -381,7 +384,8 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  let h=`<div class="hrow">${MP()?`<div class="tl" style="background:${PCOL[V]};color:#fff">${CPU.on?'CPU戦':'対戦'} P${V+1}</div>`:`<button data-a="mode" class="${ed?'pri':''}">${ed?'編集モード':'プレイモード'}</button>`}`+(ed?`<button data-a="swap" style="background:${PCOL[cur]};color:#fff">視点 P${cur+1}</button>`:`<div class="tl">${pd>=0?`P${pd+1}準備中`:tl}</div>`)+'</div>';
  if(SEL)h+=`<div id="prompt">${e(SEL.ttl||'ポケモンを選んでください')}</div>`+(SEL.must?'':`<button data-a="selc">${e(SEL.cl||'キャンセル')}</button>`);
  else if(NET.wait)h+=`<div id="prompt">相手の選択を待っています…</div>`;
- else if(p.phase==='setup'&&(!MP()||CTRL()===V))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button class="pri" data-a="side">サイドセット</button>`;
+ else if(p.phase==='mull')h+=`<div id="prompt">P${V+1}：たねポケモンがいません。相手がサイドを置いたら、手札を見せてマリガンします</div>`;
+ else if(p.phase==='setup'&&(!MP()||canAct()))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button class="pri" data-a="side">サイドセット</button>`;
  else if(p.phase==='wait'||(MP()&&p.phase==='setup'))h+=`<div>相手のセットアップ待ち</div>`;
  else if(MP()&&p.phase==='play'&&CTRL()!==V)h+=`<div style="text-align:center">相手の番です</div>`;
  else if(p.phase==='play'&&!ed)h+=`<div class="hexw"><button class="hex" data-a="tend"><span>Turn<br>END</span></button></div>`;
@@ -533,20 +537,23 @@ const CPU={on:0,busy:0,tried:new Set(),sug:0,d:700,iv:0,who:[0,1]},isCpu=i=>!!CP
 const PCOL=['#1f3e73','#6a2a30'];   // プレイヤーカラー：P1=青、P2=赤
 const VW=()=>MP()?MYS():cur;
 const CTRL=()=>{const pd=P.findIndex(x=>x.phase==='setup');return pd>=0?pd:(G.act===undefined?cur:G.act)};
-const canAct=()=>!MP()||CTRL()===MYS();
+const canAct=()=>!MP()||CTRL()===MYS()||(NET.on&&!!P[MYS()]&&P[MYS()].phase==='setup');   // オンラインの対戦準備は同時に行う
 function sendMsg(m){const c=NET.ch;if(!c||c.readyState!=='open')return;const t=JSON.stringify(m),id=++NET.mid,n=Math.max(1,Math.ceil(t.length/12000));
  for(let i=0;i<n;i++)c.send(JSON.stringify({k:id,n,i,d:t.slice(i*12000,(i+1)*12000)}))}
 let NTM=0;
-function netSend(now){if(!NET.on||NET.applying||!P.some(x=>x.phase!=='none'))return;const ok=canAct()||NET.was||DIRTY;NET.was=canAct();DIRTY=0;if(!ok)return;clearTimeout(NTM);
+function netSend(now){if(!NET.on||NET.applying||!P.some(x=>x.phase!=='none'))return;if(DIRTY&&P[NET.me]&&inSU(P))P[NET.me].sv=(P[NET.me].sv||0)+1;const ok=canAct()||NET.was||DIRTY;NET.was=canAct();DIRTY=0;if(!ok)return;clearTimeout(NTM);
  const go=()=>{G.ver=(G.ver||0)+1;sendMsg({t:'snap',P,G,cur,L:LGS.slice(-200)})};now?go():NTM=setTimeout(go,25)}
 function onRaw(ev){const f=JSON.parse(ev.data),b=NET.buf[f.k]||(NET.buf[f.k]=[]);b[f.i]=f.d;if(b.filter(x=>x!==undefined).length<f.n)return;delete NET.buf[f.k];onMsg(JSON.parse(b.join('')))}
 function onMsg(m){
- if(m.t==='snap'){if((m.G.ver||0)<(G.ver||0))return;const t0=G.turn,keep=P.map(q=>q.cards);NET.applying=1;P=m.P;P.forEach((q,i)=>{if(!q.cards.length)q.cards=keep[i]});G=m.G;cur=m.cur;LGS.length=0;LGS.push(...m.L);
+ if(m.t==='snap'){const su=inSU(P)||inSU(m.P);if(!su&&(m.G.ver||0)<(G.ver||0))return;const t0=G.turn,keep=P.map(q=>q.cards),mine=P[NET.me],v0=G.ver||0;NET.applying=1;
+  const np=m.P;if(su&&mine&&np[NET.me]&&(mine.sv||0)>(np[NET.me].sv||0))np[NET.me]=mine;   // 対戦準備中は同時に操作するので、自分側は新しい方を残す
+  P=np;P.forEach((q,i)=>{if(!q.cards.length)q.cards=keep[i]});if(!su||(m.G.ver||0)>=v0||m.G.act!==undefined)G=m.G;G.ver=Math.max(v0,m.G.ver||0);cur=(su&&G.act===undefined)?NET.me:m.cur;LGS.length=0;LGS.push(...m.L);
   if(G.turn!==t0&&G.act!==undefined&&P.every(q=>q.phase==='none'||q.phase==='play'))banner(`${turnLabel()} ｜ P${G.act+1}の番`);
-  render();NET.was=canAct();NET.applying=0;if(G.sq===NET.me&&!NET.sqr){NET.sqr=1;TE=1;startSeq(NET.me).finally(()=>{NET.sqr=0})}}
+  render();NET.was=canAct();NET.applying=0;if(su&&NET.me===0&&G.act===undefined&&P.every(q=>['wait','none'].includes(q.phase))&&P.some(q=>q.phase==='wait'))act(()=>finishSetup());if(G.sq===NET.me&&!NET.sqr){NET.sqr=1;TE=1;startSeq(NET.me).finally(()=>{NET.sqr=0})}}
  else if(m.t==='deck'){for(const k in(m.vm||{}))if(VMAP[k]===undefined)VMAP[k]=m.vm[k];if(P[m.i].phase!=='none')return;P[m.i].cards=m.cards;P[m.i].code=m.code||'';render()}
  else if(m.t==='ask'){SEL={ks:m.ks,i:m.i,ttl:m.ttl,must:m.must,cl:m.cl,r:k=>sendMsg({t:'ans',id:m.id,k})};closeAll();render()}
  else if(m.t==='pk'){const q=P[m.i],pool=m.us.map(u=>q.hand.find(c=>c.u===u)).filter(Boolean);closeAll();PKW=m.i;pk(m.ttl,pool,m.n,m.min).then(v=>{PKW=undefined;sendMsg({t:'ans',id:m.id,k:(v||pool.slice(0,m.min)).map(c=>c.u)})})}
+ else if(m.t==='rematch'){netRematch(0)}
  else if(m.t==='sur'){G.over=1;G.win=1-m.i;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
  else if(m.t==='ans'){const r=NET.pend[m.id];delete NET.pend[m.id];NET.wait=0;render();r&&r(m.k)}}
 const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{
@@ -646,7 +653,7 @@ addEventListener('pointerup',ev=>endDrag(ev,1));
 document.addEventListener('dragstart',e=>{if(e.target&&e.target.closest&&e.target.closest('#mat'))e.preventDefault()});
 $('#mat').addEventListener('wheel',e=>{const h=e.target.closest&&e.target.closest('.hand');if(!h||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;h.scrollLeft+=e.deltaY;e.preventDefault()},{passive:false});
 addEventListener('pointercancel',ev=>endDrag(ev,0));
-function dropCard(d,x,y){const p=me(),c=d.c;if(p.phase==='wait')return err('相手のセットアップ中です');if(p.phase==='setup'&&d.h&&c.t!=='pke')return err('セットアップ中はたねポケモンだけ出せます');
+function dropCard(d,x,y){const p=me(),c=d.c;if(p.phase==='mull')return err('相手がサイドを置くのを待っています（マリガン待ち）');if(p.phase==='wait')return err('相手のセットアップ中です');if(p.phase==='setup'&&d.h&&c.t!=='pke')return err('セットアップ中はたねポケモンだけ出せます');
  const el=document.elementFromPoint(x,y),tg=el&&el.closest('[data-a=pile],[data-a=stad]'),m=$('#mat').getBoundingClientRect(),
  own=tg&&tg.dataset.a==='pile'&&+tg.dataset.p===cur?tg.dataset.k:null,inB=x>=m.left&&x<=m.right&&y>=m.top&&y<m.top+m.height*(PCM()?.84:.83);
  if(!d.h)return;
@@ -1213,11 +1220,28 @@ async function fixBench(){if(fixing||(MP()&&!canAct()))return;fixing=1;let ch=0;
 let SIDEFLY=null;
 function sideFly(i){if(SIMQ||!SIDEFLY)return;const dz=document.querySelector(`#mat [data-a="deck"][data-p="${i}"]`),sz=document.querySelector(`#mat [data-a="sidez"][data-p="${i}"]`);if(!dz||!sz){SIDEFLY=null;return}
  const a=dz.getBoundingClientRect(),b=sz.getBoundingClientRect(),n=6;for(let j=0;j<n;j++)fly(back(),a,b,{delay:j*120,dur:420});setTimeout(()=>{SIDEFLY=null;render()},SIDEFLY.until-Date.now()+30)}
-function finishSetup(){const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){cur=pd;log(`P${pd+1}：バトル場にたねポケモンを出して、サイドをセットしてください`);return}
+/* 対戦準備：おたがい同時にセット。たねポケモンがいないプレイヤーは相手のサイドセットを待って、手札を見せてマリガン。
+   両者サイドを置いたら、マリガンが少ない側が差の枚数まで（0〜N枚、選べる）引いてからバトルスタート */
+function finishSetup(){if(G.act!==undefined)return;const pd=P.findIndex(x=>x.phase==='setup');if(pd>=0){if(!NET.on){cur=pd;log(`P${pd+1}：バトル場にたねポケモンを出して、サイドをセットしてください`)}return}
+ if(P.some(x=>x.phase==='mull'))return;if(NET.on&&NET.me!==0)return;   // オンラインは部屋を作った側（P1）が進める
  const fi=(G.fp!==undefined&&P[G.fp]&&P[G.fp].phase==='wait')?G.fp:P.findIndex(x=>x.phase==='wait');if(fi<0)return;
- if(P[0].phase==='wait'&&P[1].phase==='wait'){const a=P[0].mull||0,b=P[1].mull||0,n=Math.abs(a-b);
-  if(n){const w=a<b?0:1;for(let i=0;i<n;i++)draw1(P[w]);log(`P${w+1}は、相手のマリガン差${n}回ぶん、${n}枚引きました`)}}
+ if(P[0].phase==='wait'&&P[1].phase==='wait'&&!G.mdDone){const a=P[0].mull||0,b=P[1].mull||0,n=Math.abs(a-b);
+  if(n){if(!G.mdraw){G.mdraw={w:a<b?0:1,n};log(`P${(a<b?0:1)+1}は、相手のマリガン${n}回ぶん、最大${n}枚引けます`)}setTimeout(mdrawAsk,0);return}}
  P.forEach(x=>{if(x.phase==='wait')x.phase='play'});NOFLY=1;log('バトル場・ベンチのポケモンを一斉に表にしました');G.turn=1;G.act=fi;G.fst=fi;cur=fi;P[fi].myTurn=1;TE=1;if(NET.on&&fi!==NET.me){G.sq=fi;setTimeout(()=>startSeq(fi,1),0)}else setTimeout(()=>startSeq(fi),0)}   // オンライン：先攻の1ドローは先攻側の端末で行う
+let MDASK=0;
+function mdrawAsk(){const m=G.mdraw;if(!m||MDASK||G.act!==undefined||SIMQ)return;const w=m.w;if(NET.on&&w!==NET.me)return;
+ const done=k=>{MDASK=0;act(()=>{for(let i=0;i<k;i++)draw1(P[w]);log(`P${w+1}は、相手のマリガンぶん${k}枚引きました（最大${m.n}枚）`);G.mdraw=null;G.mdDone=1;finishSetup()})};
+ if(isCpu(w))return done(m.n);MDASK=1;if(!MP()&&cur!==w){cur=w;render()}menu(null,Array.from({length:m.n+1},(_,k)=>[`${k}枚引く`,()=>done(k)]).reverse(),`P${w+1}：相手がマリガンした回数ぶん（最大${m.n}枚）、山札を引けます。何枚引きますか？`,1)}
+/* マリガン：相手がサイドを置いたら（相手もマリガン中なら同時に）、手札を公開して引き直す。たねポケモンが来るまでくり返す */
+function mullCheck(){if(SIMQ||G.act!==undefined)return;const ctl=i=>!NET.on||i===NET.me;
+ const el=[0,1].filter(i=>{const q=P[i],o=P[1-i];return q&&q.phase==='mull'&&ctl(i)&&o&&['wait','mull','none'].includes(o.phase)});if(!el.length)return;
+ act(()=>{el.forEach(i=>{const q=P[i],hs=[];for(let g=0;g<30&&!q.hand.some(isBas);g++){hs.push(q.hand.map(c=>({u:c.u,name:c.name,img:c.img,t:c.t})));q.mull=(q.mull||0)+1;
+   log(`P${i+1}：たねポケモンがいないためマリガン（${q.mull}回目）。手札を公開：${q.hand.map(c=>c.name).join('、')}`);q.deck.push(...q.hand);q.hand=[];shuffle(q.deck);q.hand=q.deck.splice(0,7)}
+  q.phase='setup';q.mrev={id:Math.random(),hs}});if(NET.on)cur=NET.me;else finishSetup()})}
+/* 相手のマリガンの手札を見せる（1人回しは両方、CPU戦はCPUのもの、オンラインは相手のもの） */
+const MRSEEN=[0,0];
+function mrevCheck(){P.forEach((q,i)=>{const r=q&&q.mrev;if(!r||r.id===MRSEEN[i])return;MRSEEN[i]=r.id;const show=NET.on?i!==NET.me:(CPU.on?isCpu(i):true);if(!show)return;r.hs.forEach((h,j)=>MULLQ.push({i,cs:h,k:j+1,tot:r.hs.length}))});if(MULLQ.length)showMull()}
+const inSU=ps=>ps.some(q=>['setup','mull','wait'].includes(q.phase))&&!ps.some(q=>q.phase==='play');
 /* サイドセットのモーションが終わってから「バトルスタート」→ 先攻の1ドロー（引いたカードを見せる動き）。その間は操作・CPUを止める */
 async function startSeq(fi,nd){try{await sleep(10);await sleep(Math.max(0,(SIDEFLY?SIDEFLY.until-Date.now():0),FLIPEND-Date.now())+150);banner('バトルスタート！');await sleep(1300);if(nd)return;
  act(()=>{G.sq=undefined;draw1(P[fi]);log(`バトルスタート！${solo()?'':'先攻'}P${fi+1}：1枚引きました`)})}finally{TE=0}}
@@ -1231,7 +1255,7 @@ function shufFx(i){const z=document.querySelector(`#mat [data-a=deck][data-p="${
   A(g,[{transform:m,boxShadow:'0 2px 6px #0008'},{transform:o,offset:.2},{transform:m,offset:.42},{transform:o,offset:.62},{transform:m,offset:.84},{transform:m}],{duration:1100,delay:250,easing:'ease-in-out',fill:'both'},()=>g.remove())})}
 /* 対戦開始：伏せていたポケモンを一斉に表にする（裏→表に返すモーション）。サイドセットのモーションが終わってから */
 let LASTHID=0;
-function flipCheck(){const h=G.mode==='play'&&P.some(x=>x.phase==='setup'||x.phase==='wait');const was=LASTHID;LASTHID=h;if(!was||h||G.mode!=='play'||!P.some(x=>x.phase==='play'))return;
+function flipCheck(){const h=G.mode==='play'&&P.some(x=>x.phase==='setup'||x.phase==='wait'||x.phase==='mull');const was=LASTHID;LASTHID=h;if(!was||h||G.mode!=='play'||!P.some(x=>x.phase==='play'))return;
  const d0=Math.max(0,SIDEFLY?SIDEFLY.until-Date.now():0);let j=0;
  document.querySelectorAll('#mat .slot[data-a="pile"]').forEach(el=>{const q=P[+el.dataset.p],c=q&&lastOf(q.piles[el.dataset.k]||[]);if(!c||!el.dataset.u)return;const r=el.getBoundingClientRect();if(!r.width)return;
   el.style.visibility='hidden';const g=document.createElement('div');g.className='fl dw';g.style.cssText+=`left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px`;
@@ -1306,7 +1330,7 @@ function animate(pv,hc,sd){if(NOFLY){NOFLY=0;return}const CI={},LOC={};
  let tt=fastTrash(TRW.filter(x=>x.fast));tt=showDraws(TRW.filter(x=>!x.fast),tt?tt+80:0);showDraws(DRW,tt?tt+80:0);oppAttachFly(pv,hc,d);DROPR=null}
 const trR=i=>{const z=document.querySelector(`#mat [data-a=trash][data-p="${i}"]`);return z&&z.getBoundingClientRect()};
 function render(){if(SIMQ)return;const hs=$('.hand'),sc=hs?hs.scrollLeft:0,pv=snapDom(),c0=VW();render0();const h2=$('.hand');if(h2)h2.scrollLeft=sc;
- const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;shufCheck();flipCheck();LS=snapLoc();revPlay();netSend()}
+ const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;shufCheck();flipCheck();LS=snapLoc();revPlay();netSend();if(!SIMQ&&P.some(q=>q.phase==='mull'||q.mrev)||G.mdraw)setTimeout(()=>{mullCheck();mrevCheck();mdrawAsk()},0);if(G.over){if(!RSHOWN){RSHOWN=1;setTimeout(showResult,1900)}}else RSHOWN=0}
 async function turnSwitch(){if(G.over)return;if(SIMQ&&SIMSTOP){SIMEND=1;return}if(!SIMQ&&TURNEND)TURNEND(cur);const XT=G.xt!==undefined&&G.xt===(G.act===undefined?cur:G.act);act(()=>{const a0=G.act===undefined?cur:G.act,nx=XT?a0:(P[1-a0].phase==='play'?1-a0:a0);if(XT)G.xt=undefined;G.act=nx;G.turn++;G.drawn=1;cur=nx;P[nx].myTurn=(P[nx].myTurn||0)+1});
  const lb=turnLabel();if(XT)log(`P${cur+1}：もう1回自分の番（タイムレスGX）`);banner(`${lb} ｜ P${cur+1}の番${XT?'（もう1回）':''}`);await sleep(1100);
  if(!G.over){await statusTick()}
@@ -1442,12 +1466,8 @@ async function runFX(c){const p=me(),idx=p.hand.indexOf(c),n0=ERRN;STG.c=c;STG.c
  if(STG.endTurn){STG.endTurn=0;await endTurn()}}
 /* 強制マリガン：たねポケモンがいなければ、手札を相手に公開して引き直す（いれば行えない） */
 const MULLQ=[];
-function autoMull(p,i){for(let g=0;g<30&&!p.hand.some(isBas);g++){const cs=p.hand.slice();p.mull=(p.mull||0)+1;
-  log(`P${i+1}：たねポケモンがいないため強制マリガン（${p.mull}回目）。手札を公開：${cs.map(c=>c.name).join('、')}`);MULLQ.push({i,cs});
-  p.deck.push(...p.hand);p.hand=[];shuffle(p.deck);p.hand=p.deck.splice(0,7)}
- if(CPU.d>0)setTimeout(showMull,0);else MULLQ.length=0}
 function showMull(){if(!MULLQ.length||$('#ov').className==='on')return;const m=MULLQ.shift();
- list(`P${m.i+1}のマリガン（手札を公開）`,m.cs,()=>{},[['次へ',()=>{closeAll();showMull()}]],0,null,()=>{closeAll();MULLQ.length=0},1,'#ov')}
+ list(`P${m.i+1}のマリガン（手札を公開${m.tot>1?`・${m.k}/${m.tot}回目`:''}）：たねポケモンがいません`,m.cs,()=>{},[['次へ',()=>{closeAll();showMull()}]],0,null,()=>{closeAll();MULLQ.length=0},1,'#ov')}
 /* CPUの動作速度（2段階）。立て続けに処理せず、行動の間に間を入れる */
 const CPUSPD=[['ゆっくり',2000],['ふつう',1100]];let CPULV=0;try{CPULV=+localStorage.cpulv||0}catch(_){}
 const cpuSpd=()=>{CPU.d=CPUSPD[CPULV][1]};
@@ -1543,6 +1563,18 @@ async function cpuSearchPick(i,C,sc){
  const deepOn=C.some(c=>c.v2!==undefined);let bs=-1e9;
  C.forEach((c,j)=>{if(deepOn&&c.v2===undefined)return;const t=(deepOn?c.v2*.7+c.v*.3:c.v)*100+(j===0?sc.prior:0);if(t>bs){bs=t;best=c}});
  return best&&best.a}
+/* 勝敗がついたら：もう一度対戦／デッキを変えて対戦／やめる */
+let RSHOWN=0,LASTSET=null;
+function showResult(){if(!G.over)return;const o=$('#ovr'),V=VW(),w=G.win,mine=MP()?(w===V?'あなたの勝ち！':w<0?'引き分け':'あなたの負け…'):(w<0?'引き分け':`P${w+1}の勝利！`);
+ const why=G.why&&w>=0&&G.why[w]?G.why[w].join('・'):'';
+ o.innerHTML=`<div class="sheet lp rs"><div class="rst ${MP()?(w===V?'win':w<0?'':'lose'):''}">${e(mine)}</div>${why?`<div class="rsw">${e(why)}</div>`:''}
+  <button id="rsa" class="pri">もう一度対戦</button><button id="rsd">デッキを変えて対戦</button><button id="rsq">やめる</button></div>`;o.className='on';
+ const mode=NET.on?'net':CPU.on?'cpu':'solo';
+ $('#rsa').onclick=()=>{o.className='';if(mode==='net'){netRematch(1);return}if(LASTSET&&LASTSET.mode===mode){DKSEL={mode,picks:LASTSET.picks.slice()};deckSet()}else{[0,1].forEach(z=>{if(P[z].cards.length){cur=z;start()}});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));LGS.length=0;HS=[];log('もう一度対戦');render()}};
+ $('#rsd').onclick=()=>{o.className='';if(mode==='net')netRematch(1);openDeckPicker(mode)};
+ $('#rsq').onclick=()=>{o.className='';openMenu()}}
+function netRematch(send){const cs=P.map(q=>[q.cards,q.code]);P=[newP(),newP()];P.forEach((q,i)=>{q.cards=cs[i][0];q.code=cs[i][1]});G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0,ver:(G.ver||0)+1};LGS.length=0;HS=[];RSHOWN=0;$('#ovr').className='';
+ if(send)sendMsg({t:'rematch'});log(NET.me===0?'再戦の準備ができました。デッキがそろったら「対戦開始」を押してください':'再戦の準備ができました。ホストが対戦開始するのを待っています');render()}
 function surrender(){if(G.over)return;if(!confirm('投了しますか？'))return;const m=MYS();G.over=1;G.win=1-m;log(`P${m+1}が投了。P${2-m}の勝利！`);banner(`P${2-m}の勝利！`);if(NET.on)sendMsg({t:'sur',i:m});render()}
 /* ---------- events ---------- */
 /* ベンチ→バトル場に出たかを記録（サンダー「アサルトサンダー」用）：前回の描画でベンチにいたカードが今バトル場のいちばん上なら toA=この番 */
@@ -1590,7 +1622,7 @@ else if(a==='trash')openTrash(+t.dataset.p);else if(a==='logs')openLog();
  else if(a==='logs')openLog();
  else if(a==='net')$('#ovn').className='on';
  else if(a==='cpu')cpuStart();else if(a==='cpuspd')cpuSpdToggle();else if(a==='sur')surrender();else if(a==='cpuend'){CPU.on=0;clearInterval(CPU.iv);render()}
- else if(a==='nstart'){if(NET.me!==0||!P[0].cards.length||!P[1].cards.length)return;HS=[];[0,1].forEach(z=>{cur=z;start()});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));log('対戦開始！');render()}
+ else if(a==='nstart'){if(NET.me!==0||!P[0].cards.length||!P[1].cards.length)return;HS=[];[0,1].forEach(z=>{cur=z;start()});cur=NET.me;log('対戦開始！');render()}
  else if(a==='ratio')ratioMenu();
  else if(a==='hauto'){AS=AS?0:1;try{localStorage.asort=AS}catch(_){}render()}
  else if(a==='hsort')act(()=>{p.hand=handSort(p,p.hand)});
@@ -1676,9 +1708,9 @@ function mdPress(r,i){let x0=0,y0=0;
  r.onpointercancel=()=>{clearTimeout(MDT);MDT=null;MDOVER=null};
  r.oncontextmenu=ev=>ev.preventDefault()}
 /* 選んだデッキで開始（1人回し・CPU戦・オンライン） */
-function deckSet(){if(!DKSEL)return;const {mode,picks}=DKSEL,M=DKMODE[mode];if(picks.length<M.min||picks.length>M.max)return;
+function deckSet(){if(!DKSEL)return;const {mode,picks}=DKSEL,M=DKMODE[mode];if(picks.length<M.min||picks.length>M.max)return;LASTSET={mode,picks:picks.slice()};
  const ds=picks.map(getDeck);if(ds[1]&&ds[1]===ds[0])ds[1]=JSON.parse(JSON.stringify(ds[0]));if(ds.some(d=>!d))return err('データのないデッキがあります');DKSEL=null;$('#ovmd').className='';
- if(mode==='net'){if(NET.on)return ok(ds[0],picks[0]);PENDING_DECK={cards:ds[0],code:picks[0]};$('#ovn').className='on';if(NET.auto){const c=NET.auto;NET.auto='';$('#n0').style.display='none';$('#nj').style.display='block';$('#nrin').value=c;setTimeout(()=>$('#nrgo').click(),50);return}nst('デッキをセットしました。部屋を作る（先攻P1）か、参加する（後攻P2）を選んでください。');return}
+ if(mode==='net'){if(NET.on)return ok(ds[0],picks[0]);PENDING_DECK={cards:ds[0],code:picks[0]};$('#ovn').className='on';if(NET.auto){const c=NET.auto;NET.auto='';$('#n0').style.display='none';$('#nj').style.display='block';$('#nrin').value=c;setTimeout(()=>$('#nrgo').click(),50);return}nst('');return}
  if(NET.on)return err('オンライン接続中は使えません');
  CPU.on=0;clearInterval(CPU.iv);P=[newP(),newP()];G={mode:'play',turn:1,drawn:0,ab:{},nm:{},atk:0,stp:0};LGS.length=0;HS=[];
  G.rg=picks.map(rgOfCode).find(Boolean)||'';
@@ -1826,13 +1858,13 @@ async function roomOpen(code,role){const url=BROKERS[+code[0]-1];if(!/^\d{6}$/.t
  if(role==='g'){clearInterval(NET.hi);const hi=()=>hs({hs:'hello'});hi();NET.hi=setInterval(()=>{if(NET.on)clearInterval(NET.hi);else hi()},2000)}}
 const inviteURL=code=>location.origin+location.pathname+'?room='+code;
 $('#nhost').onclick=async()=>{NET.me=0;applyPend();$('#n0').style.display='none';$('#nman').style.display='none';nst('部屋を作っています…');
- for(let i=0;i<BROKERS.length;i++){const code=(i+1)+String(Math.floor(Math.random()*1e5)).padStart(5,'0');try{await roomOpen(code,'h');$('#nroom').textContent=code;$('#nr').style.display='block';nst('部屋ができました。相手に部屋番号（または招待リンク）を伝えて、つながるのを待ってください。');return}catch(x){nst(`中継サーバー${i+1}につながりません。別のサーバーを試しています…`)}}
+ for(let i=0;i<BROKERS.length;i++){const code=(i+1)+String(Math.floor(Math.random()*1e5)).padStart(5,'0');try{await roomOpen(code,'h');$('#nroom').textContent=code;$('#nr').style.display='block';nst('');return}catch(x){nst(`中継サーバー${i+1}につながりません。別のサーバーを試しています…`)}}
  nst('中継サーバーにつながりませんでした。インターネット接続を確認するか、下の手動コード方式を試してください。');$('#nman').style.display='';$('#n0').style.display=''};
 $('#nrcopy').onclick=()=>{const c=$('#nroom').textContent;try{navigator.clipboard.writeText(c)}catch(_){}nst('部屋番号をコピーしました：'+c)};
 $('#nrshare').onclick=async()=>{const c=$('#nroom').textContent,u=inviteURL(c),tx=`ポケカ対戦の招待です。部屋番号 ${c}\n${u}`;try{if(navigator.share){await navigator.share({title:'ポケカ対戦の招待',text:tx,url:u});return}}catch(_){return}try{await navigator.clipboard.writeText(tx);nst('招待リンクをコピーしました。LINEなどに貼り付けて送ってください。')}catch(_){nst('招待リンク：'+u)}};
-$('#njoin').onclick=()=>{NET.me=1;applyPend();$('#n0').style.display='none';$('#nj').style.display='block';nst('ホストから聞いた部屋番号を入力してください。');setTimeout(()=>$('#nrin').focus(),50)};
+$('#njoin').onclick=()=>{NET.me=1;applyPend();$('#n0').style.display='none';$('#nj').style.display='block';nst('');setTimeout(()=>$('#nrin').focus(),50)};
 $('#nrgo').onclick=async()=>{const code=($('#nrin').value||'').replace(/\D/g,'');if(code.length!==6)return nst('部屋番号は6けたの数字です');NET.me=1;applyPend();nst('接続しています…');
- try{await roomOpen(code,'g');nst('部屋に入りました。ホストとつながるのを待っています…（ホストが部屋の画面を開いている必要があります）')}catch(x){nst('接続できませんでした：'+x.message)}};
+ try{await roomOpen(code,'g');nst('ホストとつながるのを待っています…')}catch(x){nst('接続できませんでした：'+x.message)}};
 /* 招待リンク（?room=123456）で開いたら：デッキを選ぶ → 自動で参加 */
 (()=>{const m=location.search.match(/[?&]room=(\d{6})/);if(!m)return;NET.auto=m[1];setTimeout(()=>{try{openDeckPicker('net')}catch(_){}},300)})();
 $('#nmk').onclick=async()=>{try{const pc=NET.pc=new RTCPeerConnection(RTC);pc.ondatachannel=e=>wire(e.channel);await pc.setRemoteDescription(dec($('#ninv').value));
