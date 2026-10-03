@@ -662,7 +662,7 @@ const dl=(p,cs)=>{const ix={};p.cards.forEach((c,i)=>ix[c.id]=i);return cs.map((
 /* 山札サーチ：初期は対象のみ。「山札を確認」で全表示（選べるのは対象のみ）。閉じると null を返す */
 /* 相手に選ばせる（クセロシキのたくらみ等）：CPUならCPUが、オンラインなら相手の端末で、1人回しならその場で選ぶ */
 let PKW;
-const pkWho=(t,pool,n,min,who)=>{if(NET.on&&who!==NET.me)return new Promise(r=>{const id=++NET.mid;NET.pend[id]=k=>r(pool.filter(c=>(k||[]).includes(c.u)));NET.wait=1;netSend(1);sendMsg({t:'pk',id,i:who,us:pool.map(c=>c.u),ttl:t,n,min});render()});
+const pkWho=(t,pool,n,min,who)=>{if(NET.on&&who!==NET.me)return new Promise(r=>{netReq({t:'pk',i:who,us:pool.map(c=>c.u),ttl:t,n,min},k=>r(pool.filter(c=>(k||[]).includes(c.u))))});
  PKW=who;return pk(t,pool,n,min).then(v=>{PKW=undefined;return v||pool.slice(0,min)})};
 const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(isCpu(PKW!==undefined?PKW:cur)){const w0=PKW!==undefined?PKW:cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
  const draw=()=>{list(t+(all?'（全カード確認中：薄いカードは選べません）':''),all?view:view.filter(ok),(c,w)=>{if(!ok(c))return;
@@ -749,10 +749,15 @@ function sendMsg(m){const c=NET.ch;if(!c||c.readyState!=='open')return;const t=J
  for(let i=0;i<n;i++)c.send(JSON.stringify({k:id,n,i,d:t.slice(i*12000,(i+1)*12000)}))}
 let NTM=0;
 function netSend(now){if(!NET.on||NET.applying||!P.some(x=>x.phase!=='none'))return;if(DIRTY&&P[NET.me]&&inSU(P))P[NET.me].sv=(P[NET.me].sv||0)+1;const su=inSU(P),ok=canAct()||NET.was||(DIRTY&&(su||NET.lsu));NET.lsu=su;NET.was=canAct();DIRTY=0;if(!ok)return;   // 番でない端末は盤面を送らない（古い盤面で上書きしない）。対戦準備中は両方が送るclearTimeout(NTM);
- const go=()=>{G.ver=(G.ver||0)+1;sendMsg({t:'snap',P,G,cur,L:LGS.slice(-200)})};now?go():NTM=setTimeout(go,25)}
+ const go=()=>{G.ver=(G.ver||0)+1;const msg={t:'snap',P,G,cur,L:LGS.slice(-200)};NET.lastSnap=JSON.parse(JSON.stringify(msg));NET.lastVer=G.ver;sendMsg(msg);netRetry()};now?go():NTM=setTimeout(go,25)}
+/* 通信が途中で落ちても止まらないように：相手から「受け取った」が返るまで、最後に送った盤面を送り直す */
+function netRetry(){clearInterval(NET.rtm);let n=0;NET.rtm=setInterval(()=>{if(!NET.on||!NET.lastSnap||(NET.ackVer||0)>=NET.lastVer||++n>120){clearInterval(NET.rtm);return}sendMsg(NET.lastSnap)},1000)}
+/* 相手への問い合わせ（選択の依頼）も、答えが返るまで送り直す */
+const NSESS=Math.random().toString(36).slice(2,7);
+function netReq(msg,onAns){const id=NET.me+'_'+NSESS+'_'+(++NET.mid);msg.id=id;NET.pend[id]=onAns;NET.wait=1;netSend(1);sendMsg(msg);let n=0;const t=setInterval(()=>{if(!NET.on||!NET.pend[id]||++n>150){clearInterval(t);return}sendMsg(msg)},2000);render()}
 function onRaw(ev){const f=JSON.parse(ev.data),b=NET.buf[f.k]||(NET.buf[f.k]=[]);b[f.i]=f.d;if(b.filter(x=>x!==undefined).length<f.n)return;delete NET.buf[f.k];onMsg(JSON.parse(b.join('')))}
 function onMsg(m){
- if(m.t==='snap'){if(G.act!==undefined&&m.G.act===undefined&&P.some(q=>q.phase==='play')&&!m.P.every(q=>q.phase==='none'))return;   /* 対戦が始まった後に届いた、準備中の古い盤面は無視（先攻が2回引く原因） */
+ if(m.t==='snap'){sendMsg({t:'ack',v:m.G.ver||0});if(G.act!==undefined&&m.G.act===undefined&&P.some(q=>q.phase==='play')&&!m.P.every(q=>q.phase==='none'))return;   /* 対戦が始まった後に届いた、準備中の古い盤面は無視（先攻が2回引く原因） */
   const su=inSU(P)||inSU(m.P);if(!su&&(m.G.ver||0)<(G.ver||0))return;const t0=G.turn,keep=P.map(q=>q.cards),mine=P[NET.me],v0=G.ver||0;NET.applying=1;
   const np=m.P;if(su&&mine&&np[NET.me]&&(mine.sv||0)>(np[NET.me].sv||0))np[NET.me]=mine;   // 対戦準備中は同時に操作するので、自分側は新しい方を残す
   P=np;P.forEach((q,i)=>{if(!q.cards.length)q.cards=keep[i]});if(!su||(m.G.ver||0)>=v0||m.G.act!==undefined)G=m.G;G.ver=Math.max(v0,m.G.ver||0);cur=(su&&G.act===undefined)?NET.me:m.cur;LGS.length=0;LGS.push(...m.L);
@@ -760,16 +765,18 @@ function onMsg(m){
   render();NET.was=canAct();NET.applying=0;if(su&&NET.me===0&&G.act===undefined&&P.every(q=>['wait','none'].includes(q.phase))&&P.some(q=>q.phase==='wait'))act(()=>finishSetup());if(G.sq===NET.me&&!NET.sqr){NET.sqr=1;TE=1;startSeq(NET.me).finally(()=>{NET.sqr=0})}
   if(G.td&&G.td.p===NET.me&&!NET.tdr&&!G.over){NET.tdr=1;TE=1;(async()=>{await sleep(1150);if(!G.td||G.td.p!==NET.me||G.over)return;act(()=>{const td=G.td;G.td=undefined;const q=P[NET.me];cur=NET.me;if(!draw1(q)){q.dko=1;log(`P${NET.me+1}は山札が0枚で引けません`)}else log(`${td.lb}：P${NET.me+1}が1枚引きました`)});judge();render()})().finally(()=>{TE=0;NET.tdr=0})}}
  else if(m.t==='deck'){for(const k in(m.vm||{}))if(VMAP[k]===undefined)VMAP[k]=m.vm[k];if(P[m.i].phase!=='none')return;P[m.i].cards=m.cards;P[m.i].code=m.code||'';preloadCards([m.cards]);render()}
- else if(m.t==='ask'){SEL={ks:m.ks,i:m.i,ttl:m.ttl,must:m.must,cl:m.cl,r:k=>sendMsg({t:'ans',id:m.id,k})};closeAll();render()}
- else if(m.t==='pk'){const q=P[m.i],pool=m.us.map(u=>q.hand.find(c=>c.u===u)).filter(Boolean);closeAll();PKW=m.i;pk(m.ttl,pool,m.n,m.min).then(v=>{PKW=undefined;sendMsg({t:'ans',id:m.id,k:(v||pool.slice(0,m.min)).map(c=>c.u)})})}
+ else if(m.t==='ack'){NET.ackVer=Math.max(NET.ackVer||0,m.v||0)}
+ else if((m.t==='ask'||m.t==='pk'||m.t==='fpq')&&NET.seen&&NET.seen[m.id]){const z=NET.seen[m.id];if(z.done)sendMsg({t:'ans',id:m.id,k:z.k})}   /* 送り直された同じ問い合わせ：答え済みなら答えを送り直す */
+ else if(m.t==='ask'){(NET.seen=NET.seen||{})[m.id]={};const ans=k=>{NET.seen[m.id]={done:1,k};sendMsg({t:'ans',id:m.id,k})};SEL={ks:m.ks,i:m.i,ttl:m.ttl,must:m.must,cl:m.cl,r:ans};closeAll();render()}
+ else if(m.t==='pk'){(NET.seen=NET.seen||{})[m.id]={};const q=P[m.i],pool=m.us.map(u=>q.hand.find(c=>c.u===u)).filter(Boolean);closeAll();PKW=m.i;pk(m.ttl,pool,m.n,m.min).then(v=>{PKW=undefined;const k=(v||pool.slice(0,m.min)).map(c=>c.u);NET.seen[m.id]={done:1,k};sendMsg({t:'ans',id:m.id,k})})}
  else if(m.t==='coin'){coinAnim(m.h).then(()=>{if(!m.h)return})}
- else if(m.t==='fpq'){closeAll();menu(null,[['先攻にする',()=>sendMsg({t:'ans',id:m.id,k:NET.me})],['後攻にする',()=>sendMsg({t:'ans',id:m.id,k:1-NET.me})]],'コインはウラ！先攻・後攻を選んでください',1)}
+ else if(m.t==='fpq'){(NET.seen=NET.seen||{})[m.id]={};const ans=k=>{NET.seen[m.id]={done:1,k};sendMsg({t:'ans',id:m.id,k})};closeAll();menu(null,[['先攻にする',()=>ans(NET.me)],['後攻にする',()=>ans(1-NET.me)]],'コインはウラ！先攻・後攻を選んでください',1)}
  else if(m.t==='rematch'){netRematch(0)}
  else if(m.t==='sur'){G.over=1;G.win=1-m.i;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
- else if(m.t==='ans'){const r=NET.pend[m.id];delete NET.pend[m.id];NET.wait=0;render();r&&r(m.k)}}
+ else if(m.t==='ans'){const r=NET.pend[m.id];if(!r)return;delete NET.pend[m.id];NET.wait=0;render();r(m.k)}}
 const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{
  {const w=who!==undefined?who:cur;if(isCpu(w))return sleep(CPU.d*.4).then(()=>r(cpuAsk(ks,q,ttl,must,w,c)))}
- if(NET.on&&who!==undefined&&who!==NET.me){const id=++NET.mid;NET.pend[id]=r;NET.wait=1;netSend(1);sendMsg({t:'ask',id,ks,i:P.indexOf(q),ttl,must,cl});render();return}
+ if(NET.on&&who!==undefined&&who!==NET.me){netReq({t:'ask',ks,i:P.indexOf(q),ttl,must,cl},r);return}
  SEL={ks,i:P.indexOf(q),ttl,must,cl,r};closeAll();render()});
 const yn=q=>new Promise(r=>menu(null,[['はい',()=>r(1)],['いいえ',()=>r(0)]],q,1));
 const fin=(c,fn)=>{STG.done=1;act(()=>{if(c.t==='sup')G.sup=G.turn;fn&&fn()})};   // 使用カードは runFX が効果終了後にトラッシュへ送る
@@ -2051,7 +2058,7 @@ let NSTPL=0,NFP;
 /* オンライン：先攻・後攻をコインで決める（オモテ：P1が選ぶ／ウラ：P2が選ぶ）。コインは両方の画面で見せる */
 async function netCoin(){const h=Math.random()<.5;sendMsg({t:'coin',h});await coinAnim(h);log(`コイン：${h?'オモテ（P1が先攻・後攻を選びます）':'ウラ（P2が先攻・後攻を選びます）'}`);
  let first;if(h)first=await new Promise(r=>menu(null,[['先攻にする',()=>r(0)],['後攻にする',()=>r(1)]],'コインはオモテ！先攻・後攻を選んでください',1));
- else first=await new Promise(r=>{const id=++NET.mid;NET.pend[id]=k=>r(+k);NET.wait=1;render();sendMsg({t:'fpq',id})});NFP=first;log(`先攻：P${first+1}`)}
+ else first=await new Promise(r=>netReq({t:'fpq'},k=>r(+k)));NFP=first;log(`先攻：P${first+1}`)}
 function deckSet(){if(!DKSEL)return;const {mode,picks}=DKSEL,M=DKMODE[mode];if(picks.length<M.min||picks.length>M.max)return;LASTSET={mode,picks:picks.slice()};
  const ds=picks.map(getDeck);if(ds[1]&&ds[1]===ds[0])ds[1]=JSON.parse(JSON.stringify(ds[0]));if(ds.some(d=>!d))return err('データのないデッキがあります');DKSEL=null;$('#ovmd').className='';
  if(mode==='net'){if(NET.on)return ok(ds[0],picks[0]);PENDING_DECK={cards:ds[0],code:picks[0]};$('#ovn').className='on';if(NET.auto){const c=NET.auto;NET.auto='';$('#n0').style.display='none';$('#nj').style.display='block';$('#nrin').value=c;setTimeout(()=>$('#nrgo').click(),50);return}nst('');return}
