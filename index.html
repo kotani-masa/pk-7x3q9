@@ -242,6 +242,7 @@ body.pc #hud{background:linear-gradient(#2a303ce8,#1b1f28e8);color:#eef2f8;borde
 .stmk::after{content:'';position:absolute;inset:9%;border-radius:50%;background:radial-gradient(ellipse 62% 42% at 36% 24%,#ffffffb0,#fff0 72%),radial-gradient(circle at 50% 50%,#fff0 60%,#0004 100%);pointer-events:none}
 /* わざのコスト：エネルギーマーク */
 .sheet>button.atk{display:flex;align-items:center;gap:10px;text-align:left}
+.ad.up{color:#14a44d!important}.ad.dn{color:#d62839!important}
 .acs{display:flex;gap:3px;flex:none}.an{flex:1;font-weight:800}.ad{flex:none;font:800 20px/1 "Barlow Condensed",sans-serif;min-width:2.4em;text-align:right}
 .eic{display:inline-block;width:22px;height:22px;border-radius:50%;vertical-align:middle;box-shadow:0 1px 2px #0008;flex:none}
 .eic.cl{background:radial-gradient(circle at 40% 35%,#ffffff,#d9dce1 60%,#b9bec6);position:relative}
@@ -638,13 +639,13 @@ function playSt(el,kind){let L=$('#fxl');if(!L){L=document.createElement('div');
 /* ---------- overlays ---------- */
 const btn=(l,f,c)=>{const b=document.createElement('button');b.textContent=l;b.onclick=f;if(c)b.className=c;return b};
 const closeAll=()=>{for(const s of['#ov','#ov2','#ov3','#ov5'])$(s).className='';$('#ov').style.zIndex='';HOLD=0;$('#hold').style.display='none'};
-function menu(c,items,ttl,must,cx){if(isCpu(cur)&&items.length)return cpuMenu(items,ttl,c,cur);
+function menu(c,items,ttl,must,cx){if(PREVM)return;if(isCpu(cur)&&items.length)return cpuMenu(items,ttl,c,cur);
 const o=$('#ov2'),s=document.createElement('div');s.className='sheet';o.innerHTML='';
  s.innerHTML=(ttl?`<div style="margin-bottom:6px;font-weight:700;white-space:pre-line">${e(ttl)}</div>`:'')+(c?`<div class="zoom${c.pair?' zoom2':''}">${cardH(c)}</div>`:'');
  const cancel=()=>{o.className='';cx&&cx()};
  items.forEach(([l,f,cl])=>s.append(btn(l,()=>{o.className='';f()},cl)));if(!must)s.append(btn('キャンセル',cancel));
  o.append(s);o.className='on';o.onclick=must?null:ev=>{if(ev.target===o)cancel()}}
-function list(title,cs,pick,ex=[],num,dim,cl,nc,ovid,nh){const o=$(ovid||'#ov'),s=document.createElement('div');s.className='sheet';o.innerHTML='';const cx=cl||closeAll;
+function list(title,cs,pick,ex=[],num,dim,cl,nc,ovid,nh){if(PREVM)return;const o=$(ovid||'#ov'),s=document.createElement('div');s.className='sheet';o.innerHTML='';const cx=cl||closeAll;
  const bar=document.createElement('div');bar.className='bar';bar.innerHTML=`<b style="flex:1">${e(title)}</b>`;
  ex.forEach(([l,f,cls])=>bar.append(btn(l,f,cls||((nc?'big':'sm')+(l==='決定'?' pri':'')))));if(!ovid&&!nh)bar.append(btn('保留',holdList,'big'));if(!nc)bar.append(btn('閉じる',cx,'big'));s.append(bar);
  const g=document.createElement('div');g.className='grid';if(!cs.length)g.textContent='カードなし';
@@ -662,9 +663,9 @@ const dl=(p,cs)=>{const ix={};p.cards.forEach((c,i)=>ix[c.id]=i);return cs.map((
 /* 山札サーチ：初期は対象のみ。「山札を確認」で全表示（選べるのは対象のみ）。閉じると null を返す */
 /* 相手に選ばせる（クセロシキのたくらみ等）：CPUならCPUが、オンラインなら相手の端末で、1人回しならその場で選ぶ */
 let PKW;
-const pkWho=(t,pool,n,min,who)=>{if(NET.on&&who!==NET.me)return new Promise(r=>{netReq({t:'pk',i:who,us:pool.map(c=>c.u),ttl:t,n,min},k=>r(pool.filter(c=>(k||[]).includes(c.u))))});
+const pkWho=(t,pool,n,min,who)=>{if(PREVM)return Promise.resolve(PREVM.pk(pool,n,min,()=>true));if(NET.on&&who!==NET.me)return new Promise(r=>{netReq({t:'pk',i:who,us:pool.map(c=>c.u),ttl:t,n,min},k=>r(pool.filter(c=>(k||[]).includes(c.u))))});
  PKW=who;return pk(t,pool,n,min).then(v=>{PKW=undefined;return v||pool.slice(0,min)})};
-const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(isCpu(PKW!==undefined?PKW:cur)){const w0=PKW!==undefined?PKW:cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
+const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(PREVM)return r(PREVM.pk(pool,n,min,ok));if(isCpu(PKW!==undefined?PKW:cur)){const w0=PKW!==undefined?PKW:cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
  const draw=()=>{list(t+(all?'（全カード確認中：薄いカードは選べません）':''),all?view:view.filter(ok),(c,w)=>{if(!ok(c))return;
   if(s.has(c.u)){s.delete(c.u);w.classList.remove('sel')}else if(s.size<n){s.add(c.u);w.classList.add('sel')}},
   [...(pool.some(c=>!ok(c))?[[all?'対象のみ表示':'山札を確認',()=>{all=!all;draw()}]]:[]),['決定',()=>{if(s.size>=min){closeAll();r(pool.filter(c=>s.has(c.u)))}}]],0,c=>!ok(c),()=>{closeAll();r(null)},1);
@@ -755,7 +756,7 @@ function netRetry(){clearInterval(NET.rtm);let n=0;NET.rtm=setInterval(()=>{if(!
 /* 相手への問い合わせ（選択の依頼）も、答えが返るまで送り直す */
 const NSESS=Math.random().toString(36).slice(2,7);
 function netReq(msg,onAns){const id=NET.me+'_'+NSESS+'_'+(++NET.mid);msg.id=id;NET.pend[id]=onAns;NET.wait=1;netSend(1);sendMsg(msg);let n=0;const t=setInterval(()=>{if(!NET.on||!NET.pend[id]||++n>150){clearInterval(t);return}sendMsg(msg)},2000);render()}
-function onRaw(ev){const f=JSON.parse(ev.data),b=NET.buf[f.k]||(NET.buf[f.k]=[]);b[f.i]=f.d;if(b.filter(x=>x!==undefined).length<f.n)return;delete NET.buf[f.k];onMsg(JSON.parse(b.join('')))}
+function onRaw(ev){if(PREVM){(NET.hold=NET.hold||[]).push(ev);return}const f=JSON.parse(ev.data),b=NET.buf[f.k]||(NET.buf[f.k]=[]);b[f.i]=f.d;if(b.filter(x=>x!==undefined).length<f.n)return;delete NET.buf[f.k];onMsg(JSON.parse(b.join('')))}
 function onMsg(m){
  if(m.t==='snap'){sendMsg({t:'ack',v:m.G.ver||0});if(G.act!==undefined&&m.G.act===undefined&&P.some(q=>q.phase==='play')&&!m.P.every(q=>q.phase==='none'))return;   /* 対戦が始まった後に届いた、準備中の古い盤面は無視（先攻が2回引く原因） */
   const su=inSU(P)||inSU(m.P);if(!su&&(m.G.ver||0)<(G.ver||0))return;const t0=G.turn,keep=P.map(q=>q.cards),mine=P[NET.me],v0=G.ver||0;NET.applying=1;
@@ -774,7 +775,7 @@ function onMsg(m){
  else if(m.t==='rematch'){netRematch(0)}
  else if(m.t==='sur'){G.over=1;G.win=1-m.i;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
  else if(m.t==='ans'){const r=NET.pend[m.id];if(!r)return;delete NET.pend[m.id];NET.wait=0;render();r(m.k)}}
-const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{
+const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{if(PREVM)return r(ks&&ks[0]);
  {const w=who!==undefined?who:cur;if(isCpu(w))return sleep(CPU.d*.4).then(()=>r(cpuAsk(ks,q,ttl,must,w,c)))}
  if(NET.on&&who!==undefined&&who!==NET.me){netReq({t:'ask',ks,i:P.indexOf(q),ttl,must,cl},r);return}
  SEL={ks,i:P.indexOf(q),ttl,must,cl,r};closeAll();render()});
@@ -1374,10 +1375,24 @@ async function promote(i){const q=P[i],ks=OWN(q).filter(k=>k!=='battle');
 /* ---- ワザ・特性・にげる ---- */
 /* エネルギーのマーク（わざのコスト表示用）。基本エネルギーと同じ画像。無色・コストなしはCSSで描く */
 const ENCL='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciIGN4PSIzOCUiIGN5PSIzMCUiIHI9Ijc1JSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmZmZmIi8+PHN0b3Agb2Zmc2V0PSIuNTUiIHN0b3AtY29sb3I9IiNlY2VlZjEiLz48c3RvcCBvZmZzZXQ9Ii44NSIgc3RvcC1jb2xvcj0iI2NkZDFkNyIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2FlYjNiYiIvPjwvcmFkaWFsR3JhZGllbnQ+PHJhZGlhbEdyYWRpZW50IGlkPSJzIiBjeD0iNDUlIiBjeT0iMzUlIiByPSI2NSUiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzNlNDE0NyIvPjxzdG9wIG9mZnNldD0iLjU1IiBzdG9wLWNvbG9yPSIjMTUxNzFhIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDAwIi8+PC9yYWRpYWxHcmFkaWVudD48L2RlZnM+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDgiIGZpbGw9InVybCgjZykiLz48ZWxsaXBzZSBjeD0iMzQiIGN5PSIyNCIgcng9IjE3IiByeT0iOSIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjgiIHRyYW5zZm9ybT0icm90YXRlKC0yOCAzNCAyNCkiLz48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0Ny42IiBmaWxsPSJub25lIiBzdHJva2U9IiM5YWEwYTgiIHN0cm9rZS13aWR0aD0iLjkiLz48cGF0aCBkPSJNNTAuMDAsMTMuMDAgUTUzLjcxLDI2LjkyIDU4LjI1LDM1LjcxIFE2OC4xMywzNS4yNCA4Mi4wNCwzMS41MCBRNzEuODQsNDEuNjggNjYuNTAsNTAuMDAgUTcxLjg0LDU4LjMzIDgyLjA0LDY4LjUwIFE2OC4xMyw2NC43NiA1OC4yNSw2NC4yOSBRNTMuNzEsNzMuMDggNTAuMDAsODcuMDAgUTQ2LjI5LDczLjA4IDQxLjc1LDY0LjI5IFEzMS44Nyw2NC43NiAxNy45Niw2OC41MCBRMjguMTYsNTguMzMgMzMuNTAsNTAuMDAgUTI4LjE2LDQxLjY4IDE3Ljk2LDMxLjUwIFEzMS44NywzNS4yNCA0MS43NSwzNS43MSBRNDYuMjksMjYuOTIgNTAuMDAsMTMuMDBaIiBmaWxsPSJ1cmwoI3MpIi8+PC9zdmc+';
+/* わざ選択：実際にバトルポケモンへ与えるダメージを、盤面をコピーして試しに計算する（弱点・抵抗力・どうぐ・からておうの稽古なども込み）。
+   選択や コインで変わるわざは、少ない側／多い側の両方で計算して「10-70」のように出す */
+let PREVM=null;
+async function atkPreview(a){if(!a||!a.run)return null;const snap=JSON.stringify([P,G,cur]),sv={P,G,cur,stg:{...STG},HS,TE,rnd:Math.random,rv:REVSEEN,actn:ACTN,net:NET.on,ah:ATTACHHOOK,te:TURNEND,lg:LGS.length,fx:FXEND,dirty:DIRTY};
+ const one=async mode=>{[P,G,cur]=JSON.parse(snap);const p=P[cur],o=P[1-cur],c=lastOf(p.piles.battle),t=lastOf(o.piles.battle);if(!c||!t)return null;const d0=t.dm||0;
+  PREVM={pk:(pool,n,min,ok)=>{const f=(pool||[]).filter(y=>{try{return ok(y)}catch(_){return true}});return f.slice(0,mode?Math.min(n,f.length):Math.min(min||0,f.length))},coin:(()=>{let k=0;return()=>!!mode&&k++<8})()};
+  const x={p,o,c,msg:[],k:'battle'};let r,done=0;try{r=await Promise.race([Promise.resolve(a.run(x)).then(v=>{done=1;return v}),new Promise(res=>setTimeout(()=>res('__to'),25))])}catch(e){return null}
+  if(r==='__to'||r===false)return null;const tt=Object.values(P[1-cur].piles).flat().find(y=>y&&y.u===t.u);return tt?(tt.dm||0)-d0:null};
+ let lo=null,hi=null;try{SIMQ=1;NET.on=0;HS={push(){},pop(){},shift(){},length:0};ATTACHHOOK=null;TURNEND=null;TE=1;lo=await one(0);hi=await one(1)}catch(e){lo=hi=null}
+ finally{P=sv.P;G=sv.G;cur=sv.cur;Object.assign(STG,sv.stg);HS=sv.HS;TE=sv.TE;Math.random=sv.rnd;REVSEEN=sv.rv;ACTN=sv.actn;NET.on=sv.net;ATTACHHOOK=sv.ah;TURNEND=sv.te;LGS.length=Math.min(LGS.length,sv.lg);FXEND=sv.fx;DIRTY=sv.dirty;SIMQ=0;PREVM=null;
+  const h=NET.hold;NET.hold=null;if(h)h.forEach(onRaw)}
+ if(lo==null&&hi==null)return null;if(lo==null)lo=hi;if(hi==null)hi=lo;return{min:Math.min(lo,hi),max:Math.max(lo,hi)}}
+const dmgTxt=(a,pv)=>{const base=parseInt(a.dt)||0;if(!pv)return{t:a.dt||'',c:''};const t=pv.min===pv.max?String(pv.min):`${pv.min}-${pv.max}`;if(!base&&!pv.max)return{t:a.dt||'',c:''};return{t,c:pv.min>base?'up':pv.max<base?'dn':''}};
 const enIc=ch=>EI[ch]?`<img class="eic" src="${EI[ch]}" alt="${ch}">`:ch==='無'?`<img class="eic" src="${ENCL}" alt="無">`:`<i class="eic tx" title="${e(ch)}">${e(ch)}</i>`;
 const costH=cost=>cost&&cost.length?cost.map(enIc).join(''):'<i class="eic zero" title="エネルギーなし"></i>';
 function atkMenu(t){const at=mi(t).at,r=menu(t,at.map(a=>[`${a.n}　${a.dt}（${a.cost.join('')}）`,()=>useAttack(a),canPay(a.cost,me().piles.battle)?'atk':'atk no']),'わざを選択');
- if(!isCpu(cur)){const bs=[...$('#ov2').querySelectorAll('button.atk')];at.forEach((a,j)=>{const b=bs[j];if(b)b.innerHTML=`<span class="acs">${costH(a.cost)}</span><span class="an">${e(a.n)}</span><span class="ad">${e(a.dt||'')}</span>`})}return r}
+ if(!isCpu(cur)){const bs=[...$('#ov2').querySelectorAll('button.atk')];at.forEach((a,j)=>{const b=bs[j];if(b)b.innerHTML=`<span class="acs">${costH(a.cost)}</span><span class="an">${e(a.n)}</span><span class="ad">${e(a.dt||'')}</span>`});
+  (async()=>{for(let j=0;j<at.length;j++){const pv=await atkPreview(at[j]),b=bs[j],sp=b&&b.querySelector('.ad');if(!sp||!b.isConnected)continue;const d=dmgTxt(at[j],pv);sp.textContent=d.t;sp.className='ad'+(d.c?' '+d.c:'')}})()}return r}
 async function useAttack(a){const p=me(),o=P[1-cur],c=lastOf(p.piles.battle);if(!c)return;
  if(G.turn===1)return err('先攻の最初の番はワザを使えません');
  if(G.atk===G.turn)return err('この番はすでにワザを使いました');
@@ -1428,11 +1443,12 @@ async function retreat(){const p=me(),c=lastOf(p.piles.battle),rc=retreatCost(p,
  if(c.par===G.turn&&!hasTool(p.piles.battle,'エスケープボード'))return err('マヒのため、にげられません');
  if(c.slp&&!hasTool(p.piles.battle,'エスケープボード'))return err('ねむりのため、にげられません');
  if(c.nr===G.turn)return err('このポケモンは次の番までにげられません');
+ if(G.rt===G.turn)return err('にげるのは自分の番に1回だけです');
  if(eunits(p.piles.battle)<rc)return err(`エネルギーが足りません（にげるには${rc}個必要）`);
  const ks=OWN(p).filter(k=>k!=='battle');if(!ks.length)return err('ベンチにポケモンがいません');
  const k=await ask(null,ks,p,'にげる：バトル場に出すベンチポケモンを選択');if(!k)return;
  let pay=[];if(rc>0){if(eunits(p.piles.battle)===rc)pay=en;else{pay=await pk(`トラッシュするエネルギーを選択（${rc}個ぶん以上）`,en,en.length,1);if(!pay)return;if(pay.reduce((a,z)=>a+unitsOf(z,c).length,0)<rc)return err('選んだエネルギーが足りません')}}
- act(()=>{pay.forEach(x=>mv(x.u,'trash'));swap(k)});log(rc?'にげました':'にげました（エネルギー不要）')}
+ act(()=>{pay.forEach(x=>mv(x.u,'trash'));swap(k);G.rt=G.turn});log(rc?'にげました':'にげました（エネルギー不要）')}
 /* ゼロの大空洞：テラスタルがいなくなる／スタジアムがなくなるとベンチは5匹に */
 let fixing=0;
 async function trimBench(i){const q=P[i];if(!q||q.phase==='none')return 0;let ch=0;
@@ -1521,7 +1537,7 @@ function coinAnim(head){if(SIMQ)return Promise.resolve();return new Promise(res=
  const f=document.createElement('img'),b=document.createElement('img');f.src=CN.F;b.src=CN.B;[f,b].forEach(i=>{i.style.cssText='position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:50%;box-shadow:0 0 12px #000'});b.style.transform='rotateY(180deg)';
  c.append(f,b);o.append(c);document.body.append(o);const end=head?1800:1980;
  A(c,[{transform:'translateY(0) scale(.6) rotateY(0deg)'},{transform:`translateY(-22vh) scale(1.25) rotateY(${end/2}deg)`,offset:.5},{transform:`translateY(0) scale(1) rotateY(${end}deg)`}],{duration:1300,easing:'ease-in-out',fill:'forwards'},()=>{setTimeout(()=>{o.remove();res()},550)})})}
-async function coin(){const h=Math.random()<.5;await coinAnim(h);log(`コイン：${h?'オモテ':'ウラ'}`);return h}
+async function coin(){if(PREVM)return PREVM.coin();const h=Math.random()<.5;await coinAnim(h);log(`コイン：${h?'オモテ':'ウラ'}`);return h}
 const sleep=ms=>SIMQ?Promise.resolve():new Promise(r=>setTimeout(r,ms));let TE=0,LASTCUR=0,LASTHC=[0,0],LASTSC=[0,0],DROPR=null;
 /* 動きのカードは盤面の上・確認画面（暗い幕）の下のレイヤーに置く */
 const FLL=()=>{let L=document.getElementById('fll');if(!L){L=document.createElement('div');L.id='fll';document.body.append(L)}return L};
@@ -1674,13 +1690,15 @@ async function turnSwitch(){if(G.over)return;if(SIMQ&&SIMSTOP){SIMEND=1;return}i
  const lb=turnLabel();if(XT)log(`P${cur+1}：もう1回自分の番（タイムレスGX）`);banner(`${lb} ｜ P${cur+1}の番${XT?'（もう1回）':''}`);await sleep(1100);
  if(G.over)return;
  act(()=>{if(!draw1(me())){me().dko=1;log(`P${cur+1}は山札が0枚で引けません`)}else log(`${lb}：P${cur+1}が1枚引きました`)});judge()}
-async function statusTick(){for(const i of[0,1]){const q=P[i],t=lastOf(q.piles.battle);if(!q||q.phase!=='play'||!t)continue;
-  if(t.psn){act(()=>{t.dm=(t.dm||0)+10});log(`${t.name}は、どくのダメージを受けた`)}
-  if(t.brn){act(()=>{t.dm=(t.dm||0)+20});log(`${t.name}は、やけどのダメージを受けた`);const h=await coin();if(h){act(()=>{t.brn=0});log(`${t.name}のやけどが治った`)}}
-  if(t.slp){const h=await coin();if(h){act(()=>{t.slp=0});log(`${t.name}は目をさました（コイン：オモテ）`)}else log(`${t.name}はねむったまま（コイン：ウラ）`)}}
+/* ポケモンチェック（ルールガイド F）：特殊状態を どく→やけど→ねむり の順に、おたがい同時に確認（マヒは番の経過で回復）→ 効果 → きぜつの確認。
+   バトルポケモンが同時にきぜつしたら、次の番を行うプレイヤーから新しいバトルポケモンを出す */
+async function statusTick(){const B=[0,1].map(i=>{const q=P[i],t=q&&lastOf(q.piles.battle);return q&&q.phase==='play'&&t?t:null});
+ for(const t of B)if(t&&t.psn){act(()=>{t.dm=(t.dm||0)+10});log(`${t.name}は、どくのダメージを受けた`)}
+ for(const t of B)if(t&&t.brn){act(()=>{t.dm=(t.dm||0)+20});log(`${t.name}は、やけどのダメージを受けた`);const h=await coin();if(h){act(()=>{t.brn=0});log(`${t.name}のやけどが治った`)}}
+ for(const t of B)if(t&&t.slp){const h=await coin();if(h){act(()=>{t.slp=0});log(`${t.name}は目をさました（コイン：オモテ）`)}else log(`${t.name}はねむったまま（コイン：ウラ）`)}
  if(stadName()==='戒めの祠'){const L=[];P.forEach(q=>{if(q.phase==='play')OWN(q).forEach(k=>{const t=lastOf(q.piles[k]);if(/(GX|EX)$/.test(t.name))L.push(t)})});   /* 戒めの祠：ポケモンチェックのたび、おたがいのGX・EX全員にダメカン1個 */
   if(L.length){act(()=>L.forEach(t=>{t.dm=(t.dm||0)+10}));log(`戒めの祠：${L.map(t=>t.name).join('、')}にダメカンを1個ずつのせた`)}}
- await koScan(P[0]);if(G.over)return;await koScan(P[1])}
+ const a0=G.act===undefined?cur:G.act,nx=(G.xt!==undefined&&G.xt===a0)||!P[1-a0]||P[1-a0].phase!=='play'?a0:1-a0;await koScan(P[nx]);if(G.over)return;await koScan(P[1-nx])}
 async function endTurn(){if(TE)return;TE=1;try{await turnSwitch()}finally{TE=0}}
 function ratioMenu(){menu(null,RATIOS.map(([n,v])=>[(RSEL===v?'● ':'')+n,()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render()}]),'画面比率を選択（現在：'+(RSEL?RSEL.toFixed(3):'自動')+'）')}
 addEventListener('resize',()=>{LASTCUR=-1;render()});
@@ -1721,7 +1739,7 @@ function cpuView(i,mode){const p=P[i],o=P[1-i],T=G.turn,cd={};
    else if(c.t==='tool'&&/^ヒーローマント/.test(c.name)){lg.att[c.u]=ks.filter(k=>!p.piles[k].some(y=>y.t==='tool'))}
    else if(c.t==='sta'&&G.stp!==T&&stadName()!==c.name.replace(/\(ACE SPEC\)$/,''))lg.stad.push(c.u)}
   for(const k of ks){const t=lastOf(p.piles[k]),m=mi(t),A=m&&m.ab;if(A&&!A.passive&&!A.onBench&&!abWhy(t,k,p))lg.abil.push({u:t.u,k,n:A.n})}
-  if(at&&M){const rc=retreatCost(p,at);lg.retreat=at.nr!==T&&!((at.slp||at.par===T)&&!hasTool(p.piles.battle,'エスケープボード'))&&eunits(p.piles.battle)>=rc&&bk.length?{cost:rc,ks:bk}:null;
+  if(at&&M){const rc=retreatCost(p,at);lg.retreat=at.nr!==T&&G.rt!==T&&!((at.slp||at.par===T)&&!hasTool(p.piles.battle,'エスケープボード'))&&eunits(p.piles.battle)>=rc&&bk.length?{cost:rc,ks:bk}:null;
    if(T!==1&&G.atk!==T&&at.na!==T&&!at.slp&&at.par!==T)for(const a of(M.at||[]))lg.atk.push({n:a.n,ok:canPay(a.cost,p.piles.battle)&&!(a.chk&&a.chk({p,o,c:at,msg:[],k:'battle'}))})}
   v.lg=lg}
  const sn=CPUX.sent[i]||(CPUX.sent[i]={deck:0,cd:new Set()});if(sn.deck)delete v.deck;else sn.deck=1;
