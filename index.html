@@ -663,9 +663,9 @@ const dl=(p,cs)=>{const ix={};p.cards.forEach((c,i)=>ix[c.id]=i);return cs.map((
 /* 山札サーチ：初期は対象のみ。「山札を確認」で全表示（選べるのは対象のみ）。閉じると null を返す */
 /* 相手に選ばせる（クセロシキのたくらみ等）：CPUならCPUが、オンラインなら相手の端末で、1人回しならその場で選ぶ */
 let PKW;
-const pkWho=(t,pool,n,min,who)=>{if(PREVM)return Promise.resolve(PREVM.pk(pool,n,min,()=>true));if(NET.on&&who!==NET.me)return new Promise(r=>{netReq({t:'pk',i:who,us:pool.map(c=>c.u),ttl:t,n,min},k=>r(pool.filter(c=>(k||[]).includes(c.u))))});
+const pkWho=(t,pool,n,min,who)=>{if(PREVM){try{PREVM.tick()}catch(e){return Promise.reject(e)}return Promise.resolve(PREVM.pk(pool,n,min,()=>true))}if(NET.on&&who!==NET.me)return new Promise(r=>{netReq({t:'pk',i:who,us:pool.map(c=>c.u),ttl:t,n,min},k=>r(pool.filter(c=>(k||[]).includes(c.u))))});
  PKW=who;return pk(t,pool,n,min).then(v=>{PKW=undefined;return v||pool.slice(0,min)})};
-const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(PREVM)return r(PREVM.pk(pool,n,min,ok));if(isCpu(PKW!==undefined?PKW:cur)){const w0=PKW!==undefined?PKW:cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
+const pk=(t,pool,n,min=n,ok=()=>true)=>new Promise(r=>{if(PREVM){PREVM.tick();return r(PREVM.pk(pool,n,min,ok))}if(isCpu(PKW!==undefined?PKW:cur)){const w0=PKW!==undefined?PKW:cur;return sleep(CPU.d*.4).then(()=>r(cpuPk(t,pool,n,min,ok,w0)))}const s=new Set();let all=0;const view=pool===me().deck?dl(me(),pool):pool;
  const draw=()=>{list(t+(all?'（全カード確認中：薄いカードは選べません）':''),all?view:view.filter(ok),(c,w)=>{if(!ok(c))return;
   if(s.has(c.u)){s.delete(c.u);w.classList.remove('sel')}else if(s.size<n){s.add(c.u);w.classList.add('sel')}},
   [...(pool.some(c=>!ok(c))?[[all?'対象のみ表示':'山札を確認',()=>{all=!all;draw()}]]:[]),['決定',()=>{if(s.size>=min){closeAll();r(pool.filter(c=>s.has(c.u)))}}]],0,c=>!ok(c),()=>{closeAll();r(null)},1);
@@ -775,7 +775,7 @@ function onMsg(m){
  else if(m.t==='rematch'){netRematch(0)}
  else if(m.t==='sur'){G.over=1;G.win=1-m.i;log(`P${m.i+1}が投了。P${2-m.i}の勝利！`);banner(`P${2-m.i}の勝利！`);render()}
  else if(m.t==='ans'){const r=NET.pend[m.id];if(!r)return;delete NET.pend[m.id];NET.wait=0;render();r(m.k)}}
-const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{if(PREVM)return r(ks&&ks[0]);
+const ask=(c,ks,q,ttl,must,cl,who)=>new Promise(r=>{if(PREVM){PREVM.tick();return r(ks&&ks[0])}
  {const w=who!==undefined?who:cur;if(isCpu(w))return sleep(CPU.d*.4).then(()=>r(cpuAsk(ks,q,ttl,must,w,c)))}
  if(NET.on&&who!==undefined&&who!==NET.me){netReq({t:'ask',ks,i:P.indexOf(q),ttl,must,cl},r);return}
  SEL={ks,i:P.indexOf(q),ttl,must,cl,r};closeAll();render()});
@@ -1307,9 +1307,9 @@ mon('Nのゾロアークex',{hp:280,type:'悪',rc:2,weak:'草',st:'1進化',
  ab:{n:'とりひき',ok:x=>x.p.hand.length?null:'手札にトラッシュするカードがありません',
   run:async x=>{const t=await pk('トラッシュする手札を1枚選ぶ',x.p.hand.filter(y=>y!==x.c),1,1);if(!t||!t[0])return false;
    act(()=>mv(t[0].u,'trash'));for(let i=0;i<2;i++)draw1(x.p)}},
- at:[{n:'ナイトジョーカー',dt:'',cost:[...'悪悪'],run:async x=>{const ks=BN.filter(k=>x.p.piles[k].length&&/^N(の|ん)/.test(lastOf(x.p.piles[k]).name)&&mi(lastOf(x.p.piles[k]))&&mi(lastOf(x.p.piles[k])).at);
+ at:[{n:'ナイトジョーカー',dt:'',cost:[...'悪悪'],run:async x=>{const NJ=a=>a.n!=='ナイトジョーカー',ks=BN.filter(k=>x.p.piles[k].length&&/^N(の|ん)/.test(lastOf(x.p.piles[k]).name)&&mi(lastOf(x.p.piles[k]))&&(mi(lastOf(x.p.piles[k])).at||[]).some(NJ));   /* ナイトジョーカー自身は借りられない（無限にくり返すため） */
    if(!ks.length){x.msg.push('使えるベンチの「Nのポケモン」のワザがありません');return}
-   const k=await ask(null,ks,x.p,'借りるワザを持つベンチの「Nのポケモン」を選択',1);const src=lastOf(x.p.piles[k]),as=mi(src).at;
+   const k=await ask(null,ks,x.p,'借りるワザを持つベンチの「Nのポケモン」を選択',1);const src=lastOf(x.p.piles[k]),as=mi(src).at.filter(NJ);
    const a2=as.length===1?as[0]:await new Promise(res=>menu(null,as.map(a=>[`${a.n}　${a.dt}`,()=>res(a)]),'借りるワザを選択',1));
    x.msg.push(`${src.name}の${a2.n}として使用`);await a2.run(x)}}]});
 mon('Nのゾロア',{hp:70,type:'悪',rc:1,weak:'草',at:[{n:'ひっかく',dt:'20',cost:['悪'],run:async x=>{hit(x,'battle',20)}}]});
@@ -1380,7 +1380,7 @@ const ENCL='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMj
 let PREVM=null;
 async function atkPreview(a){if(!a||!a.run)return null;const snap=JSON.stringify([P,G,cur]),sv={P,G,cur,stg:{...STG},HS,TE,rnd:Math.random,rv:REVSEEN,actn:ACTN,net:NET.on,ah:ATTACHHOOK,te:TURNEND,lg:LGS.length,fx:FXEND,dirty:DIRTY};
  const one=async mode=>{[P,G,cur]=JSON.parse(snap);const p=P[cur],o=P[1-cur],c=lastOf(p.piles.battle),t=lastOf(o.piles.battle);if(!c||!t)return null;const d0=t.dm||0;
-  PREVM={pk:(pool,n,min,ok)=>{const f=(pool||[]).filter(y=>{try{return ok(y)}catch(_){return true}});return f.slice(0,mode?Math.min(n,f.length):Math.min(min||0,f.length))},coin:(()=>{let k=0;return()=>!!mode&&k++<8})()};
+  PREVM={pk:(pool,n,min,ok)=>{const f=(pool||[]).filter(y=>{try{return ok(y)}catch(_){return true}});return f.slice(0,mode?Math.min(n,f.length):Math.min(min||0,f.length))},coin:(()=>{let k=0;return()=>!!mode&&k++<8})(),tick:(()=>{let n=0;const t0=performance.now();return()=>{if(++n>60||performance.now()-t0>60)throw new Error('preview budget')}})()};   /* 試し計算が終わらない（くり返し）ときは打ち切る */
   const x={p,o,c,msg:[],k:'battle'};let r,done=0;try{r=await Promise.race([Promise.resolve(a.run(x)).then(v=>{done=1;return v}),new Promise(res=>setTimeout(()=>res('__to'),25))])}catch(e){return null}
   if(r==='__to'||r===false)return null;const tt=Object.values(P[1-cur].piles).flat().find(y=>y&&y.u===t.u);return tt?(tt.dm||0)-d0:null};
  let lo=null,hi=null;try{SIMQ=1;NET.on=0;HS={push(){},pop(){},shift(){},length:0};ATTACHHOOK=null;TURNEND=null;TE=1;lo=await one(0);hi=await one(1)}catch(e){lo=hi=null}
@@ -1537,7 +1537,7 @@ function coinAnim(head){if(SIMQ)return Promise.resolve();return new Promise(res=
  const f=document.createElement('img'),b=document.createElement('img');f.src=CN.F;b.src=CN.B;[f,b].forEach(i=>{i.style.cssText='position:absolute;inset:0;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:50%;box-shadow:0 0 12px #000'});b.style.transform='rotateY(180deg)';
  c.append(f,b);o.append(c);document.body.append(o);const end=head?1800:1980;
  A(c,[{transform:'translateY(0) scale(.6) rotateY(0deg)'},{transform:`translateY(-22vh) scale(1.25) rotateY(${end/2}deg)`,offset:.5},{transform:`translateY(0) scale(1) rotateY(${end}deg)`}],{duration:1300,easing:'ease-in-out',fill:'forwards'},()=>{setTimeout(()=>{o.remove();res()},550)})})}
-async function coin(){if(PREVM)return PREVM.coin();const h=Math.random()<.5;await coinAnim(h);log(`コイン：${h?'オモテ':'ウラ'}`);return h}
+async function coin(){if(PREVM){PREVM.tick();return PREVM.coin()}const h=Math.random()<.5;await coinAnim(h);log(`コイン：${h?'オモテ':'ウラ'}`);return h}
 const sleep=ms=>SIMQ?Promise.resolve():new Promise(r=>setTimeout(r,ms));let TE=0,LASTCUR=0,LASTHC=[0,0],LASTSC=[0,0],DROPR=null;
 /* 動きのカードは盤面の上・確認画面（暗い幕）の下のレイヤーに置く */
 const FLL=()=>{let L=document.getElementById('fll');if(!L){L=document.createElement('div');L.id='fll';document.body.append(L)}return L};
