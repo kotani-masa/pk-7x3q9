@@ -626,7 +626,7 @@ const PXPC={battle:[725,500,150]};for(let j=0;j<5;j++)PXPC['b'+j]=[742.5+(j-2)*1
 const PXPC8={battle:[725,500,150]};for(let j=0;j<8;j++)PXPC8['b'+j]=[750+(j-3.5)*112,765,100];
 const PX8={battle:[355,855,215],b0:[146,1170,150],b1:[306,1170,150],b2:[466,1170,150],b3:[626,1170,150],b4:[146,1389,150],b5:[306,1389,150],b6:[466,1389,150],b7:[626,1389,150]};
 /* 特性が今使えない理由（使用済み・同名特性を使用済み・発動条件を満たさない）。使えるなら空文字 */
-function abWhy(t,k,p){const A=(mi(t)||{}).ab;if(!A)return'';if(noAb(t))return'noab';if(G.ab[t.u]===G.turn)return'used';if(A.key&&G.nm[A.key]===G.turn)return'key';const b=A.ok&&A.ok({p,o:P[1-P.indexOf(p)],c:t,k});return b||''}
+function abWhy(t,k,p){const A=(mi(t)||{}).ab;if(!A)return'';if(noAb(t))return'noab';if(G.ab[t.u]===G.turn)return'used';if(A.key&&G.nm[A.key]===G.turn)return'key';if(A.vs&&mkUsed('vs',P.indexOf(p)))return'vs';const b=A.ok&&A.ok({p,o:P[1-P.indexOf(p)],c:t,k});return b||''}
 const abB=(t,i,k)=>{const M=mi(t),A=M&&M.ab;if(i!==VW()||!A||A.passive||A.onBench||P[i].phase!=='play')return'';const w=abWhy(t,k,P[i]);if(w==='used')return'<span class="abx u"></span>';return w?'':'<span class="abx"></span>'};
 const hpOf=pl=>{const h=(mi(lastOf(pl))||{}).hp;return h?h+(stadName()==='ジャミングタワー'?0:100)*pl.slice(0,-1).filter(x=>x.t==='tool'&&/^ヒーローマント/.test(x.name)).length:0};
 const stMarks=t=>(t.psn||t.brn?`<div class="stw">${t.psn?`<span class="stmk psn" title="どく"><img src="${ST.PSN}"></span>`:''}${t.brn?`<span class="stmk brn" title="やけど"><img src="${ST.BRN}"></span>`:''}</div>`:'');
@@ -1023,7 +1023,7 @@ mon('ドラパルトex',{hp:320,type:'龍',rc:1,st:'2進化',tera:1,bnc:1,
  at:[{n:'ジェットヘッド',dt:'70',cost:['無'],run:async x=>{hit(x,'battle',70)}},
   {n:'ファントムダイブ',dt:'200',cost:[...'炎超'],run:async x=>{hit(x,'battle',200);await spread(x,6)}}]});
 mon('ドロンチ',{hp:90,type:'龍',rc:1,st:'1進化',
- ab:{n:'ていさつしれい',run:async x=>{const t2=x.p.deck.slice(0,2);if(!t2.length)return false;const s=await pk('山札の上2枚：手札に加える1枚を選ぶ（残りは山札の下）',t2,1);if(!s||!s.length)return false;
+ ab:{n:'ていさつしれい',ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const t2=x.p.deck.slice(0,2);if(!t2.length)return false;const s=await pk('山札の上2枚：手札に加える1枚を選ぶ（残りは山札の下）',t2,1);if(!s||!s.length)return false;
   mv(s[0].u,'hand',1);t2.filter(y=>y!==s[0]).forEach(y=>{find(x.p,y.u);x.p.deck.push(y)})}},
  at:[{n:'リューズヘッド',dt:'70',cost:[...'炎超'],run:async x=>{hit(x,'battle',70)}}]});
 mon('ドラメシヤ',{hp:70,type:'龍',rc:1,
@@ -1104,7 +1104,7 @@ mon('カラマネロ',{hp:90,type:'超',rc:2,st:'1進化',weak:'超',
    const k=await ask(null,ks,p,'サイコリチャージ：超エネルギーをつけるベンチポケモンを選択');if(!k)return false;const e=p.trash.find(y=>y.name==='基本超エネルギー');p.trash.splice(p.trash.indexOf(e),1);p.piles[k].unshift(e)}},
  at:[{n:'ねんどうだん',dt:'60',cost:[...'超超無'],run:async x=>{hit(x,'battle',60)}}]});
 mon('マシマシラ',{hp:110,type:'超',rc:1,weak:'悪',res:'闘',
- ab:{n:'アドレナブレイン',ok:x=>ens(x.p.piles[x.k]).length?null:'このポケモンにエネルギーがついていません',
+ ab:{n:'アドレナブレイン',ok:x=>!canPay(['悪'],x.p.piles[x.k])?'このポケモンに悪エネルギーがついていません':!OWN(x.p).some(k=>(lastOf(x.p.piles[k]).dm||0)>0)?'ダメカンがのっている自分のポケモンがいません':null,
   run:async x=>{const mine=OWN(x.p).filter(k=>(lastOf(x.p.piles[k]).dm||0)>0),tg=OWN(x.o);if(!mine.length||!tg.length){err('ダメカンを動かせません');return false}
    const a=await ask(null,mine,x.p,'ダメカンを取る自分のポケモンを選択');if(!a)return false;
    const mx=Math.min(3,Math.floor(lastOf(x.p.piles[a]).dm/10)),n=await new Promise(r=>menu(null,[...Array(mx)].map((_,i)=>[`${i+1}個`,()=>r(i+1)]),'動かすダメカンの数',1));
@@ -1139,7 +1139,7 @@ mon('ノココッチex',{hp:270,type:'無',rc:3,weak:'闘',st:'1進化',
  at:[{n:'ぎゃっきょうテール',dt:'60×',cost:['無'],run:async x=>{const n=OWN(x.o).filter(k=>/ex$/.test(lastOf(x.o.piles[k]).name)).length;x.msg.push(`相手のポケモンex ${n}匹`);hit(x,'battle',60*n)}},
   {n:'ドリルブレイク',dt:'150',cost:[...'無無無'],run:async x=>{hit(x,'battle',150,{ign:1});x.msg.push('相手にかかっている効果は計算しない')}}]});
 mon('ノココッチ',{hp:140,type:'無',rc:3,weak:'闘',st:'1進化',
- ab:{n:'にげあしドロー',run:async x=>{for(let i=0;i<3;i++)draw1(x.p);const pl=x.p.piles[x.k];pl.forEach(y=>{y.dm=0;y.cf=0});x.p.deck.push(...pl.splice(0));shuffle(x.p.deck);if(x.k==='battle')await promote(P.indexOf(x.p))}},
+ ab:{n:'にげあしドロー',ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{for(let i=0;i<3;i++)draw1(x.p);const pl=x.p.piles[x.k];pl.forEach(y=>{y.dm=0;y.cf=0});x.p.deck.push(...pl.splice(0));shuffle(x.p.deck);if(x.k==='battle')await promote(P.indexOf(x.p))}},
  at:[{n:'ランドクラッシュ',dt:'90',cost:[...'無無無'],run:async x=>{hit(x,'battle',90)}}]});
 mon('ノコッチ#0',{hp:70,type:'無',rc:1,weak:'闘',
  at:[{n:'いれかわる',dt:'',cost:['無'],run:async x=>{const ks=BN.filter(k=>x.p.piles[k].length);if(!ks.length){err('ベンチにポケモンがいません');return false}const k=await ask(null,ks,x.p,'入れ替えるベンチポケモンを選択');if(!k)return false;swap(k);x.msg.push('ベンチと入れ替えた')}},
@@ -1445,7 +1445,7 @@ async function atkPreview(a){if(!a||!a.run)return null;const snap=JSON.stringify
 const dmgTxt=(a,pv)=>{const base=parseInt(a.dt)||0;if(!pv)return{t:a.dt||'',c:''};const t=pv.min===pv.max?String(pv.min):`${pv.min}-${pv.max}`;if(!base&&!pv.max)return{t:a.dt||'',c:''};return{t,c:pv.min>base?'up':pv.max<base?'dn':''}};
 const enIc=ch=>EI[ch]?`<img class="eic" src="${EI[ch]}" alt="${ch}">`:ch==='無'?`<img class="eic" src="${ENCL}" alt="無">`:`<i class="eic tx" title="${e(ch)}">${e(ch)}</i>`;
 const costH=cost=>cost&&cost.length?cost.map(enIc).join(''):'<i class="eic zero" title="エネルギーなし"></i>';
-function atkMenu(t){const at=mi(t).at,r=menu(t,at.map(a=>[`${a.n}　${a.dt}（${a.cost.join('')}）`,()=>useAttack(a),canPay(a.cost,me().piles.battle)?'atk':'atk no']),'わざを選択');
+function atkMenu(t){const at=mi(t).at,r=menu(t,at.map(a=>[`${a.n}　${a.dt}（${a.cost.join('')}）`,()=>useAttack(a),canPay(a.cost,me().piles.battle)&&!(a.vs&&mkUsed('vs'))&&!(a.gx&&mkUsed('gx'))?'atk':'atk no']),'わざを選択');
  if(!isCpu(cur)){const bs=[...$('#ov2').querySelectorAll('button.atk')];at.forEach((a,j)=>{const b=bs[j];if(b)b.innerHTML=`<span class="acs">${costH(a.cost)}</span><span class="an">${e(a.n)}</span><span class="ad">${e(a.dt||'')}</span>`});
   (async()=>{for(let j=0;j<at.length;j++){const pv=await atkPreview(at[j]),b=bs[j],sp=b&&b.querySelector('.ad');if(!sp||!b.isConnected)continue;const d=dmgTxt(at[j],pv);sp.textContent=d.t;sp.className='ad'+(d.c?' '+d.c:'')}})()}return r}
 async function useAttack(a){const p=me(),o=P[1-cur],c=lastOf(p.piles.battle);if(!c)return;
