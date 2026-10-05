@@ -2,6 +2,7 @@
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ポケカ盤面</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0c0f15"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="ポケカ盤面"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -319,6 +320,52 @@ body.pc .usebox{top:45%}
 .usebox .ubc{flex:none;width:calc(11*var(--u));aspect-ratio:63/88;border-radius:5%;overflow:hidden;box-shadow:0 2px 6px #000a}
 .usebox .ubt{display:flex;flex-direction:column;gap:2px;color:#eef2f8;min-width:0}.usebox small{font-size:calc(2.3*var(--u));color:#9aa2b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.usebox b{font-size:calc(3.4*var(--u));color:#f2d264;white-space:nowrap}.usebox span{font-size:calc(2.3*var(--u));color:#cfd5de}
 @keyframes ubin{from{opacity:0;transform:translate(-50%,-8px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* ===== デッキ調整（タブ＋カード画像の一覧） ===== */
+#ovd{align-items:stretch!important}
+#edsh{height:96vh!important;max-height:96vh!important;height:96dvh!important;max-height:96dvh!important;width:100%;max-width:820px!important;display:flex;flex-direction:column;padding:0!important;overflow:hidden;background:#0c0f15!important;border-radius:14px 14px 0 0}
+.edhd{display:flex;gap:8px;align-items:center;padding:10px 12px;background:linear-gradient(100deg,#000 0 40%,#8c1f30 130%);border-bottom:2px solid #c9a227}
+.edhd input{flex:1;min-width:0;background:#0000;border:0;border-bottom:1px solid #ffffff33;border-radius:0;color:#fff;font:italic 800 22px/1.2 "Barlow Condensed","Hiragino Sans",sans-serif;text-align:center;padding:4px}
+.edhd button{flex:none;width:42px;height:40px;padding:0;font-size:18px}
+.edtabs{display:flex;background:#1b1e25;border-bottom:1px solid #2a2f39}
+.edtabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:8px 2px 6px!important;color:#c3c9d3!important;border-bottom:3px solid transparent!important}
+.edtabs button span{font:700 12px/1 "Hiragino Sans",sans-serif;letter-spacing:.04em}.edtabs button b{font:800 20px/1 "Barlow Condensed",sans-serif;color:#fff}
+.edtabs button.cur{color:#f2d264!important;border-bottom-color:#f2d264!important}.edtabs button.cur b{color:#f2d264}
+.edtabs button[data-t=deck]{background:linear-gradient(100deg,#2b2f37,#22262e)!important}
+.edbar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#12151c}
+#edt{font:800 22px/1 "Barlow Condensed",sans-serif;letter-spacing:.04em}#edt.ok{color:#5be08a}#edt.ng{color:#ff7a8a}
+#edm{flex:1;min-width:0;font-size:12px;color:#f2d264}
+.edbar button{padding:6px 14px}
+.edsub{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px;background:#12151c}.edsub:empty{display:none}
+.edsub button{padding:5px 12px!important;font-size:12px;border-radius:14px!important}.edsub button.cur{background:linear-gradient(100deg,#2b2f37,#1e5fc0)!important;border-color:#c9a227!important}
+.edsub input{flex:1 1 160px;min-width:0;padding:6px 10px;border-radius:14px}
+.edfmt{font-size:12px;color:#9aa2b0;border:1px solid #3a4252;border-radius:10px;padding:2px 10px}.edfmt.ext{color:#f2d264}
+.edgrid{flex:1;min-height:0;padding-bottom:calc(90px + env(safe-area-inset-bottom))!important;overflow:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 8px;align-content:start;padding:12px;background:radial-gradient(circle at 50% 0,#f3f4f6,#d9dce1);overscroll-behavior:contain}
+@media (min-width:700px){.edgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.et{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.etc{position:relative;width:100%;aspect-ratio:63/88;border-radius:6%;box-shadow:0 3px 8px #0006;cursor:zoom-in}
+.etc .card{border-radius:6%}
+.etd{position:absolute;top:-6px;right:-6px;font:800 12px/1 "Barlow Condensed",sans-serif;font-style:normal;padding:3px 6px;border-radius:9px;color:#fff;box-shadow:0 1px 3px #0008;z-index:3}.etd.p{background:#16a34a}.etd.m{background:#dc2645}
+.etb{display:flex;align-items:center;gap:2px;margin-top:-14px;z-index:2}
+.etb b{min-width:24px;height:24px;border-radius:50%;background:#fff;color:#1c2027;font:800 15px/22px "Barlow Condensed",sans-serif;text-align:center;border:1px solid #c5cad2;box-shadow:0 2px 4px #0005}
+.etb button{width:21px;height:21px;padding:0!important;border-radius:50%!important;font-size:13px!important;line-height:1}
+@media (min-width:700px){.etb button{width:26px;height:26px;font-size:15px!important}.etb b{min-width:28px;height:28px;line-height:26px}}
+.etb button:disabled{opacity:.3}
+.et.zero .etb b{color:#9aa0aa}
+.et.gone .etc{filter:grayscale(1) brightness(.75)}
+.edsec{grid-column:1/-1;font-size:12px;font-weight:700;color:#4b5260;border-bottom:1px solid #b9bec6;padding:4px 0}
+.edexp{margin:0!important;border-radius:0!important;font-size:12px!important;padding:8px!important}
+#edz{display:none;position:fixed;inset:0;z-index:48;background:#000c;align-items:center;justify-content:center}#edz.on{display:flex}
+.edzc{width:min(78vw,380px);aspect-ratio:63/88}
+
+#mdhint:empty{display:none}#mdmsg:empty{display:none}
+#mdgrid.jig .mdblk:not(.ph){animation:jig .26s ease-in-out infinite alternate}
+#mdgrid.jig .mdblk:nth-child(2n){animation-delay:-.13s}#mdgrid.jig .mdblk:nth-child(3n){animation-duration:.3s}
+@keyframes jig{from{transform:rotate(-1.2deg)}to{transform:rotate(1.2deg)}}
+#mdgrid .mdblk.ph{visibility:hidden}
+.mdghost{transform:scale(1.08);box-shadow:0 12px 28px #000c!important;opacity:.96;transition:transform .15s}
+/* PC：メニューボタンとログは、画面の左端ではなくバトル場（スタジアム側）のすぐ左に置く */
+body.pc .lbtn,body.pc #log{left:auto!important;right:calc(100% - var(--arl,15%) + .9%)!important}
 .nroom{font-size:44px;font-weight:800;letter-spacing:.12em;color:#ffd23f;margin:6px 0 12px;font-variant-numeric:tabular-nums}#nst:empty{display:none}
 #ovr{display:none;position:fixed;inset:0;background:#000b;z-index:70;align-items:center;justify-content:center}#ovr.on{display:flex}
 #ovr .rs{display:flex;flex-direction:column;gap:10px;min-width:260px;max-width:90vw;text-align:center;padding:22px 20px}
@@ -439,16 +486,13 @@ body.pc .usebox{top:45%}
 .stmk{display:block;width:100%;aspect-ratio:1;border-radius:50%;box-shadow:0 0 2px #000}
 </style></head><body>
 <div id="mat"></div><div id="ovd"><div class="sheet" id="edsh">
-<div class="bar"><b style="flex:1">デッキ調整</b><button id="edx" class="big">閉じる</button></div>
-<div class="bar"><input id="edn" placeholder="デッキ名" style="flex:1;min-width:0"><button id="eddel" title="このデッキを削除" style="flex:0 0 44px;height:40px;padding:0;font-size:20px">🗑</button></div>
-<div class="bar"><span id="edt" style="font-size:18px;font-weight:700;flex:1"></span><button id="edsv" class="pri">保存</button><button id="edrs">元に戻す</button></div>
-<button id="edexp" style="width:100%;margin:4px 0">未実装カードを書き出す（Claudeに実装を頼む用）</button>
-<div id="edm" style="font-size:12px;color:#ffd23f;min-height:1.3em"></div>
-<div id="edl"></div>
-<div style="margin:12px 0 4px;font-weight:700">カードを追加（調整用カード＋保存済みデッキのカード）</div>
-<input id="edq" placeholder="カード名で絞り込み" style="width:100%;margin-bottom:6px">
-<div id="edp"></div>
-</div></div>
+<div class="edhd"><button id="edx" title="閉じる">✕</button><input id="edn" placeholder="デッキ名"><button id="eddel" title="このデッキを削除">🗑</button></div>
+<div id="edtabs" class="edtabs"><button data-t="deck"></button><button data-t="pke"></button><button data-t="trn"></button><button data-t="ene"></button></div>
+<div class="edbar"><span id="edt"></span><span id="edm"></span><button id="edexp">書き出し</button><button id="edrs">元に戻す</button><button id="edsv" class="pri">保存</button></div>
+<div id="edsub" class="edsub"></div>
+<div id="edg" class="edgrid"></div>
+<input id="edq" type="hidden">
+</div><div id="edz"></div></div>
 <div id="ovr"></div>
 <div id="ovn"><div class="sheet lp">
 <div class="mnbar"><button id="ncl">✕</button><b>オンライン対戦</b><span style="width:1.6em"></span></div>
@@ -590,9 +634,9 @@ function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x
  let h=`<div class="hrow">${MP()?`<div class="tl" style="background:${PCOL[V]};color:#fff">${CPU.on?'CPU戦':'対戦'} P${V+1}</div>`:`<button data-a="mode" class="${ed?'pri':''}">${ed?'編集モード':'プレイモード'}</button>`}`+(ed?`<button data-a="swap" style="background:${PCOL[cur]};color:#fff">視点 P${cur+1}</button>`:`<div class="tl">${pd>=0?`P${pd+1}準備中`:tl}</div>`)+'</div>';
  if(SEL)h+=`<div id="prompt">${e(SEL.ttl||'ポケモンを選んでください')}</div>`+(SEL.must?'':`<button data-a="selc">${e(SEL.cl||'キャンセル')}</button>`);
  else if(NET.wait)h+=`<div id="prompt">相手の選択を待っています…</div>`;
- else if(p.phase==='mull')h+=`<div id="prompt">P${V+1}：たねポケモンがいません。相手がサイドを置いたら、手札を見せてマリガンします</div>`;
- else if(p.phase==='setup'&&(!MP()||canAct()))h+=`<div id="prompt">P${V+1}：たねポケモンをバトル場に出して、サイドセットしてください</div><button class="pri" data-a="side">サイドセット</button>`;
- else if(p.phase==='bench'&&(!MP()||canAct()))h+=`<div id="prompt">P${V+1}：引いたたねポケモンをベンチに出せます。終わったら「準備完了」</div><button class="pri" data-a="mbok">準備完了</button>`;
+ else if(p.phase==='mull')h+=`<div id="prompt">マリガン待ち</div>`;
+ else if(p.phase==='setup'&&(!MP()||canAct()))h+=`<div id="prompt">たねポケモンを出してサイドセット</div><button class="pri" data-a="side">サイドセット</button>`;
+ else if(p.phase==='bench'&&(!MP()||canAct()))h+=`<div id="prompt">ベンチに出せます</div><button class="pri" data-a="mbok">準備完了</button>`;
  else if(p.phase==='wait'||(MP()&&(p.phase==='setup'||p.phase==='bench')))h+=`<div>相手のセットアップ待ち</div>`;
  else if(MP()&&p.phase==='play'&&CTRL()!==V)h+=`<div style="text-align:center">相手の番です</div>`;
  else if(p.phase==='play'&&!ed)h+=`<div class="hexw"><button class="hex" data-a="tend"><span>TURN END</span></button></div>`;
@@ -679,7 +723,7 @@ function openSide(i){const p=P[i];list(`サイド ${p.side.length}枚`,p.side,c=
 function openMenu(){$('#ovm').className='on'}
 function closeMenu(){$('#ovm').className=''}
 function openSettings(){const d=$('#stdev');d.innerHTML='';[['スマホ用（縦長・タッチ操作）','sp'],['パソコン用（横長・マウス操作）','pc']].forEach(([n,v])=>{const x=document.createElement('button');x.textContent=n;if(DEV===v)x.className='cur';x.onclick=()=>{DEV=v;try{localStorage.dev=v}catch(_){}LASTCUR=-1;render();openSettings()};d.append(x)});
- const b=$('#stratio');b.innerHTML='';if(PCM()){const n=document.createElement('div');n.className='lphint';n.textContent='パソコン用では画面比率は自動（横長固定）です';b.append(n)}RATIOS.forEach(([n,v])=>{const x=document.createElement('button');x.textContent=n;if(PCM())x.disabled=true;else if(RSEL===v)x.className='cur';x.onclick=()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render();openSettings()};b.append(x)});$('#ovst').className='on'}
+ const b=$('#stratio');b.innerHTML='';if(PCM()){const n=document.createElement('div');n.className='lphint';n.textContent='自動';b.append(n)}RATIOS.forEach(([n,v])=>{const x=document.createElement('button');x.textContent=n;if(PCM())x.disabled=true;else if(RSEL===v)x.className='cur';x.onclick=()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render();openSettings()};b.append(x)});$('#ovst').className='on'}
 function openTrash(i){const q=P[i],ed=G.mode==='edit'&&i===cur;list(`トラッシュ ${q.trash.length}枚（新しい順）${q.lost&&q.lost.length?`／ロストゾーン ${q.lost.length}枚：${q.lost.map(c=>c.name).join('、')}`:''}`,q.trash.slice().reverse(),c=>{if(!ed){const m=mi(c);if(m&&m.tab&&i===cur&&G.mode==='play'&&!MP()||m&&m.tab&&i===cur&&MP()&&canAct())return menu(c,[[`特性「${m.tab.n}」を使う`,()=>{closeAll();runTab(c)}]]);return menu(c,[])}menu(c,[
  ['手札に加える',()=>act(()=>mv(c.u,'hand'),()=>openTrash(i))],['山札の下に戻す',()=>act(()=>mv(c.u,'deckB'),()=>openTrash(i))],['山札の上に戻す',()=>act(()=>mv(c.u,'deckT'),()=>openTrash(i))]])})}
 function openAtt(k){const cs=me().piles[k].slice(0,-1),ed=G.mode==='edit';list('付属カード（エネルギー等）',cs,c=>menu(c,[
@@ -704,7 +748,7 @@ const BN=['b0','b1','b2','b3','b4','b5','b6','b7'],nk=n=>String(n).replace(/[\s�
 const VARS={'ノコッチ':['HP70｜いれかわる／ぶつかる20','HP60｜かじる10／あなをほる30']};
 let VMAP={};try{VMAP=JSON.parse(localStorage.dvar||'{}')}catch(_){}
 /* レギュレーションマーク（カード名ごと。再録があるものは最新の収録のマーク）。ノコッチは版ごと（#0=HP70、#1=HP60）。基本エネルギーは空欄＝どのレギュレーションでも使用可 */
-const REG={"シャリタツ":"H","クセロシキのたくらみ":"H","アンズの秘技":"H","メガガルーラex":"I","メガレックウザex":"J","ニャースex":"J","テラパゴスex":"H","ファイアローex":"J","ヒビキのホウオウex":"I","オーガポンいどのめんex":"H","キチキギスex":"H","ラティアスex":"H","パルデアケンタロス":"H","ガチグマアカツキex":"H","パオジアン":"H","ドラパルトex":"H","ドロンチ":"H","ドラメシヤ":"H","ヨノワール":"H","サマヨール":"H","ヨマワル":"H","スボミー":"H","マシマシラ":"H","ノココッチex":"I","ノココッチ":"H","ノコッチ#0":"I","ノコッチ#1":"H","ファイヤー":"I","オーガポンみどりのめんex":"H","カミツオロチex":"H","カミッチュ":"H","カジッチュ":"H","メガニウム":"I","ベイリーフ":"I","チコリータ":"I","セレビィ":"I","テツノイバラex":"H","Nのゾロアークex":"I","Nのゾロア":"I","Nのゼクロム":"I","Nのレシラム":"I","イベルタル":"I","モモワロウex":"H","ハイパーボール":"I","エネルギーつけかえ":"I","スペシャルレッドカード":"J","ガラスのラッパ":"H","なかよしポフィン":"H","ポケパッド":"J","ふしぎなアメ":"I","夜のタンカ":"H","アンフェアスタンプ":"H","ぼうけんのランタン":"J","クラッシュハンマー":"J","むしとりセット":"H","ポケモン回収サイクロン":"H","ダークボール":"H","エネルギー回収":"I","Nのポイントアップ":"I","ツールスクラッパー":"I","シアノ":"H","アカマツ":"H","ボスの指令":"I","ジャッジマン":"J","リーリエの決心":"I","暗号マニアの解読":"H","スグリ":"H","ヒカリ":"I","トウコ":"I","メイのはげまし":"J","スイレンのお世話":"H","探検家の先導":"H","AZの安らぎ":"J","タケシのスカウト":"I","からておうの稽古":"H","ゼロの大空洞":"H","ジャミングタワー":"H","危ない廃墟":"I","活力の森":"I","伝説の溶岩洞":"J","ロケット団の監視塔":"I","Nの城":"I","ヒーローマント":"H","くさりもち":"H","ネオアッパーエネルギー":"H","メガアブソルex":"I","ダストダス":"なし","ヤブクロン":"J","デデンネGX":"C","カプ・テテフGX":"A","クロバットV":"D","イキリンコex":"G","クイックボール":"D","バトルVIPパス":"E","バトルコンプレッサー（フレア団ギア）":"なし","バトルサーチャー":"なし","トレーナーズポスト":"なし","ダークパッチ":"F","ぐんぐんシェイク":"E","シークレットボックス":"H","かるいし":"なし","森の封印石":"F","ちからのハチマキ":"なし","マリィ":"D","グズマ":"A","カリン":"なし","ゼイユ":"H","プルメリ":"A","シンオウ神殿":"F","レジドラゴVSTAR":"F","レジドラゴV":"F","ディアルガGX":"B","オンバーンex":"G","コライドンex":"H","ヒスイヌメルゴンVSTAR":"F","キュレム":"H","ミステリートレジャー":"B","ヒスイのヘビーボール":"F","カウンターキャッチャー":"G","すごいつりざお":"G","メガトンブロアー":"H","博士の研究":"G","ナンジャモ":"G","キバナ":"E","ポケモンレンジャー":"なし","サイレントラボ":"なし","パラレルシティ":"なし","ダブルドラゴンエネルギー":"なし"};
+const REG={"ポケモンいれかえ":"I","シャリタツ":"H","クセロシキのたくらみ":"H","アンズの秘技":"H","メガガルーラex":"I","メガレックウザex":"J","ニャースex":"J","テラパゴスex":"H","ファイアローex":"J","ヒビキのホウオウex":"I","オーガポンいどのめんex":"H","キチキギスex":"H","ラティアスex":"H","パルデアケンタロス":"H","ガチグマアカツキex":"H","パオジアン":"H","ドラパルトex":"H","ドロンチ":"H","ドラメシヤ":"H","ヨノワール":"H","サマヨール":"H","ヨマワル":"H","スボミー":"H","マシマシラ":"H","ノココッチex":"I","ノココッチ":"H","ノコッチ#0":"I","ノコッチ#1":"H","ファイヤー":"I","オーガポンみどりのめんex":"H","カミツオロチex":"H","カミッチュ":"H","カジッチュ":"H","メガニウム":"I","ベイリーフ":"I","チコリータ":"I","セレビィ":"I","テツノイバラex":"H","Nのゾロアークex":"I","Nのゾロア":"I","Nのゼクロム":"I","Nのレシラム":"I","イベルタル":"I","モモワロウex":"H","ハイパーボール":"I","エネルギーつけかえ":"I","スペシャルレッドカード":"J","ガラスのラッパ":"H","なかよしポフィン":"H","ポケパッド":"J","ふしぎなアメ":"I","夜のタンカ":"H","アンフェアスタンプ":"H","ぼうけんのランタン":"J","クラッシュハンマー":"J","むしとりセット":"H","ポケモン回収サイクロン":"H","ダークボール":"H","エネルギー回収":"I","Nのポイントアップ":"I","ツールスクラッパー":"I","シアノ":"H","アカマツ":"H","ボスの指令":"I","ジャッジマン":"J","リーリエの決心":"I","暗号マニアの解読":"H","スグリ":"H","ヒカリ":"I","トウコ":"I","メイのはげまし":"J","スイレンのお世話":"H","探検家の先導":"H","AZの安らぎ":"J","タケシのスカウト":"I","からておうの稽古":"H","ゼロの大空洞":"H","ジャミングタワー":"H","危ない廃墟":"I","活力の森":"I","伝説の溶岩洞":"J","ロケット団の監視塔":"I","Nの城":"I","ヒーローマント":"H","くさりもち":"H","ネオアッパーエネルギー":"H","メガアブソルex":"I","ダストダス":"なし","ヤブクロン":"J","デデンネGX":"C","カプ・テテフGX":"A","クロバットV":"D","イキリンコex":"G","クイックボール":"D","バトルVIPパス":"E","バトルコンプレッサー（フレア団ギア）":"なし","バトルサーチャー":"なし","トレーナーズポスト":"なし","ダークパッチ":"F","ぐんぐんシェイク":"E","シークレットボックス":"H","かるいし":"なし","森の封印石":"F","ちからのハチマキ":"なし","マリィ":"D","グズマ":"A","カリン":"なし","ゼイユ":"H","プルメリ":"A","シンオウ神殿":"F","レジドラゴVSTAR":"F","レジドラゴV":"F","ディアルガGX":"B","オンバーンex":"G","コライドンex":"H","ヒスイヌメルゴンVSTAR":"F","キュレム":"H","ミステリートレジャー":"B","ヒスイのヘビーボール":"F","カウンターキャッチャー":"G","すごいつりざお":"G","メガトンブロアー":"H","博士の研究":"G","ナンジャモ":"G","キバナ":"E","ポケモンレンジャー":"なし","サイレントラボ":"なし","パラレルシティ":"なし","ダブルドラゴンエネルギー":"なし"};
 /* スタンダードで使えるレギュレーションマーク（入れ替わったらここを変える）。これ以外のマーク・「なし」・未登録のGX/V系カードを含むデッキはエクストラ */
 const STDR=['H','I','J'];
 const cardExt=c=>{if(!c||(c.t==='ene'&&/^基本/.test(c.name)))return false;const r=regOf(c);if(r)return!STDR.includes(r);return/(GX|VSTAR|VMAX|V-UNION|V|EX|BREAK)$/.test(String(c.name).replace(/\(ACE SPEC\)$/,''))};
@@ -1490,7 +1534,7 @@ function mdrawAsk(){const m=G.mdraw;if(!m||MDASK||G.act!==undefined||SIMQ)return
  const done=k=>{MDASK=0;const q=P[w];act(()=>{for(let i=0;i<k;i++)draw1(q);log(`P${w+1}は、相手のマリガンぶん${k}枚引きました（最大${m.n}枚）`);G.mdraw=null;G.mdDone=1;
    if(k&&q.hand.some(isBas)&&freeBench(q)){if(isCpu(w))cpuBenchAll(w);else{q.phase='bench';log(`P${w+1}：引いたたねポケモンをベンチに出せます`)}}});   // 引いたカードを見せてから、ベンチに出す／バトルスタート
   if(q.phase!=='bench')setTimeout(()=>{if(G.act===undefined&&!G.over)act(()=>finishSetup())},Math.max(0,FXEND-Date.now())+200)};
- if(isCpu(w))return done(m.n);MDASK=1;if(!MP()&&cur!==w){cur=w;render()}menu(null,Array.from({length:m.n+1},(_,k)=>[`${k}枚引く`,()=>done(k)]).reverse(),`P${w+1}：相手がマリガンした回数ぶん（最大${m.n}枚）、山札を引けます。何枚引きますか？`,1)}
+ if(isCpu(w))return done(m.n);MDASK=1;if(!MP()&&cur!==w){cur=w;render()}menu(null,Array.from({length:m.n+1},(_,k)=>[`${k}枚引く`,()=>done(k)]).reverse(),`追加で引く枚数（最大${m.n}枚）`,1)}
 /* マリガン：相手がサイドを置いたら（相手もマリガン中なら同時に）、手札を公開して引き直す。たねポケモンが来るまでくり返す */
 function mullCheck(){if(SIMQ||G.act!==undefined)return;const ctl=i=>!NET.on||i===NET.me;
  const el=[0,1].filter(i=>{const q=P[i],o=P[1-i];return q&&q.phase==='mull'&&ctl(i)&&o&&['wait','mull','none'].includes(o.phase)});if(!el.length)return;
@@ -2038,7 +2082,7 @@ function renderMyDecks(){const b=$('#mdgrid');if(!b)return;b.innerHTML='';const 
  const fm=h.map(x=>{if(x.rg&&SPREG[x.rg])return'sp';const d=getDeck(x.c);return d?deckFmt(d):'std'}),cnt={std:0,ext:0,sp:0};fm.forEach(f=>cnt[f]++);let shown=0;
  $('#mdtabs').querySelectorAll('button').forEach(t=>{const k=t.dataset.t,sel=DKSEL?DKSEL.picks.filter(c=>fm[h.findIndex(x=>x.c===c)]===k).length:0;t.textContent=`${k==='std'?'スタンダード':k==='ext'?'エクストラ':'特殊'}（${cnt[k]}）${sel?` ・${k==='sp'?'':'選択'}${sel}`:''}`;t.className=k===MDTAB?'cur':'';t.onclick=()=>{MDTAB=k;try{localStorage.mdtab=k}catch(_){}MDMV=null;renderMyDecks()}});
  {const sb=$('#mdsub');sb.innerHTML='';sb.style.display=MDTAB==='sp'?'':'none';if(MDTAB==='sp')SPKEYS.forEach(k=>{const b2=document.createElement('button');const n=h.filter((x,i)=>fm[i]==='sp'&&x.rg===k).length;b2.textContent=`${SPREG[k].n}（${n}）`;if(k===MDSUB)b2.className='cur';b2.onclick=()=>{MDSUB=k;try{localStorage.mdsub=k}catch(_){}renderMyDecks()};sb.append(b2)})}
- $('#mdtitle').textContent=M?M.t:'マイデッキ';$('#mdhint').textContent=M?M.h:'タップで調整・長押しで並べ替え';$('#mdadd').style.display=M?'none':'';$('#mdselbar').style.display=M?'':'none';
+ $('#mdtitle').textContent=M?M.t:'マイデッキ';$('#mdhint').textContent='';$('#mdadd').style.display=M?'none':'';$('#mdselbar').style.display=M?'':'none';
  if(M){const n=DKSEL.picks.length;$('#mdset').disabled=n<M.min||n>M.max;$('#mdset').textContent=`デッキをセット（${n}/${M.max}）`}
  h.forEach((x,i)=>{if(fm[i]!==MDTAB||(MDTAB==='sp'&&x.rg!==MDSUB))return;shown++;const ca=!!getDeck(x.c),r=document.createElement('div');r.className='mdblk';
   const nm=document.createElement('div');nm.className='mdnm';nm.innerHTML=`${e(x.n)}${ca?'':' <span style="color:#ff8a8a">（データなし）</span>'}`;
@@ -2050,19 +2094,29 @@ function renderMyDecks(){const b=$('#mdgrid');if(!b)return;b.innerHTML='';const 
     if(n===1&&M.max===2&&ps.length<2)ps.push(x.c);else if(n)DKSEL.picks=ps.filter(c=>c!==x.c);else if(ps.length<M.max)ps.push(x.c);else if(M.max===1)ps.splice(0,1,x.c);renderMyDecks()};
    b.append(r);return}
   r.dataset.i=i;if(MDMV===i)r.classList.add('mv');mdPress(r,i);
-  r.onclick=()=>{if(MDSKIP){MDSKIP=0;return}if(MDMV!==null){if(MDMV!==i)mdSwap(MDMV,i);else{MDMV=null;mdHint();renderMyDecks()}return}$('#ovmd').className='';openEditor(x,'md')};b.append(r)});if(!shown)b.innerHTML=`<div class="mdempty">${MDTAB==='std'?'スタンダード':MDTAB==='ext'?'エクストラ':SPREG[MDSUB].n}のデッキはありません</div>`;mdHint()}
+  r.onclick=()=>{if(MDSKIP){MDSKIP=0;return}if(MDMV!==null)return;$('#ovmd').className='';openEditor(x,'md')};b.append(r)});if(!shown)b.innerHTML=`<div class="mdempty">${MDTAB==='std'?'スタンダード':MDTAB==='ext'?'エクストラ':SPREG[MDSUB].n}のデッキはありません</div>`;mdHint()}
 /* 長押しで持ち上げ → 指を離した位置（または次にタップしたデッキ）と入れ替え */
 let MDMV=null,MDSKIP=0,MDT=null,MDOVER=null;
-function mdHint(){$('#mdmsg').textContent=MDMV!==null&&!DKSEL?'入れ替え先のデッキまで指を動かして離すか、タップしてください（同じデッキをタップで取り消し）':''}
+function mdHint(){}
 function mdSwap(a,b){const h=hist();if(h[a]&&h[b]){[h[a],h[b]]=[h[b],h[a]];hsv(h)}MDMV=null;renderMyDecks()}
 function mdAt(x,y){const el=document.elementFromPoint&&document.elementFromPoint(x,y),b=el&&el.closest('#mdgrid .mdblk');return b?+b.dataset.i:null}
-function mdPress(r,i){let x0=0,y0=0;
- r.onpointerdown=ev=>{MDSKIP=0;x0=ev.clientX;y0=ev.clientY;clearTimeout(MDT);MDT=setTimeout(()=>{MDT=null;MDMV=i;MDSKIP=1;try{navigator.vibrate&&navigator.vibrate(30)}catch(_){}
-  document.querySelectorAll('#mdgrid .mdblk').forEach(b=>b.classList.toggle('mv',+b.dataset.i===i));mdHint()},450)};
- r.onpointermove=ev=>{if(MDT&&Math.hypot(ev.clientX-x0,ev.clientY-y0)>10){clearTimeout(MDT);MDT=null}
-  if(MDMV===i){const t=mdAt(ev.clientX,ev.clientY);if(t!==MDOVER){MDOVER=t;document.querySelectorAll('#mdgrid .mdblk').forEach(b=>b.classList.toggle('ov',+b.dataset.i===t&&t!==i))}}};
- r.onpointerup=ev=>{clearTimeout(MDT);MDT=null;if(MDMV===i){const t=mdAt(ev.clientX,ev.clientY);MDOVER=null;if(t!==null&&t!==i){MDSKIP=1;mdSwap(i,t)}}};
- r.onpointercancel=()=>{clearTimeout(MDT);MDT=null;MDOVER=null};
+/* 並べ替え：長押しで全体がゆれて、つかんだデッキが指についてくる。ほかのデッキは押しのけられるように動き、離したところに置く（スマホのアプリの並べ替えと同じ） */
+function mdPress(r,i){let x0=0,y0=0,drag=null;
+ const tiles=()=>[...document.querySelectorAll('#mdgrid .mdblk')];
+ const flip=fn=>{const T=tiles(),bef=new Map(T.map(t=>[t,t.getBoundingClientRect()]));fn();T.forEach(t=>{if(t===r)return;const a=bef.get(t),b=t.getBoundingClientRect();const dx=a.left-b.left,dy=a.top-b.top;if(dx||dy)A(t,[{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:180,easing:'ease-out'})})};
+ r.onpointerdown=ev=>{if(DKSEL)return;MDSKIP=0;x0=ev.clientX;y0=ev.clientY;clearTimeout(MDT);
+  MDT=setTimeout(()=>{MDT=null;MDMV=i;MDSKIP=1;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}
+   const rc=r.getBoundingClientRect(),g=r.cloneNode(true);g.classList.add('mdghost');g.style.cssText=`position:fixed;left:${rc.left}px;top:${rc.top}px;width:${rc.width}px;height:${rc.height}px;margin:0;z-index:60;pointer-events:none`;document.body.append(g);
+   drag={g,ox:x0-rc.left,oy:y0-rc.top};r.classList.add('ph');$('#mdgrid').classList.add('jig');addEventListener('pointermove',mv);addEventListener('pointerup',end);addEventListener('pointercancel',end)},420)};
+ r.onpointermove=ev=>{if(MDT&&Math.hypot(ev.clientX-x0,ev.clientY-y0)>10){clearTimeout(MDT);MDT=null}};
+ const mv=ev=>{if(!drag)return;
+  drag.g.style.left=(ev.clientX-drag.ox)+'px';drag.g.style.top=(ev.clientY-drag.oy)+'px';
+  const el=document.elementFromPoint(ev.clientX,ev.clientY),t=el&&el.closest('#mdgrid .mdblk');if(!t||t===r)return;
+  const T=tiles(),a=T.indexOf(r),b=T.indexOf(t);flip(()=>{if(a<b)t.after(r);else t.before(r)})};
+ const end=()=>{clearTimeout(MDT);MDT=null;if(!drag)return;removeEventListener('pointermove',mv);removeEventListener('pointerup',end);removeEventListener('pointercancel',end);const{g}=drag;drag=null;const rc=r.getBoundingClientRect();
+  A(g,[{left:g.style.left,top:g.style.top},{left:rc.left+'px',top:rc.top+'px'}],{duration:160,easing:'ease-out'},()=>{g.remove();r.classList.remove('ph');$('#mdgrid').classList.remove('jig');
+   const T=tiles().map(t=>+t.dataset.i),pos=[...T].sort((x,y)=>x-y),h=hist(),old=h.slice();pos.forEach((p,k)=>{h[p]=old[T[k]]});hsv(h);MDMV=null;renderMyDecks()});g.style.left=rc.left+'px';g.style.top=rc.top+'px'};
+ r.onpointerup=()=>{clearTimeout(MDT);MDT=null};r.onpointercancel=r.onpointerup;
  r.oncontextmenu=ev=>ev.preventDefault()}
 /* 選んだデッキで開始（1人回し・CPU戦・オンライン） */
 /* カード画像の先読み：配る前にデッキの画像を読み込んでおく（読み込み中は進み具合を表示。最大12秒で打ち切り） */
@@ -2129,36 +2183,58 @@ const fillCard=(c,K)=>{if(!noData(c))return c;const f=K[bnm(c.name)];return f?{.
 function fillDeck(d){if(!d||!d.some(noData))return d;const K=knownCards(),o=[];d.forEach(c=>{const x=fillCard(c,K),y=o.find(z=>z.id===x.id);if(y)y.n+=x.n;else o.push({...x})});return o}
 const bnm=n=>n.replace(/\(ACE SPEC\)$/,''),isAce=n=>/\(ACE SPEC\)$/.test(n),isBasicE=n=>/^基本.エネルギー/.test(n),jclone=o=>JSON.parse(JSON.stringify(o)),edMsg=t=>{$('#edm').textContent=t};
 function edTotals(){const by={};let ace=0,tot=0;ED.cards.forEach(c=>{const b=bnm(c.name);by[b]=(by[b]||0)+c.n;tot+=c.n;if(isAce(c.name))ace+=c.n});return{by,ace,tot}}
-function openEditor(x,from){const base=getDeck(x.c)||[];ED={code:x.c,base:jclone(base),cards:jclone(base),src:x,from};$('#edn').value=x.n;edMsg('');renderEditor();$('#edq').value='';$('#ovd').className='on'}
+function openEditor(x,from){const base=getDeck(x.c)||[];ED={code:x.c,base:jclone(base),cards:jclone(base),src:x,from,fmt:x.rg&&SPREG[x.rg]?'sp':deckFmt(base),rg:x.rg||'',q:''};EDTAB='deck';EDSUB='all';$('#edn').value=x.n;edMsg('');renderEditor();$('#edq').value='';$('#ovd').className='on'}
 function edAdd(c,d){const T=edTotals(),b=bnm(c.name),ex=ED.cards.find(z=>z.id===c.id);
  if(d>0){if(!isBasicE(b)&&(T.by[b]||0)>=4)return edMsg(`「${b}」は4枚までです`);if(isAce(c.name)&&T.ace>=1)return edMsg('ACE SPECのカードは、デッキに1枚しか入れられません')}
  if(ex){ex.n+=d;if(ex.n<=0)ED.cards=ED.cards.filter(z=>z!==ex)}else if(d>0)ED.cards.push({id:c.id,name:c.name,t:c.t,img:c.img||'',full:c.full||'',n:1});
  edMsg('');renderEditor()}
 const eRow=(c,mid,btn)=>{const r=regOf(c);return`<div class="er"><div class="eth">${cardH(c)}</div><div class="en">${e(c.name)}${r?` <span class="rgm">${r}</span>`:''}<small>${mid}</small></div>${btn}</div>`};
-function renderEditor(){const T=edTotals(),t=$('#edt');t.textContent=`${T.tot}/60枚`;t.style.color=T.tot===60?'#7fe08a':'#ff8a8a';
- const bm={};ED.base.forEach(c=>{bm[c.id]=c.n});
- const rows=ED.cards.slice().sort(cardCmp).map(c=>{const d=c.n-(bm[c.id]||0);
-  return eRow(c,`${TGN[c.t]||c.t}${d?` <b style="color:${d>0?'#7fe08a':'#ff8a8a'}">${d>0?'+':''}${d}</b>`:''}`,`<button data-id="${e(c.id)}" data-d="-1">−</button><span class="ec">${c.n}</span><button data-id="${e(c.id)}" data-d="1">＋</button>`)}).join('');
- const gone=ED.base.filter(b=>!ED.cards.some(c=>c.id===b.id)).sort(cardCmp).map(b=>eRow(b,`抜いたカード <b style="color:#ff8a8a">-${b.n}</b>`,`<button data-id="${e(b.id)}" data-d="1" style="flex-basis:60px;font-size:13px">戻す</button>`).replace('class="er"','class="er gone"')).join('');
- $('#edl').innerHTML=rows+(gone?'<div style="margin:8px 0 2px;font-size:12px;opacity:.8">抜いたカード</div>'+gone:'');renderPool()}
+/* デッキ調整：タブ（デッキ／ポケモン／トレーナーズ／エネルギー）でカードを画像の一覧で表示。
+   デッキ＝今のデッキの中身、ほかのタブ＝入れられるカード（デッキのカード＋調整用カード＋保存済みデッキのカード）。スタンダードのデッキにはスタンダードで使えるカードだけを出す */
+let EDTAB='deck',EDSUB='all';
+const edCat=c=>c.t==='pke'?'pke':c.t==='ene'?'ene':'trn';
+/* レギュレーションマーク：登録が無いカードは、カード画像の収録パック（SV1〜4＝G、SV5〜8＝H、SV9〜11＝I、M＝J、それより前＝旧）から判断する */
+const regFromImg=img=>{const m=String(img||'').match(/card_images\/large\/([^/]+)\//);if(!m)return'';const s=m[1];if(/^SV[1-4]/.test(s))return'G';if(/^SV[5-8]/.test(s))return'H';if(/^SV(9|1[01])/.test(s))return'I';if(/^M(\d|C|EM|-P)/.test(s))return'J';if(/^(SM|S\d|S-P|SI|SB|XY|BW|DP|PCG|L\d)/.test(s))return'old';return''};
+/* CL新潟2019の調整候補：A・Bレギュレーション（SM1〜SM8弾と、その頃の構築デッキ・プロモ）のカードだけ */
+const clOK=c=>{if(c.t==='ene'&&/^基本/.test(c.name))return true;const m=String(c.img||'').match(/card_images\/large\/([^/]+)\//);if(!m)return false;const s=m[1];return /^SM[1-8](?!\d)/.test(s)||/^SM[A-Z]/.test(s)};
+const stdOK=c=>{if(c.t==='ene'&&/^基本/.test(c.name))return true;const r=regOf(c)||regFromImg(c.img);return r?STDR.includes(r):!cardExt(c)};
+function edPool(){const std=ED.fmt==='std',m=new Map(),ids=new Set(),own=new Set([...ED.cards,...ED.base].map(c=>c.id));[...ED.cards,...ED.base,...(ED.pc||(ED.pc=poolCards()))].forEach(c=>{const k=bnm(c.name)+'|'+(VARS[nk(bnm(c.name))]?c.id:'');if(ids.has(c.id)||m.has(k)||(!own.has(c.id)&&(std?!stdOK(c):ED.rg==='CLN19'?!clOK(c):false)))return;ids.add(c.id);m.set(k,c)});return[...m.values()]}   /* 同じ名前のカードは1つにまとめる（効果が違う同名カードは別） */
+function edTile(c,n,d,gone,ro){return`<div class="et${n?'':' zero'}${gone?' gone':''}" data-id="${e(c.id)}"><div class="etc" data-z="${e(c.id)}">${cardH(c)}${d?`<i class="etd ${d>0?'p':'m'}">${d>0?'+':''}${d}</i>`:''}</div>
+ <div class="etb">${ro?`<b>${n}</b>`:`<button data-id="${e(c.id)}" data-d="-1"${n?'':' disabled'}>−</button><b>${n}</b><button data-id="${e(c.id)}" data-d="1">＋</button>`}</div></div>`}
+function renderEditor(){const T=edTotals(),t=$('#edt');t.textContent=`${T.tot} / 60`;t.className=T.tot===60?'ok':'ng';
+ const cnt={pke:0,trn:0,ene:0};ED.cards.forEach(c=>{cnt[edCat(c)]+=c.n});
+ const L={deck:['デッキ',T.tot],pke:['ポケモン',cnt.pke],trn:['トレーナーズ',cnt.trn],ene:['エネルギー',cnt.ene]};
+ $('#edtabs').querySelectorAll('button').forEach(b=>{const k=b.dataset.t;b.className=k===EDTAB?'cur':'';b.innerHTML=`<span>${L[k][0]}</span><b>${L[k][1]}</b>`});
+ const bm={};ED.base.forEach(c=>{bm[c.id]=c.n});const inDeck=id=>(ED.cards.find(z=>z.id===id)||{}).n||0;
+ const sub=$('#edsub');
+ if(EDTAB==='trn')sub.innerHTML=[['all','すべて'],['tr','グッズ'],['tool','どうぐ'],['sup','サポート'],['sta','スタジアム']].map(([k,l])=>`<button data-s="${k}" class="${EDSUB===k?'cur':''}">${l}</button>`).join('')+`<input id="edq2" placeholder="カード名で絞り込み" value="${e(ED.q||'')}">`;
+ else if(EDTAB!=='deck')sub.innerHTML=`<input id="edq2" placeholder="カード名で絞り込み" value="${e(ED.q||'')}">`;
+ else sub.innerHTML=ED.fmt==='std'?'<span class="edfmt">スタンダード</span>':ED.fmt==='ext'?'<span class="edfmt ext">エクストラ</span>':'';
+ const qi=$('#edq2');if(qi)qi.oninput=()=>{ED.q=qi.value;const p=qi.selectionStart;renderEditor();const q2=$('#edq2');if(q2){q2.focus();try{q2.setSelectionRange(p,p)}catch(_){}}};
+ let h='';
+ if(EDTAB==='deck'){h=ED.cards.slice().sort(cardCmp).map(c=>edTile(c,c.n,c.n-(bm[c.id]||0),0,1)).join('');   /* デッキタブは確認用（枚数の調整はほかのタブで） */
+  const gone=ED.base.filter(b=>!ED.cards.some(c=>c.id===b.id)).sort(cardCmp);if(gone.length)h+=`<div class="edsec">抜いたカード</div>`+gone.map(b=>edTile(b,0,-b.n,1,1)).join('')}
+ else{const q=(ED.q||'').trim(),L=edPool().filter(c=>edCat(c)===EDTAB&&(EDTAB!=='trn'||EDSUB==='all'||c.t===EDSUB)&&(!q||c.name.includes(q))).sort(cardCmp),
+   A=L.filter(c=>inDeck(c.id)||bm[c.id]),B=L.filter(c=>!inDeck(c.id)&&!bm[c.id]),tile=c=>{const n=inDeck(c.id);return edTile(c,n,n-(bm[c.id]||0))};   /* 上：デッキに入っているカード（抜いたものも）／下：調整用カード */
+  h=(A.length?`<div class="edsec">デッキのカード</div>`+A.map(tile).join(''):'')+(B.length?`<div class="edsec">調整用カード</div>`+B.map(tile).join(''):'')||'<div class="edsec">該当するカードがありません</div>'}
+ $('#edg').innerHTML=h}
+function renderPool(){renderEditor()}
 function poolCards(){const K=knownCards(),PL=POOL.map(p=>({...fillCard(p,K),pool:1})),seenId=new Set(PL.map(p=>p.id)),seenN=new Set(PL.map(p=>p.name)),out=PL;hist().forEach(h=>{(getDeck(h.c)||[]).forEach(c=>{if(!seenId.has(c.id)&&!seenN.has(c.name)){seenId.add(c.id);seenN.add(c.name);out.push({...c})}})});return out}
-function renderPool(){const q=($('#edq').value||'').trim();
- $('#edp').innerHTML=poolCards().filter(c=>!q||c.name.includes(q)).sort(cardCmp).map(c=>{const inn=(ED.cards.find(z=>z.id===c.id)||{}).n||0;
-  return eRow(c,`${c.pool?'調整用カード｜':''}${TGN[c.t]||c.t}${inn?`｜デッキに${inn}枚`:''}`,`<button data-id="${e(c.id)}">＋</button>`)}).join('')||'該当なし'}
 function edSave(){const nm=$('#edn').value.trim()||'調整デッキ',cards=ED.cards.filter(c=>c.n>0).map(c=>({...c})),code=ED.code||('my:'+Date.now().toString(36));
  save(code,cards);const h=hist(),i=h.findIndex(x=>x.c===code);if(i>=0)h[i].n=nm;else h.push({n:nm,c:code});hsv(h);ED.code=code;ED.base=jclone(cards);renderHist();renderMyDecks();renderEditor();return{code,cards}}
-$('#edl').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const c=ED.cards.find(z=>z.id===b.dataset.id)||ED.base.find(z=>z.id===b.dataset.id);if(c)edAdd(c,+b.dataset.d)};
-$('#edp').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(!b)return;const c=poolCards().find(z=>z.id===b.dataset.id);if(c)edAdd(c,1)};
-$('#edq').oninput=renderPool;$('#edx').onclick=()=>{$('#ovd').className='';if(ED.from==='md')openMyDecks()};
+$('#edg').onclick=ev=>{const b=ev.target.closest('button[data-id]');if(b){const id=b.dataset.id,c=ED.cards.find(z=>z.id===id)||ED.base.find(z=>z.id===id)||edPool().find(z=>z.id===id);if(c)edAdd(c,+b.dataset.d);return}
+ const z=ev.target.closest('[data-z]');if(z){const id=z.dataset.z,c=ED.cards.find(y=>y.id===id)||edPool().find(y=>y.id===id);if(c){const o=$('#edz');o.innerHTML=`<div class="edzc">${cardH(c)}</div>`;o.className='on';o.onclick=()=>{o.className=''}}}};
+$('#edtabs').onclick=ev=>{const b=ev.target.closest('button[data-t]');if(!b)return;EDTAB=b.dataset.t;renderEditor();$('#edg').scrollTop=0};
+$('#edsub').onclick=ev=>{const b=ev.target.closest('button[data-s]');if(!b)return;EDSUB=b.dataset.s;renderEditor()};$('#edx').onclick=()=>{$('#ovd').className='';if(ED.from==='md')openMyDecks()};
 $('#eddel').onclick=()=>{const c=ED.code||ED.src.c,x=hist().find(z=>z.c===c)||ED.src;if(!confirm(`「${x.n}」を一覧から削除しますか？`))return;const h=hist().filter(z=>z.c!==c);hsv(h);if(DEF.some(d=>d.c===c))delDeckAdd(c,1);$('#ovd').className='';renderHist();if(ED.from==='md')openMyDecks()};$('#edrs').onclick=()=>{ED.cards=jclone(ED.base);edMsg('');renderEditor()};
 /* 未実装カードの書き出し：名前・IDの一覧（コピーしてチャットに貼る）＋カード画像（スクリーンショット用） */
 $('#edexp').onclick=()=>{const cs=ED.cards.filter(c=>c.n>0&&unimpl(c)),o=$('#ov'),sh=document.createElement('div');sh.className='sheet';o.innerHTML='';
  const txt=cs.length?`【未実装カード】${$('#edn').value}（${ED.code||''}）\n`+cs.map(c=>`${c.name}｜${/^pool:/.test(c.id)?'ID不明':c.id}｜${TGN[c.t]||c.t}`).join('\n'):'';
  sh.innerHTML=cs.length?`<div class="bar"><b style="flex:1">未実装カード ${cs.length}種類</b></div>
-<div style="font-size:12px;margin-bottom:6px">① 下の一覧をコピーしてチャットに貼ってください（効果文は公式サイトからClaudeが取得します）。<br>② ポケモンは、タイプ・エネルギー・弱点・にげるをアイコンで読み取るため、下のカード画像を長いスクリーンショットで撮って一緒に送ってください（グッズ・サポート等は不要）。</div>
+
 <textarea readonly rows="6" style="width:100%">${e(txt)}</textarea><button id="expcp" class="pri" style="width:100%;margin:6px 0">一覧をコピー</button>
 <div>${cs.filter(c=>c.t==='pke').map(c=>c.img?`<img src="${e(IMGS[c.img]||c.img)}" referrerpolicy="no-referrer" style="width:100%;display:block;margin:0 0 10px;border-radius:12px" alt="${e(c.name)}">`:`<div style="padding:10px;border:1px dashed #fff5;margin-bottom:10px">${e(c.name)}（画像なし）</div>`).join('')}</div>`
-  :'<div style="padding:10px">このデッキに未実装のカードはありません。</div>';
+  :'<div style="padding:10px">未実装カードなし</div>';
  const cl=document.createElement('button');cl.textContent='閉じる';cl.onclick=()=>{o.className='';o.style.zIndex=''};sh.append(cl);o.append(sh);o.className='on';o.style.zIndex=45;
  const b=sh.querySelector('#expcp');if(b)b.onclick=()=>{const t=sh.querySelector('textarea');t.select();let okc=0;try{document.execCommand('copy');okc=1}catch(_){}try{navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>{b.textContent='コピーしました'},()=>{})}catch(_){}if(okc)b.textContent='コピーしました'}};
 $('#edsv').onclick=()=>{edSave();edMsg('保存しました')};
@@ -2252,4 +2328,5 @@ render();
 <script src="ai/value_model.js"></script>
 <script src="ai/ai_refs.js"></script>
 <script src="ai/legacy_cpu.js"></script>
+<script>/* ホーム画面に追加したときのアプリ化（https で開いたときだけ） */if('serviceWorker'in navigator&&location.protocol==='https:')addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})</script>
 </body></html>
