@@ -7,11 +7,12 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#000;color:#eaf4f2;font:14px/1.3 "Hiragino Sans","Noto Sans JP",system-ui,sans-serif}
-#mat{position:relative;margin:auto;width:min(100vw,calc(100dvh*var(--r,.45)));aspect-ratio:var(--r,.45);--u:calc(1cqw*var(--sc,1));container-type:inline-size;overflow:hidden;background:linear-gradient(var(--topc,#6a2a30) 0 27%,#cdd0d6 27% 55%,var(--bottomc,#1f3e73) 55%)}
+#mat{position:relative;margin:auto;width:min(var(--vpw,100vw),calc(var(--vph,100dvh)*var(--r,.45)));aspect-ratio:var(--r,.45);--u:calc(1cqw*var(--sc,1));container-type:inline-size;overflow:hidden;background:linear-gradient(var(--topc,#6a2a30) 0 27%,#cdd0d6 27% 55%,var(--bottomc,#1f3e73) 55%)}
 button{background:#25454f;color:#eaf4f2;border:1px solid #3f6a75;border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
 button.pri{background:#ffd23f;color:#222;border-color:#ffd23f;font-weight:700}
 button.sm{padding:3px 8px;font-size:12px}
 input,textarea,select{background:#0b1417;color:#eaf4f2;border:1px solid #3f6a75;border-radius:8px;padding:7px;font:inherit}
+img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
 .slot{position:absolute;aspect-ratio:63/88;border:1px dashed #fff5;border-radius:4%;overflow:hidden;cursor:pointer;background:#0002}
 .slot.f{border:0;background:none}
@@ -76,6 +77,7 @@ body.pc .slot:hover{outline:2px solid #fff8}
 .ic img,.ic i{flex:0 1 calc(5.8*var(--u));min-width:0;max-width:calc(5.8*var(--u));width:auto;height:auto;aspect-ratio:1;border:0;border-radius:50%}
 .ic i{background:#888;font-size:calc(2.6*var(--u));line-height:calc(5.8*var(--u));color:#fff;text-align:center}
 html,body{overscroll-behavior:none;overflow:hidden}
+html,body{height:var(--vph,100%)}
 .sheet{overscroll-behavior:contain}
 #hud button{font-size:calc(2.4*var(--u));padding:calc(1.4*var(--u)) calc(0.4*var(--u));white-space:nowrap}
 #hud .big{font-size:calc(6*var(--u))}
@@ -521,7 +523,12 @@ body.pc .lbtn,body.pc #log{left:auto!important;right:calc(100% - var(--arl,15%) 
 </div></div>
 <div id="ovst"><div class="sheet lp">
 <div class="mnbar"><button id="stcl">✕</button><b>設定</b><span style="width:1.6em"></span></div>
-<div class="lphint">端末切り替え</div><div id="stdev" class="stlist"></div>
+<div class="lphint">データ引き継ぎ</div>
+<div class="bar"><input id="udn" placeholder="ユーザー名" autocomplete="username" style="flex:1;min-width:0"><input id="udp" placeholder="合言葉" type="password" autocomplete="current-password" style="flex:1;min-width:0"></div>
+<div class="stlist" style="grid-template-columns:1fr 1fr"><button id="udsv">クラウドに保存</button><button id="udld">クラウドから読込</button><button id="udfx">ファイルに保存</button><button id="udfi">ファイルから読込</button></div>
+<input id="udff" type="file" accept=".json,application/json,text/plain" style="display:none">
+<div id="udst" class="lphint"></div><div style="height:8px"></div>
+<div class="lphint" style="margin-top:14px">端末切り替え</div><div id="stdev" class="stlist"></div>
 <div class="lphint" style="margin-top:14px">画面比率</div><div id="stratio" class="stlist"></div>
 </div></div>
 <div id="ovmd"><div class="sheet lp">
@@ -601,7 +608,11 @@ let RSEL=0;try{RSEL=+localStorage.ratio||0}catch(_){}
 let DEV='';try{DEV=localStorage.dev||''}catch(_){}
 if(DEV!=='pc'&&DEV!=='sp')DEV=(window.matchMedia&&matchMedia('(pointer:fine)').matches&&innerWidth>innerHeight)?'pc':'sp';
 const PCM=()=>DEV==='pc';
-const RT=()=>PCM()?Math.max(1.3,Math.min(2.2,innerWidth/innerHeight)):(RSEL||Math.max(.2,Math.min(1.2,innerWidth/innerHeight)));
+/* 画面サイズ：実測値を1か所で管理（dvhとinnerHeightのずれ・全画面切替でresizeが来ない端末対策）。入力中（キーボード表示）は固定 */
+let VPW=innerWidth,VPH=innerHeight;const vpTyping=()=>{const a=document.activeElement;return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')};
+function vpRead(){const w=document.documentElement.clientWidth||innerWidth,h=Math.max(innerHeight,document.documentElement.clientHeight||0);if(vpTyping()&&w===VPW&&h<VPH)return 0;if(w===VPW&&h===VPH)return 0;VPW=w;VPH=h;document.documentElement.style.setProperty('--vph',h+'px');document.documentElement.style.setProperty('--vpw',w+'px');return 1}
+document.documentElement.style.setProperty('--vph',VPH+'px');document.documentElement.style.setProperty('--vpw',VPW+'px');
+const RT=()=>PCM()?Math.max(1.3,Math.min(2.2,VPW/VPH)):(RSEL||Math.max(.2,Math.min(1.2,VPW/VPH)));
 function applyRatio(){const r=RT();document.documentElement.style.setProperty('--r',r);document.body.classList.toggle('pc',PCM());if(PCM()){const[l,w]=PCX(1382,210),m=$('#mat').style;m.setProperty('--hudl',l+'%');m.setProperty('--hudw',w+'%');const BW=1100*r,a=Math.max(PCP(235),232/BW*100),b=Math.min(PCP(1365),l-.8);m.setProperty('--arl',a+'%');m.setProperty('--arw',(b-a)+'%')}$('#mat').style.setProperty('--sc',PCM()?.55/r:Math.min(1,(1/r)/(2048/922)))}
 /* PC用は 1600×1100 の座標系。相手側は y=960-y-h で反転 */
 const LY=(sp,pc)=>PCM()?pc:sp;
@@ -769,7 +780,7 @@ function showMissing(who=[0,1]){const L=[];who.forEach(i=>{const p=P[i];if(!p||!
 async function askVars(){for(const p of P)for(const c of p.cards){const v=VARS[nk(c.name)];if(!v||VMAP[c.id]!==undefined)continue;
   const card={u:'v'+c.id,id:c.id,name:c.name,img:c.img,t:c.t},no=(c.full||'').replace(/^.*\((.*)\)$/,'$1');
   const r=await new Promise(res=>menu(card,[...v.map((d,i)=>[d,()=>res(i)]),['この中にない（性能データなし）',()=>res(-1)]],`「${c.name}」${no?'（'+no+'）':''}は、どのカードですか？（カード画像で確認）`,1));
-  VMAP[c.id]=r;try{localStorage.dvar=JSON.stringify(VMAP)}catch(_){}}render()}
+  VMAP[c.id]=r;try{localStorage.dvar=JSON.stringify(VMAP)}catch(_){}udDirty();}render()}
 const ens=pl=>pl.filter(x=>x.t==='ene'),etype=c=>{const m=c.name.match(/基本(.)エネルギー/);return m?m[1]:'無'};
 const OWN=p=>['battle',...BN].filter(k=>p.piles[k].length),isBE=x=>x.t==='ene'&&/^基本/.test(x.name),isEx=x=>x.t==='pke'&&/ex$/.test(x.name);
 const ownerOf=top=>P.find(x=>Object.values(x.piles).some(q=>q.includes(top))),hasMega=p=>!!p&&['battle',...BN].some(k=>p.piles[k].length&&nk(lastOf(p.piles[k]).name)==='メガニウム'&&!noAb(lastOf(p.piles[k])));
@@ -1718,7 +1729,7 @@ function hArrows(h){const L=$('#hsl'),Rr=$('#hsr');if(!L||!Rr)return;const upd=(
  if(h&&!h.dataset.ha){h.dataset.ha=1;h.addEventListener('scroll',upd)}upd()}
 /* 盤面の飾り：ベンチ・山札とトラッシュの下に、プレイヤー色のふちのトレイを敷く（実際のスロット位置から作るので、どの画面比率でもずれない） */
 let DECK0='',DECH='';
-function decor(){const M=$('#mat');if(!M)return;const key=[PCM(),RT(),innerWidth,innerHeight,benchMax(0),benchMax(1),P[0].b8,P[1].b8,P[0].side.length,P[1].side.length,VW()].join();if(key===DECK0&&DECH){M.insertAdjacentHTML('afterbegin',DECH);return}
+function decor(){const M=$('#mat');if(!M)return;const key=[PCM(),RT(),VPW,VPH,benchMax(0),benchMax(1),P[0].b8,P[1].b8,P[0].side.length,P[1].side.length,VW()].join();if(key===DECK0&&DECH){M.insertAdjacentHTML('afterbegin',DECH);return}
  M.querySelectorAll('.tray').forEach(e=>e.remove());const mr=M.getBoundingClientRect();if(!mr.width)return;const pad=Math.max(4,mr.width*.011);
  const box=(els,cls,i)=>{const rs=els.map(e=>e.getBoundingClientRect()).filter(r=>r.width);if(!rs.length)return;const l=Math.min(...rs.map(r=>r.left))-pad,t=Math.min(...rs.map(r=>r.top))-pad,r=Math.max(...rs.map(r=>r.right))+pad,b=Math.max(...rs.map(r=>r.bottom))+pad;
   const d=document.createElement('div');d.className='tray '+cls;d.style.cssText=`left:${(l-mr.left)/mr.width*100}%;top:${(t-mr.top)/mr.height*100}%;width:${(r-l)/mr.width*100}%;height:${(b-t)/mr.height*100}%;--tc:${PCOL[i]}`;M.prepend(d)};
@@ -1745,7 +1756,7 @@ async function statusTick(){const B=[0,1].map(i=>{const q=P[i],t=q&&lastOf(q.pil
  const a0=G.act===undefined?cur:G.act,nx=(G.xt!==undefined&&G.xt===a0)||!P[1-a0]||P[1-a0].phase!=='play'?a0:1-a0;await koScan(P[nx]);if(G.over)return;await koScan(P[1-nx])}
 async function endTurn(){if(TE)return;TE=1;try{await turnSwitch()}finally{TE=0}}
 function ratioMenu(){menu(null,RATIOS.map(([n,v])=>[(RSEL===v?'● ':'')+n,()=>{RSEL=v;try{localStorage.ratio=v}catch(_){}LASTCUR=-1;render()}]),'画面比率を選択（現在：'+(RSEL?RSEL.toFixed(3):'自動')+'）')}
-addEventListener('resize',()=>{LASTCUR=-1;render()});
+{const vpChk=()=>{if(vpRead()){LASTCUR=-1;render()}};addEventListener('resize',vpChk);addEventListener('orientationchange',()=>setTimeout(vpChk,300));document.addEventListener('fullscreenchange',()=>setTimeout(vpChk,200));if(window.visualViewport)visualViewport.addEventListener('resize',vpChk);setInterval(vpChk,700);addEventListener('pageshow',vpChk);document.addEventListener('visibilitychange',()=>setTimeout(vpChk,300));vpChk()}
 /* ---------- CPU対戦：プレイアルゴリズムは外部ファイル（ai/*.js）。ここは盤面⇔AIの橋渡しだけ ----------
    ・AIには「そのプレイヤーに見える情報」だけを渡す（相手の手札・山札の中身と順序・サイドの中身は渡さない）
    ・AIからは「行動（play/ab/hab/retreat/attack/end）」と「選択結果」だけを受け取り、実処理はこの盤面のルール処理が行う
@@ -2055,13 +2066,13 @@ function parse(h){const img={},nm={},H0='https://www.pokemon-card.com';
 async function fetchDeck(code){const ps=[`https://www.pokemon-card.com/deck/confirm.html/deckID/${code}/`,`https://www.pokemon-card.com/deck/deckView.php/deckID/${code}`];
  const ws=[u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
  for(const w of ws)for(const u of ps){try{const r=await fetch(w(u));if(!r.ok)continue;const c=parse(await r.text());if(c.length)return c}catch(_){}}return null}
-const DELK='dkdel',delDecks=()=>{try{return JSON.parse(localStorage[DELK]||'[]')}catch(_){return HMEM.del||[]}},delDeckAdd=(c,on)=>{let d=delDecks().filter(x=>x!==c);if(on)d.push(c);HMEM.del=d;try{localStorage[DELK]=JSON.stringify(d)}catch(_){}};
+const DELK='dkdel',delDecks=()=>{try{return JSON.parse(localStorage[DELK]||'[]')}catch(_){return HMEM.del||[]}},delDeckAdd=(c,on)=>{let d=delDecks().filter(x=>x!==c);if(on)d.push(c);HMEM.del=d;try{localStorage[DELK]=JSON.stringify(d)}catch(_){}udDirty()};
 const OLD_DECKS=['pyRp3M-j9Hi4H-ypyy3p','kvwbdF-zcJSFF-VVVFFk'];   // 削除対象：テツノイバラ型メガレックウザ／最初期の古いメガレックウザ（本体は8cK8GK-…に差し替えて復活）
 /* 組み込みデッキのコード差し替え（旧コード→新コード）。マイデッキに旧コードが残っていたら自動で置き換える */
 const DECK_RENAME={'69ngnL-P4hfGh-Ngg6QQ':'pyM2pS-qYkBSM-Rypp3y','M3Sypp-6vqqSt-yMMRSX':'pEpRy2-00TWQ6-yy33yU','vdFbkf-G1ehqU-1Ffwvk':'vVkvfw-TaUKg0-kFkbkf','yyyXMS-o5MzGh-RpSy23':'vVkvfw-TaUKg0-kFkbkf'};
 const HK='dkl',DEF=[{n:'メガレックウザ',c:'8cK8GK-AACWUC-8D8Gcx'},{n:'AGドラパ',c:'pEpRy2-00TWQ6-yy33yU'},{n:'クラハンドラパ',c:'pyM2pS-qYkBSM-Rypp3y'},{n:'カミツオロチexデッキ',c:'6LNNnn-BgpA6l-nn9gLQ'},{n:'Nのゾロアークデッキ',c:'vVkvfw-TaUKg0-kFkbkf'},{n:'アブソルダストダス',c:'nQgg96-NS3Q1j-gQ6ngi'},{n:'レジドラゴ',c:'aK4DKD-l513qI-GcD888'},{n:'ウルトラネクロズマ',c:'1kVF1V-VkvmHT-FfVkkf',rg:'CLN19'},{n:'ジラーチサンダー',c:'x88x8G-pHvbwC-D8KDKc',rg:'CLN19'}];
 const HMEM={};
-const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){h=HMEM.h||null}if(Array.isArray(h)&&h.some(x=>OLD_DECKS.includes(x.c))){h=h.filter(x=>!OLD_DECKS.includes(x.c));hsv(h)}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv(h)}h.forEach(x=>{const nc=DECK_RENAME[x.c];if(nc){x.c=nc;hsv(h)}});const dd=delDecks();DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)&&!dd.includes(d.c)){h.push({...d});hsv(h)}});return h},hsv=h=>{HMEM.h=h;try{localStorage[HK]=JSON.stringify(h)}catch(_){}};
+const hist=()=>{let h=null;try{h=JSON.parse(localStorage[HK])}catch(_){h=HMEM.h||null}if(Array.isArray(h)&&h.some(x=>OLD_DECKS.includes(x.c))){h=h.filter(x=>!OLD_DECKS.includes(x.c));hsv0(h)}if(!Array.isArray(h)){h=DEF.map(x=>({...x}));hsv0(h)}h.forEach(x=>{const nc=DECK_RENAME[x.c];if(nc){x.c=nc;hsv0(h)}});const dd=delDecks();DEF.forEach(d=>{if(!h.some(x=>x.c===d.c)&&!dd.includes(d.c)){h.push({...d});hsv0(h)}});return h},hsv0=h=>{HMEM.h=h;try{localStorage[HK]=JSON.stringify(h)}catch(_){}},hsv=h=>{hsv0(h);udDirty()};
 function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forEach((x,i)=>{const ca=!!getDeck(x.c);
  const r=document.createElement('div');r.className='hr';const bt=document.createElement('button');bt.className='hn';bt.innerHTML=`${e(x.n)}${ca?' ✓':''}<small>${e(x.c)}</small>`;
  bt.onclick=()=>{$('#code').value=x.c;$('#go').click()};
@@ -2070,7 +2081,7 @@ function renderHist(){const b=$('#hist');if(!b)return;b.innerHTML='';hist().forE
  const a1=document.createElement('button'),a2=document.createElement('button');a1.className=a2.className='hs';a1.textContent='→1';a2.textContent='→2';a1.onclick=()=>{$('#c1').value=x.c};a2.onclick=()=>{$('#c2').value=x.c};
  const tn=document.createElement('button');tn.className='hs';tn.textContent='調整';tn.onclick=()=>openEditor(x);
  r.append(bt,a1,a2,tn,dl);b.append(r)})}
-function addDeck(code,cards,name,rg){delDeckAdd(code,0);MEM[code]=cards;try{localStorage['dk2_'+code]=JSON.stringify(cards)}catch(_){}
+function addDeck(code,cards,name,rg){delDeckAdd(code,0);MEM[code]=cards;try{localStorage['dk2_'+code]=JSON.stringify(cards)}catch(_){}udDirty();
  const h=hist(),nm=(name||'').trim()||code,ex=h.find(x=>x.c===code);if(ex){ex.n=nm;if(rg!==undefined)ex.rg=rg}else h.push(rg?{n:nm,c:code,rg}:{n:nm,c:code});hsv(h)}
 /* マイデッキ一覧。DKSEL=null：管理（タップで調整・▲▼で並べ替え・×で削除）／DKSEL={mode,picks}：対戦用に選択 */
 let DKSEL=null,PENDING_DECK=null;
@@ -2144,7 +2155,7 @@ function deckSet2(mode,picks,ds){
  if(ds[1]){P[1].cards=ds[1];P[1].code=picks[1]}
  [0,1].forEach(z=>{if(P[z].cards.length){cur=z;start()}});cur=Math.max(0,P.findIndex(x=>x.phase==='setup'));closeAll();render();
  log((ds[1]?'1人回し：P1・P2のデッキをセットしました':'1人回し（P1のみ）：デッキをセットしました')+(RULE()?`（${RULE().n}のルール）`:isExtra()?'（エクストラのルール）':'（スタンダードのルール）'));askVars().then(()=>showMissing())}
-const save=(code,c)=>{if(!code)return;MEM[code]=c;try{localStorage['dk2_'+code]=JSON.stringify(c)}catch(_){}const h=hist();if(!h.some(x=>x.c===code)){h.push({n:code,c:code});hsv(h)}};
+const save=(code,c)=>{if(!code)return;MEM[code]=c;try{localStorage['dk2_'+code]=JSON.stringify(c)}catch(_){}udDirty();const h=hist();if(!h.some(x=>x.c===code)){h.push({n:code,c:code});hsv(h)}};
 
 /* ---------- デッキ調整ツール ---------- */
 const MEM={},BUILTIN={"pyM2pS-qYkBSM-Rypp3y": [{"id": "45772", "name": "ドラパルトex", "n": 3, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045772_P_DORAPARUTOEX.jpg", "full": "ドラパルトex(SV6 081/101)"}, {"id": "45771", "name": "ドロンチ", "n": 4, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045771_P_DORONCHI.jpg", "full": "ドロンチ(SV6 080/101)"}, {"id": "45770", "name": "ドラメシヤ", "n": 4, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045770_P_DORAMESHIYA.jpg", "full": "ドラメシヤ(SV6 079/101)"}, {"id": "49956", "name": "スボミー", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M2a/049956_P_SUBOMI.jpg", "full": "スボミー(M2a 196/193)"}, {"id": "47240", "name": "ノココッチex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV9/047240_P_NOKOKOTCHIEX.jpg", "full": "ノココッチex(SV9 120/100)"}, {"id": "48483", "name": "ノココッチ", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M-P/048483_P_NOKOKOTCHI.jpg", "full": "ノココッチ(M-P 048/M-P)"}, {"id": "49290", "name": "ノコッチ", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049290_P_NOKOTCHI.jpg", "full": "ノコッチ(MC 574/742)"}, {"id": "45746", "name": "マシマシラ", "n": 2, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6/045746_P_MASHIMASHIRA.jpg", "full": "マシマシラ(SV6 055/101)"}, {"id": "50067", "name": "ニャースex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M3/050067_P_NIXYASUEX.jpg", "full": "ニャースex(M3 100/080)"}, {"id": "45913", "name": "キチキギスex", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV6a/045913_P_KICHIKIGISUEX.jpg", "full": "キチキギスex(SV6a 038/064)"}, {"id": "48354", "name": "ファイヤー", "n": 1, "t": "pke", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M2/048354_P_FUAIYA.jpg", "full": "ファイヤー(M2 014/080)"}, {"id": "45209", "name": "なかよしポフィン", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5K/045209_T_NAKAYOSHIPOFUIN.jpg", "full": ""}, {"id": "49378", "name": "ポケパッド", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049378_T_POKEPADDO.jpg", "full": ""}, {"id": "42694", "name": "ハイパーボール", "n": 3, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV1V/042694_T_HAIPABORU.jpg", "full": ""}, {"id": "49386", "name": "夜のタンカ", "n": 2, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MC/049386_T_YORUNOTANKA.jpg", "full": ""}, {"id": "50324", "name": "クラッシュハンマー", "n": 4, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M5/050324_T_KURASSHIXYUHANMA.jpg", "full": ""}, {"id": "50156", "name": "スペシャルレッドカード", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M4/050156_T_SUPESHIXYARUREDDOKADO.jpg", "full": ""}, {"id": "45640", "name": "アンフェアスタンプ(ACE SPEC)", "n": 1, "t": "tr", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV5a/045640_T_ANFUEASUTANPU.jpg", "full": ""}, {"id": "47795", "name": "リーリエの決心", "n": 4, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1L/047795_T_RIRIENOKESSHIN.jpg", "full": ""}, {"id": "46036", "name": "アカマツ", "n": 2, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SV7/046036_T_AKAMATSU.jpg", "full": ""}, {"id": "49708", "name": "メイのはげまし", "n": 1, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M3/049708_T_MEINOHAGEMASHI.jpg", "full": ""}, {"id": "50449", "name": "ボスの指令", "n": 3, "t": "sup", "img": "https://www.pokemon-card.com/assets/images/card_images/large/MEZ/050449_T_BOSUNOSHIREI.jpg", "full": ""}, {"id": "47796", "name": "危ない廃墟", "n": 2, "t": "sta", "img": "https://www.pokemon-card.com/assets/images/card_images/large/M1L/047796_T_ABUNAIHAIKIXYO.jpg", "full": ""}, {"id": "42783", "name": "基本超エネルギー", "n": 3, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/ENE/042783_E_KIHONCHIXYOUENERUGI.jpg", "full": ""}, {"id": "42780", "name": "基本炎エネルギー", "n": 3, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/ENE/042780_E_KIHONHONOOENERUGI.jpg", "full": ""}, {"id": "40888", "name": "基本悪エネルギー", "n": 2, "t": "ene", "img": "https://www.pokemon-card.com/assets/images/card_images/large/SI/040888_E_KIHONAKUENERUGI.jpg", "full": ""}]};
@@ -2290,6 +2301,36 @@ function loadMqtt(){return window.mqtt?Promise.resolve(window.mqtt):new Promise(
 function mqConnect(url){return loadMqtt().then(m=>new Promise((res,rej)=>{const c=m.connect(url,{clientId:'pk'+Math.random().toString(36).slice(2,10),clean:true,connectTimeout:7000,reconnectPeriod:2000,keepalive:30});let done=0;
  const fail=e=>{if(done)return;done=1;clearTimeout(to);try{c.end(true)}catch(_){}rej(e||new Error('接続できませんでした'))},to=setTimeout(()=>fail(new Error('timeout')),8000);
  c.once('connect',()=>{if(done)return;done=1;clearTimeout(to);res(c)});c.once('error',fail)}))}
+
+/* ---------- データ引き継ぎ：ユーザー名＋合言葉 → 公開MQTTブローカーのretainedに保存（全ブローカーへ） ---------- */
+const UDK=k=>k===HK||k===DELK||k==='dvar'||k==='asort'||k==='cpulv'||/^dk2_/.test(k);
+function udH(s,a,b){for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return(b>>>0).toString(16).padStart(8,'0')+(a>>>0).toString(16).padStart(8,'0')}
+const udTopic=(n,p)=>{const s=n.trim().normalize('NFKC')+'\n'+p;return TPRE+'u/'+udH(s,0xdeadbeef,0x41c6ce57)+udH(s,0x9e3779b9,0x7f4a7c15)};
+let UDT=0,UDREADY=0,UDBUSY=0;const udAcc=()=>{try{const n=localStorage.udn,p=localStorage.udp;return n&&p?[n,p]:null}catch(_){return null}};
+function udDirty(){try{localStorage.udm=Date.now()}catch(_){}if(!UDREADY||!udAcc())return;clearTimeout(UDT);UDT=setTimeout(()=>udSave(1).catch(()=>{}),4000)}
+function udCollect(){const d={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(UDK(k))d[k]=localStorage[k]}}catch(_){}if(!d[HK])d[HK]=JSON.stringify(hist());return{v:1,t:+(localStorage.udm||Date.now()),d}}
+async function udPack(o){const raw=new TextEncoder().encode(JSON.stringify(o));if(window.CompressionStream){try{const b=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()),r=new Uint8Array(b.length+1);r[0]=1;r.set(b,1);return r}catch(_){}}const r=new Uint8Array(raw.length+1);r[0]=0;r.set(raw,1);return r}
+async function udUnpack(u){u=new Uint8Array(u);let b=u.subarray(1);if(u[0]===1)b=new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());else if(u[0]!==0)throw 0;return JSON.parse(new TextDecoder().decode(b))}
+function udApply(o){if(!o||!o.d||!o.d[HK])throw new Error('データが壊れています');const del=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(UDK(k))del.push(k)}del.forEach(k=>localStorage.removeItem(k));Object.entries(o.d).forEach(([k,v])=>{if(UDK(k))localStorage[k]=v});localStorage.udm=o.t||Date.now();
+ Object.keys(MEM).forEach(k=>delete MEM[k]);delete HMEM.h;delete HMEM.del;try{VMAP=JSON.parse(localStorage.dvar||'{}')}catch(_){VMAP={}}AS=+localStorage.asort||0;CPULV=+localStorage.cpulv||0;
+ try{if($('#ovmd').className)renderMyDecks()}catch(_){}try{render()}catch(_){}}
+const udEach=f=>Promise.allSettled(BROKERS.map(u=>mqConnect(u).then(c=>f(c).finally(()=>{try{c.end(true)}catch(_){}})))).then(r=>r.filter(x=>x.status==='fulfilled').map(x=>x.value));
+async function udSave(auto){const a=udAcc();if(!a)throw new Error('ユーザー名と合言葉を入れてください');UDBUSY++;try{const t=udTopic(...a),buf=await udPack(udCollect());
+ const ok=(await udEach(c=>new Promise((res,rej)=>c.publish(t,buf,{qos:1,retain:true},e=>e?rej(e):res(1))))).length;if(!ok)throw new Error('サーバーにつながりません');if(!auto)udMsg('保存しました');return ok}finally{UDBUSY--}}
+async function udFetch(){const a=udAcc();if(!a)throw new Error('ユーザー名と合言葉を入れてください');const t=udTopic(...a);
+ const got=(await udEach(c=>new Promise(res=>{const to=setTimeout(()=>res(null),4500);c.on('message',(tp,m)=>{if(tp!==t)return;clearTimeout(to);if(!m||!m.length)return res(null);udUnpack(m).then(res,()=>res(null))});c.subscribe(t,{qos:1})}))).filter(Boolean);
+ return got.sort((x,y)=>(y.t||0)-(x.t||0))[0]||null}
+function udMsg(m){const x=$('#udst');if(x)x.textContent=m}
+function udForm(){const n=$('#udn').value.trim(),p=$('#udp').value;if(!n||!p){udMsg('ユーザー名と合言葉を入れてください');return 0}try{localStorage.udn=n;localStorage.udp=p}catch(_){}return 1}
+$('#udsv').onclick=async()=>{if(!udForm())return;udMsg('保存中…');try{await udSave()}catch(x){udMsg(x.message||'保存できませんでした')}};
+$('#udld').onclick=async()=>{if(!udForm())return;udMsg('読込中…');try{const o=await udFetch();if(!o){udMsg('データが見つかりません');return}udApply(o);UDREADY=1;udMsg('読み込みました（'+new Date(o.t).toLocaleString()+'）')}catch(x){udMsg(x.message||'読み込めませんでした')}};
+$('#udfx').onclick=()=>{const o=udCollect(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='pokeca-data-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);udMsg('ファイルに保存しました')};
+$('#udfi').onclick=()=>$('#udff').click();
+$('#udff').onchange=async ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;try{udApply(JSON.parse(await f.text()));udMsg('読み込みました');udDirty()}catch(x){udMsg('読み込めませんでした')}};
+function udInit(){const a=udAcc();if(a){$('#udn').value=a[0];$('#udp').value=a[1]}if(!a||!navigator.onLine){UDREADY=1;return}
+ udFetch().then(o=>{if(o&&(o.t||0)>(+localStorage.udm||0)){udApply(o);udMsg('クラウドから読み込みました')}else if(!o||(o.t||0)<(+localStorage.udm||0))udSave(1).catch(()=>{})}).catch(()=>{}).finally(()=>{UDREADY=1})}
+document.addEventListener('contextmenu',ev=>{if(ev.target&&ev.target.tagName==='IMG')ev.preventDefault()},true);
+setTimeout(udInit,300);
 async function roomOpen(code,role){const url=BROKERS[+code[0]-1];if(!/^\d{6}$/.test(code)||!url)throw new Error('部屋番号が正しくありません');
  const c=await mqConnect(url),base=TPRE+code+'/',mine=base+role,peer=base+(role==='h'?'g':'h'),hs=o=>c.publish(peer,JSON.stringify(o),{qos:1});
  if(NET.mq)try{NET.mq.end(true)}catch(_){}NET.mq=c;NET.room=code;
