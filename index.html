@@ -24,6 +24,11 @@ img{-webkit-touch-callout:none;-webkit-user-drag:none}
 .back{background:linear-gradient(160deg,#2b58d0,#182b72);border:2px solid #e9c23a}
 .cnt{position:absolute;right:2%;bottom:2%;z-index:2;background:#000c;color:#fff;padding:0 .4em;border-radius:1em;font-size:12px}
 #mat .cnt{font-size:calc(3.4*var(--u))}
+.hand.attm{animation:attin .35s ease-out}@keyframes attin{from{transform:translateY(70%);opacity:0}}
+.hc.attc{filter:drop-shadow(0 0 6px #17a9ff)}
+.attbar{position:absolute;left:2%;right:2%;top:79.4%;display:flex;align-items:center;gap:2%;background:#0d1117ee;border:1px solid #c9a227;border-radius:10px;padding:.6% 2%;z-index:6;color:#fff;font-size:calc(2.6*var(--u))}
+.attbar b{flex:1;font-weight:700}.attbar span{color:#ffd23f;font-weight:800}.attbar button{font-size:calc(2.6*var(--u));padding:.4em .9em}
+body.pc .attbar{left:12%;right:12%;top:79%}
 .hand{position:absolute;left:0;top:83%;width:100%;height:17%;display:flex;gap:1.5%;overflow-x:auto;padding:0 2%}
 .hc{flex:0 0 22%;aspect-ratio:63/88;cursor:pointer}
 .oh{position:absolute;left:14%;top:-3.5%;width:72%;height:7%;display:flex;gap:1%;pointer-events:none}
@@ -636,11 +641,12 @@ const dmB=(t,pl)=>{const h=hpOf(pl),d=t.dm||0;if(!h)return(d?`<span class="dm">-
 function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>['setup','wait','mull','bench'].includes(x.phase)),cn=n=>`<span class="cnt">${n}</span>`;
  const sl=(x,y,w,a,inn)=>o.push(`<div class="slot ${inn?'f':''}" style="${at(x,y,w,f)}" ${a}>${inn}</div>`);
  const bm=benchMax(i),w8=bm===8||p.b8,L=PCM()?(w8?PXPC8:PXPC):(w8?PX8:PX);for(const k in L){const pl=p.piles[k],t=lastOf(pl);if(k!=='battle'&&+k.slice(1)>=bm&&!pl.length)continue;   /* パラレルシティ等でベンチが減ったら、使えないスロットは出さない */
-  const xy=PCM()&&!w8&&k!=='battle'&&bm<5?[L[k][0]+(5-bm)*70,L[k][1],L[k][2]]:L[k];sl(...xy,`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" data-st="${t&&!hid&&k==='battle'?scOf(t):''}" ${SEL&&SEL.i===i&&SEL.ks.includes(k)?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
+  const xy=PCM()&&!w8&&k!=='battle'&&bm<5?[L[k][0]+(5-bm)*70,L[k][1],L[k][2]]:L[k];sl(...xy,`data-a="pile" data-p="${i}" data-k="${k}" data-u="${t&&!hid?t.u:''}" data-dm="${t&&t.dm||0}" data-st="${t&&!hid&&k==='battle'?scOf(t):''}" ${(SEL&&SEL.i===i&&SEL.ks.includes(k))||(ATT&&ATT.i===i&&ATT.cards.some(c=>attAllow(c).includes(k)))?'data-s=1':''}`,t?(hid?back():cardH(t)+att(pl)+dmB(t,pl)+abB(t,i,k)):'')}
  sl(...LY([w8?-6:8,1300,w8?140:150],[150,755,115]),`data-a="sidez" data-p="${i}"`,sideH(SIDEFLY&&SIDEFLY.p===i?Math.min(SIDEFLY.n||0,p.side.length):p.side.length));
  {const dn=p.deck.length+(SIDEFLY&&SIDEFLY.p===i?Math.max(0,Math.min(6,p.side.length)-(SIDEFLY.l||0)):0);sl(...LY([w8?782:762,1170,w8?140:150],[1310,755,115]),`data-a="deck" data-p="${i}"`,dn?back()+cn(dn):'')}
  sl(...LY([w8?792:775,1465,w8?128:130],[1440,755,115]),`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
- o.push(f?`<div class="oh">${p.hand.map(()=>back()).join('')}</div>`:`<div class="hand">${p.hand.map(c=>`<div class="hc" data-a="hand" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div>`);
+ if(!f&&ATT&&ATT.i===i){o.push(`<div class="hand attm">${ATT.cards.map(c=>`<div class="hc attc" data-a="attc" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div><div class="hbtn" style="${PCM()?'left:88.5%;top:85.5%':'left:2%;top:77.1%'}">${ATT.pairs.length>=ATT.mn?`<button data-a="attok" class="pri">${ATT.pairs.length?'完了':'つけない'}</button>`:''}${!ATT.pairs.length&&ATT.o.cancel!==false?`<button data-a="attno">やめる</button>`:''}</div>`);return o.join('')}
+ o.push(f?`<div class="oh">${p.hand.map(()=>back()).join('')}</div>`:`<div class="hand${ATTBACK&&i===VW()?' attm':''}">${p.hand.map(c=>`<div class="hc" data-a="hand" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div>`);
  o.push(`<div class="hcnt" ${f&&!MP()?`data-a="ohall" data-p="${i}"`:''} style="${f&&!MP()?'pointer-events:auto;cursor:pointer;':''}${PCM()?(f?'left:1%;top:.4%':'left:1%;top:86%'):(f?'left:2%;top:.6%':'left:2%;top:84.3%')}">P${i+1} 手札 ${p.hand.length}枚</div>`);if(!f)o.push(`<div class="hbtn" style="${PCM()?'left:88.5%;top:85.5%':'left:2%;top:77.1%'}"><button data-a="hsort">整理</button><button data-a="hall">全手札</button><button class="au${AS?' pri':''}" data-a="hauto">自動整理：${AS?'ON':'OFF'}</button></div>`);return o.join('')}
 function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x.phase==='setup'||x.phase==='bench'),tl=turnLabel(p);
  let h=`<div class="hrow">${MP()?`<div class="tl" style="background:${PCOL[V]};color:#fff">${CPU.on?'CPU戦':'対戦'} P${V+1}</div>`:`<button data-a="mode" class="${ed?'pri':''}">${ed?'編集モード':'プレイモード'}</button>`}`+(ed?`<button data-a="swap" style="background:${PCOL[cur]};color:#fff">視点 P${cur+1}</button>`:`<div class="tl">${pd>=0?`P${pd+1}準備中`:tl}</div>`)+'</div>';
@@ -853,15 +859,14 @@ const FX={
   if(!t.length)return fin(c,()=>shuffle(p.deck));
   let h=t[0];if(t.length===2){const s=await pk('手札に加える1枚を選ぶ（残りをポケモンにつけます）',t,1);if(!s)return;h=s[0]}
   const rest=t.find(x=>x!==h);let k=null;
-  if(rest){const ks=OWN(p);if(!ks.length)return err('つけるポケモンがいません');k=await ask(rest,ks,p,'つけるポケモンを選択',1);if(!k)return}
-  fin(c,()=>{mv(h.u,'hand');if(rest)mv(rest.u,k);shuffle(p.deck)});log('アカマツを使用')},
+  if(rest){const ks=OWN(p);if(!ks.length)return err('つけるポケモンがいません');const pr=await dragE([rest],ks,{ttl:'アカマツ：エネルギーをポケモンにドラッグ',min:1});if(!pr)return;STG.commit=1}
+  fin(c,()=>{mv(h.u,'hand');shuffle(p.deck)});log('アカマツを使用')},
  'クセロシキのたくらみ':async c=>{const oi=1-cur,o=P[oi],n=o.hand.length-3;let s0=[];   // 相手は手札が3枚になるようにトラッシュする（選ぶのは相手）
   if(n>0){s0=await pkWho(`P${oi+1}：手札が3枚になるように、トラッシュするカードを${n}枚選んでください`,o.hand.slice(),n,n,oi);if(!s0)return}
   fin(c,()=>s0.forEach(y=>{const z=find(o,y.u);if(z)o.trash.push(z)}));log(`クセロシキのたくらみ：P${oi+1}は手札を${s0.length}枚トラッシュ（残り3枚）`)},
  'アンズの秘技':async c=>{const p=me(),isD=y=>/^基本悪エネルギー/.test(y.name),ks=OWN(p).filter(k=>(mi(lastOf(p.piles[k]))||{}).type==='悪'),sel=[];   // 悪ポケモン2匹までに山札の基本悪エネルギーを1枚ずつ。バトルポケモンにつけたらどく
-  const nE=p.deck.filter(isD).length;
-  for(let j=0;j<Math.min(2,nE);j++){const rest=ks.filter(k=>!sel.includes(k));if(!rest.length)break;const k=await ask(null,rest,p,`アンズの秘技：基本悪エネルギーをつける悪ポケモンを選択（${j+1}匹目・キャンセルで終了）`);if(!k)break;sel.push(k)}
-  fin(c,()=>{let ab=0;sel.forEach(k=>{const e=p.deck.find(isD);if(e){mv(e.u,k);if(k==='battle')ab=1}});shuffle(p.deck);const t=lastOf(p.piles.battle);if(ab&&t)t.psn=1});log(`アンズの秘技：${sel.length}匹に基本悪エネルギーをつけた${sel.includes('battle')?'（バトルポケモンはどく）':''}`)},
+  const pr=await dragE(p.deck.filter(isD).slice(0,Math.min(2,ks.length)),ks,{ttl:'アンズの秘技：基本悪エネルギーを悪ポケモンにドラッグ（1匹に1枚）',distinct:1});if(!pr)return;STG.commit=1;pr.forEach(z=>sel.push(z.k));
+  fin(c,()=>{const ab=sel.includes('battle');shuffle(p.deck);const t=lastOf(p.piles.battle);if(ab&&t)t.psn=1});log(`アンズの秘技：${sel.length}匹に基本悪エネルギーをつけた${sel.includes('battle')?'（バトルポケモンはどく）':''}`)},
  'ロケット団のいやがらせ':c=>{fin(c,()=>P.forEach(x=>{if(x.phase!=='none'){x.deck.push(...x.hand.splice(0));shuffle(x.deck);for(let i=0;i<5;i++)draw1(x)}}));log('ロケット団のいやがらせ：おたがい手札を山札にもどして切り、5枚引く')},
  'シロナ':c=>{const p=me();fin(c,()=>{p.deck.push(...p.hand.splice(0));shuffle(p.deck);for(let i=0;i<6;i++)draw1(p)});log('シロナ：手札を山札にもどして切り、6枚引く')},
  'リーリエ':c=>{const p=me(),n=(p.myTurn||1)===1?8:6;fin(c,()=>drawTo(p,n));log(`リーリエ：手札が${n}枚になるように引く${n===8?'（最初の自分の番）':''}`)},
@@ -903,26 +908,24 @@ const FX={
   if(ks.length<2)return err('ポケモンが2匹以上必要です');const has=ks.filter(k=>be(k).length);if(!has.length)return err('基本エネルギーがついていません');
   const src=await ask(null,has,p,'① エネルギーをつけ替える元のポケモンを選択');if(!src)return;
   const s=await pk(`② ${lastOf(p.piles[src]).name}の基本エネルギーを1個選択`,be(src),1);if(!s)return;
-  const k=await ask(s[0],ks.filter(x=>x!==src),p,'③ つけ替え先のポケモンを選択');if(!k)return;fin(c,()=>mv(s[0].u,k));log('エネルギーをつけ替えました')},
+  const pr=await dragE([s[0]],ks.filter(x=>x!==src),{ttl:'③ つけ替え先のポケモンにドラッグ',min:1});if(!pr)return;fin(c);log('エネルギーをつけ替えました')},
  'スペシャルレッドカード':c=>{const o=P[1-cur];if(o.phase!=='play'||o.side.length>3)return err('相手のサイドが残り3枚以下のときしか使えません');
   fin(c,()=>{const h=o.hand.splice(0);shuffle(h);o.deck.push(...h);for(let i=0;i<3;i++)draw1(o)});log('スペシャルレッドカード：相手は手札を山札の下に戻し、3枚引きました')},
  'ガラスのラッパ':async c=>{const p=me();if(!hasTera(p))return err('自分の場に「テラスタル」のポケモンがいません');
-  const pairs=[];let ks=BN.filter(k=>p.piles[k].length),pool=p.trash.filter(isBE);
-  if(!ks.length)return err('ベンチにポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
-  for(let i=0;i<2&&ks.length&&pool.length;i++){
-   const k=await ask(null,ks,p,`ガラスのラッパ：エネルギーをつけるポケモンを盤面から選択（${i+1}/2）`,0,'ここまで');
-   if(!k)break;const s=await pk('トラッシュから基本エネルギーを1枚選択',pool,1);if(!s||!s.length)break;
-   pairs.push([s[0],k]);ks=ks.filter(z=>z!==k);pool=pool.filter(z=>z!==s[0])}
-  fin(c,()=>pairs.forEach(([z,k])=>mv(z.u,k)));log(`ガラスのラッパ：${pairs.length}匹にエネルギーをつけました`)}};
+  let ks=BN.filter(k=>p.piles[k].length&&(mi(lastOf(p.piles[k]))||{}).type==='無'),pool=p.trash.filter(isBE);
+  if(!ks.length)return err('ベンチに無色ポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
+  const s=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,Math.min(2,pool.length,ks.length),1);if(!s)return;
+  const pairs=await dragE(s,ks,{ttl:'ガラスのラッパ：ベンチの無色ポケモンにドラッグ（1匹に1枚）',distinct:1,min:s.length});if(!pairs)return;
+  fin(c);log(`ガラスのラッパ：${pairs.length}匹にエネルギーをつけました`)}};
 function detail(c,hand){if(!c)return;const it=[];const m=mi(c);
  if(hand&&m&&m.hab)it.push([`特性「${m.hab.n}」を使う`,()=>runHab(c),(G.ab[c.u]===G.turn||m.hab.ok({p:me(),o:P[1-cur],c}))?'ab used':'ab']);
  menu(c,it)}
 /* ドラッグ操作（プレイモード）：手札→場で使用、盤面のポケモン同士でドラッグ入れ替え */
 let DR=null,NOCLK=0;
-$('#mat').addEventListener('pointerdown',ev=>{if(G.mode!=='play'||TE||HOLD||(MP()&&(NET.wait||!canAct())))return;const t=ev.target.closest('.hc');if(!t||+t.dataset.p!==cur||me().phase==='none')return;
+$('#mat').addEventListener('pointerdown',ev=>{if(ATT){const t=ev.target.closest('[data-a=attc]');if(!t)return;const c=ATT.cards.find(x=>x.u===t.dataset.u);if(c)DR={att:1,c,x:ev.clientX,y:ev.clientY,g:null};return}if(G.mode!=='play'||TE||HOLD||(MP()&&(NET.wait||!canAct())))return;const t=ev.target.closest('.hc');if(!t||+t.dataset.p!==cur||me().phase==='none')return;
  const h=t.dataset.a==='hand',c=h?me().hand.find(x=>x.u===t.dataset.u):lastOf(me().piles[t.dataset.k]);if(!c)return;DR={h,k:t.dataset.k,c,x:ev.clientX,y:ev.clientY,g:null}});
 addEventListener('pointermove',ev=>{if(!DR)return;
- if(!DR.g){const dx=ev.clientX-DR.x,dy=ev.clientY-DR.y;if(Math.hypot(dx,dy)<12)return;if(ev.pointerType!=='mouse'&&Math.abs(dx)>Math.abs(dy)){DR=null;return}const g=document.createElement('div');g.style.cssText='position:fixed;z-index:50;width:88px;aspect-ratio:63/88;pointer-events:none;opacity:.9';g.innerHTML=cardH(DR.c);document.body.append(g);DR.g=g}
+ if(!DR.g){const dx=ev.clientX-DR.x,dy=ev.clientY-DR.y;if(Math.hypot(dx,dy)<12)return;if(ev.pointerType!=='mouse'&&Math.abs(dx)>Math.abs(dy)&&!DR.att){DR=null;return}const g=document.createElement('div');g.style.cssText='position:fixed;z-index:50;width:88px;aspect-ratio:63/88;pointer-events:none;opacity:.9';g.innerHTML=cardH(DR.c);document.body.append(g);DR.g=g}
  DR.g.style.left=ev.clientX-44+'px';DR.g.style.top=ev.clientY-62+'px'});
 const endDrag=(ev,go)=>{if(!DR)return;const d=DR;DR=null;if(!d.g)return;DROPR={u:d.c.u,r:d.g.getBoundingClientRect()};d.g.remove();NOCLK=Date.now();if(go)dropCard(d,ev.clientX,ev.clientY)};
 addEventListener('pointerup',ev=>endDrag(ev,1));
@@ -930,7 +933,7 @@ addEventListener('pointerup',ev=>endDrag(ev,1));
 document.addEventListener('dragstart',e=>{if(e.target&&e.target.closest&&e.target.closest('#mat'))e.preventDefault()});
 $('#mat').addEventListener('wheel',e=>{const h=e.target.closest&&e.target.closest('.hand');if(!h||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;h.scrollLeft+=e.deltaY;e.preventDefault()},{passive:false});
 addEventListener('pointercancel',ev=>endDrag(ev,0));
-function dropCard(d,x,y){const p=me(),c=d.c;if(p.phase==='mull')return err('相手がサイドを置くのを待っています（マリガン待ち）');if(p.phase==='wait')return err('相手のセットアップ中です');if(p.phase==='setup'&&d.h&&c.t!=='pke')return err('セットアップ中はたねポケモンだけ出せます');if(p.phase==='bench'&&(!d.h||!isBas(c)))return err('ベンチに出せるのは、たねポケモンだけです');
+function dropCard(d,x,y){if(d.att)return attDrop(d.c,x,y);const p=me(),c=d.c;if(p.phase==='mull')return err('相手がサイドを置くのを待っています（マリガン待ち）');if(p.phase==='wait')return err('相手のセットアップ中です');if(p.phase==='setup'&&d.h&&c.t!=='pke')return err('セットアップ中はたねポケモンだけ出せます');if(p.phase==='bench'&&(!d.h||!isBas(c)))return err('ベンチに出せるのは、たねポケモンだけです');
  const el=document.elementFromPoint(x,y),tg=el&&el.closest('[data-a=pile],[data-a=stad]'),m=$('#mat').getBoundingClientRect(),
  own=tg&&tg.dataset.a==='pile'&&+tg.dataset.p===cur?tg.dataset.k:null,inB=x>=m.left&&x<=m.right&&y>=m.top&&y<m.top+m.height*(PCM()?.84:.86);
  if(!d.h)return;if(p.phase==='bench'&&(!own||!BN.includes(own)||p.piles[own].length))return err('空いているベンチに出してください');
@@ -981,7 +984,7 @@ mon('ファイアローex',{hp:280,type:'無',rc:0,weak:'雷',res:'闘',st:'2進
 mon('ヒビキのホウオウex',{hp:230,type:'炎',rc:2,weak:'水',
  ab:{n:'こんじきのほのお',ok:x=>!x.p.hand.some(isFireB)?'手札に基本炎エネルギーがありません':(hibiki(x.p).length?null:'ベンチにヒビキのポケモンがいません'),
   run:async x=>{const s=await pk('手札の基本炎エネルギーを2枚まで選ぶ',x.p.hand.filter(isFireB),2,1);if(!s||!s.length)return false;
-   const k=await ask(null,hibiki(x.p),x.p,'つけるベンチのヒビキのポケモンを選択',1);if(!k)return false;s.forEach(y=>mv(y.u,k))}},
+   const pr=await dragE(s,hibiki(x.p),{ttl:'こんじきのほのお：ベンチのヒビキのポケモンにドラッグ',same:1,min:s.length});if(!pr)return false}},
  at:[{n:'シャイニングフェザー',dt:'160',cost:[...'炎炎炎炎'],run:async x=>{hit(x,'battle',160);OWN(x.p).forEach(k=>{const t=lastOf(x.p.piles[k]);t.dm=Math.max(0,(t.dm||0)-50)});x.msg.push('自分のポケモン全員を50回復')}}]});
 mon('オーガポンいどのめんex',{hp:210,type:'水',rc:1,weak:'雷',tera:1,
  at:[{n:'すすりなく',dt:'20',cost:['無'],run:async x=>{hit(x,'battle',20);const t=lastOf(x.o.piles.battle);if(t&&!imm(t))t.nr=G.turn+1}},
@@ -1085,8 +1088,7 @@ mon('ゼブライカ',{hp:120,type:'雷',rc:1,st:'1進化',weak:'闘',res:'鋼',
   {n:'マッハボルト',dt:'100',cost:[...'雷雷無'],run:async x=>{hit(x,'battle',100)}}]});
 mon('カプ・コケコ プリズムスター',{hp:130,type:'雷',rc:1,weak:'闘',res:'鋼',resv:20,
  ab:{n:'せんじんのまい',ok:x=>x.k==='battle'?'ベンチにいるときだけ使えます':null,run:async x=>{const p=x.p,isL=y=>y.name==='基本雷エネルギー';const sel=[];   // ベンチ2匹にトラッシュの雷エネルギーを1枚ずつ。その後このカードをロストゾーンへ（ついているカードはトラッシュ）
-   for(let j=0;j<2;j++){if(p.trash.filter(isL).length<=j)break;const ks=OWN(p).filter(k=>k!=='battle'&&k!==x.k&&!sel.includes(k));if(!ks.length)break;const k=await ask(null,ks,p,`せんじんのまい：雷エネルギーをつけるベンチポケモン（${j+1}匹目）`,1);if(!k)break;sel.push(k)}
-   sel.forEach(k=>{const e=p.trash.find(isL);if(e){p.trash.splice(p.trash.indexOf(e),1);p.piles[k].unshift(e)}});
+   {const ks=OWN(p).filter(k=>k!=='battle'&&k!==x.k);const pr=await dragE(p.trash.filter(isL).slice(0,Math.min(2,ks.length)),ks,{ttl:'せんじんのまい：雷エネルギーをベンチポケモンにドラッグ（1匹に1枚）',distinct:1,cancel:false});(pr||[]).forEach(z=>sel.push(z.k))}
    const pl=p.piles[x.k],me2=pl.pop();p.trash.push(...pl.splice(0));(p.lost=p.lost||[]).push(me2);x.msg&&x.msg.push('');log(`せんじんのまい：${sel.length}匹に雷エネルギーをつけ、カプ・コケコ◇をロストゾーンに置いた`)}},
  at:[{n:'マッハボルト',dt:'120',cost:[...'雷雷無'],run:async x=>{hit(x,'battle',120)}}]});
 mon('ジラーチ',{hp:70,type:'鋼',rc:1,weak:'炎',res:'超',resv:20,
@@ -1105,7 +1107,7 @@ mon('マーイーカ',{hp:60,type:'超',rc:1,weak:'超',
  at:[{n:'さいみんじゅつ',dt:'',cost:['超'],run:async x=>{const t=oppAct(x);if(t&&!imm(t)){setSC(t,'slp');x.msg.push('相手をねむりにした')}}}]});
 mon('カラマネロ',{hp:90,type:'超',rc:2,st:'1進化',weak:'超',
  ab:{n:'サイコリチャージ',ok:x=>!x.p.trash.some(y=>y.name==='基本超エネルギー')?'トラッシュに超エネルギーがありません':(BN.some(k=>x.p.piles[k].length)?null:'ベンチにポケモンがいません'),run:async x=>{const p=x.p,ks=BN.filter(k=>p.piles[k].length);
-   const k=await ask(null,ks,p,'サイコリチャージ：超エネルギーをつけるベンチポケモンを選択');if(!k)return false;const e=p.trash.find(y=>y.name==='基本超エネルギー');p.trash.splice(p.trash.indexOf(e),1);p.piles[k].unshift(e)}},
+   const e=p.trash.find(y=>y.name==='基本超エネルギー');const pr=await dragE([e],ks,{ttl:'サイコリチャージ：超エネルギーをベンチポケモンにドラッグ',min:1});if(!pr)return false}},
  at:[{n:'ねんどうだん',dt:'60',cost:[...'超超無'],run:async x=>{hit(x,'battle',60)}}]});
 mon('マシマシラ',{hp:110,type:'超',rc:1,weak:'悪',res:'闘',
  ab:{n:'アドレナブレイン',ok:x=>!canPay(['悪'],x.p.piles[x.k])?'このポケモンに悪エネルギーがついていません':!OWN(x.p).some(k=>(lastOf(x.p.piles[k]).dm||0)>0)?'ダメカンがのっている自分のポケモンがいません':null,
@@ -1160,8 +1162,9 @@ Object.assign(FX,{
   act(()=>{const y=find(o,s[0].u);o.trash.push(y)});log(`クラッシュハンマー：${s[0].name}をトラッシュ`)},
  'メイのはげまし':async c=>{const p=me(),o=P[1-cur];if(p.side.length<=o.side.length)return err('自分のサイドが相手より多いときだけ使えます');
   const ks=OWN(p).filter(k=>stageOf(lastOf(p.piles[k]))==='2進化'),pool=p.trash.filter(isBE);if(!ks.length)return err('場に2進化ポケモンがいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
-  const k=await ask(null,ks,p,'エネルギーをつける2進化ポケモンを選択');if(!k)return;const t=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,2,0);if(!t)return;
-  fin(c,()=>t.forEach(y=>mv(y.u,k)));log(`メイのはげまし：${t.length}枚を${lastOf(p.piles[k]).name}につけました`)}});
+  const t=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,Math.min(2,pool.length),1);if(!t)return;
+  const pr=await dragE(t,ks,{ttl:'メイのはげまし：2進化ポケモンにドラッグ',same:1,min:t.length});if(!pr)return;
+  fin(c);log(`メイのはげまし：${t.length}枚を${lastOf(p.piles[pr[0].k]).name}につけました`)}});
 /* ---- 草デッキ（オーガポン みどりのめんex／カミツオロチex／メガニウムほか） ---- */
 const isGrassE=y=>y.t==='ene'&&/^基本草エネルギー/.test(y.name),isGrassP=y=>y.t==='pke'&&(mi(y)||{}).type==='草',eSum=p=>OWN(p).reduce((a,k)=>a+eunits(p.piles[k]),0);
 mon('オーガポン みどりのめんex',{hp:210,type:'草',rc:1,weak:'炎',tera:1,
@@ -1171,8 +1174,8 @@ mon('オーガポン みどりのめんex',{hp:210,type:'草',rc:1,weak:'炎',te
 mon('カミツオロチex',{hp:330,type:'草',rc:3,weak:'炎',st:'2進化',
  ab:{n:'じゅくせいチャージ',ok:x=>x.p.hand.some(isGrassE)?null:'手札に基本草エネルギーがありません',
   run:async x=>{const s=await pk('手札の基本草エネルギーを1枚選ぶ',x.p.hand.filter(isGrassE),1);if(!s||!s[0])return false;
-   const k=await ask(null,OWN(x.p),x.p,'基本草エネルギーをつける自分のポケモンを選択');if(!k)return false;
-   mv(s[0].u,k);const t=lastOf(x.p.piles[k]);t.dm=Math.max(0,(t.dm||0)-30);x.msg&&x.msg.push('HPを30回復')}},
+   const pr=await dragE(s,OWN(x.p),{ttl:'じゅくせいチャージ：基本草エネルギーをポケモンにドラッグ',min:1});if(!pr)return false;const k=pr[0].k;
+   const t=lastOf(x.p.piles[k]);t.dm=Math.max(0,(t.dm||0)-30);x.msg&&x.msg.push('HPを30回復')}},
  at:[{n:'みつあめストーム',dt:'30＋',cost:[...'無無'],run:async x=>{const n=eSum(x.p);x.msg.push(`自分のポケモン全員のエネルギー${n}個`);hit(x,'battle',30+30*n)}}]});
 mon('カミッチュ',{hp:80,type:'草',rc:2,weak:'炎',st:'1進化',
  ab:{n:'おまつりおんど',passive:1,tx:'場に「お祭り会場」が出ているなら、ワザを2回連続で使える（お祭り会場のカードが未実装のため、この効果は動きません）'},
@@ -1245,7 +1248,7 @@ mon('クロバットV',{hp:180,type:'悪',rc:1,weak:'闘',
 mon('イキリンコex',{hp:160,type:'無',rc:1,weak:'雷',res:'闘',
  ab:{n:'イキリテイク',key:'イキリテイク',ok:x=>x.p.myTurn===1?null:'最初の自分の番にしか使えません',run:x=>{x.p.trash.push(...x.p.hand.splice(0));for(let i=0;i<6;i++)draw1(x.p)}},
  at:[{n:'きあいをいれる',dt:'20',cost:['無'],run:async x=>{hit(x,'battle',20);const ks=BN.filter(k=>x.p.piles[k].length),pool=x.p.trash.filter(isBE);if(!ks.length||!pool.length)return;
-   const s=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,2,0);if(!s||!s.length)return;const k=await ask(null,ks,x.p,'エネルギーをつけるベンチポケモンを選択',1);s.forEach(y=>mv(y.u,k));x.msg.push(`基本エネルギー${s.length}枚をベンチにつけた`)}}]});
+   const s=await pk('トラッシュから基本エネルギーを2枚まで選ぶ',pool,2,0);if(!s||!s.length)return;await dragE(s,ks,{ttl:'きあいをいれる：ベンチポケモン1匹にドラッグ',same:1,min:s.length,cancel:false});x.msg.push(`基本エネルギー${s.length}枚をベンチにつけた`)}}]});
 mon('レジドラゴV',{hp:220,type:'龍',rc:3,
  at:[{n:'てんのさけび',dt:'',cost:['無'],run:async x=>{const t3=x.p.deck.splice(0,3);x.p.trash.push(...t3);const en=t3.filter(y=>y.t==='ene');en.forEach(y=>mv(y.u,x.k));x.msg.push(`山札の上3枚をトラッシュ、エネルギー${en.length}枚をつけた`)}},
   {n:'ドラゴンレーザー',dt:'130',cost:[...'草草炎'],run:async x=>{hit(x,'battle',130);const ks=BN.filter(k=>x.o.piles[k].length);if(ks.length){const k=await ask(null,ks,x.o,'30ダメージを与える相手のベンチポケモンを選択',1);hit(x,k,30)}}}]});
@@ -1296,7 +1299,7 @@ Object.assign(FX,{
   fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('トレーナーズポスト：'+(t[0]?t[0].name+'を手札に':'なし'))},
  'ダークパッチ':async c=>{const p=me(),pool=p.trash.filter(y=>y.name==='基本悪エネルギー'),ks=BN.filter(k=>p.piles[k].length&&(mi(lastOf(p.piles[k]))||{}).type==='悪');
   if(!pool.length)return err('トラッシュに基本悪エネルギーがありません');if(!ks.length)return err('ベンチに悪ポケモンがいません');
-  const k=await ask(c,ks,p,'基本悪エネルギーをつけるベンチの悪ポケモンを選択');if(!k)return;fin(c,()=>mv(pool[0].u,k));log('ダークパッチ：基本悪エネルギーをつけた')},
+  const pr=await dragE([pool[0]],ks,{ttl:'ダークパッチ：ベンチの悪ポケモンにドラッグ',min:1});if(!pr)return;fin(c);log('ダークパッチ：基本悪エネルギーをつけた')},
  'ぐんぐんシェイク':async c=>{const p=me(),can=k=>p.deck.some(y=>y.t==='pke'&&EVO[nk(y.name)]===nk(lastOf(p.piles[k]).name)),ks=OWN(p).filter(can);
   if(!ks.length){if(!(await yn('進化できる組み合わせが山札にありません。使って番を終えますか？')))return;fin(c,()=>shuffle(p.deck));STG.endTurn=1;log('ぐんぐんシェイク：進化できるカードなし。番を終える');return}
   const k=await ask(c,ks,p,'進化させる自分のポケモンを選択');if(!k)return;const base=nk(lastOf(p.piles[k]).name);
@@ -1331,9 +1334,9 @@ Object.assign(FX,{
   fin(c,()=>{if(s&&s[0])o.trash.push(find(o,s[0].u))});log('プルメリ：相手のエネルギーを1個トラッシュ')},
  'キバナ':async c=>{const p=me();if(p.koTurn!==G.turn-1)return err('前の相手の番に自分のポケモンがきぜつしていなければ使えません');
   const pool=p.trash.filter(isBE),ks=OWN(p);let e1=null,k=null;
-  if(pool.length&&ks.length){const s=await pk('トラッシュから基本エネルギーを1枚選ぶ',pool,1);if(!s)return;e1=s[0];k=await ask(c,ks,p,'基本エネルギーをつける自分のポケモンを選択');if(!k)return}
+  if(pool.length&&ks.length){const s=await pk('トラッシュから基本エネルギーを1枚選ぶ',pool,1);if(!s)return;const pr=await dragE(s,ks,{ttl:'キバナ：基本エネルギーをポケモンにドラッグ',min:1});if(!pr)return;STG.commit=1}
   const t=p.deck.length?await pk('山札から好きなカードを1枚選ぶ',p.deck,1,0):[];if(!t)return;
-  fin(c,()=>{if(e1)mv(e1.u,k);t.forEach(y=>mv(y.u,'hand',1));shuffle(p.deck)});log('キバナを使用')},
+  fin(c,()=>{t.forEach(y=>mv(y.u,'hand',1));shuffle(p.deck)});log('キバナを使用')},
  'ポケモンレンジャー':c=>{fin(c,()=>{P.forEach(q=>OWN(q).forEach(k=>q.piles[k].forEach(y=>{y.na=0;y.nr=0;y.sh=0;y.shb=0;y.dg=0;y.rd80=0})));G.noGoods=0;G.noSpE=0;G.noSta=0});log('ポケモンレンジャー：おたがいにかかっているワザの効果をすべてなくした')}
 });
 FX['シークレットボックス(ACE SPEC)']=FX['シークレットボックス'];FX['メガトンブロアー(ACE SPEC)']=FX['メガトンブロアー'];
@@ -1347,7 +1350,7 @@ const handAbOff=c=>garboOn()||(stadName()==='サイレントラボ'&&stageOf(c)=
 mon('テツノイバラex',{hp:230,type:'雷',rc:4,weak:'闘',fut:1,
  ab:{n:'イニシャライズ',passive:1,tx:'このポケモンがバトル場にいるかぎり、おたがいの場の「ルールを持つポケモン」（「未来」のポケモンをのぞく）の特性はすべてなくなる（常時）'},
  at:[{n:'ボルトサイクロン',dt:'140',cost:[...'雷無無'],run:async x=>{hit(x,'battle',140);const en=x.p.piles.battle.filter(y=>y.t==='ene'),ks=BN.filter(k=>x.p.piles[k].length);
-  if(en.length&&ks.length){const s=await pk('つけ替えるエネルギーを1個選ぶ',en,1),k=await ask(null,ks,x.p,'エネルギーをつけ替えるベンチポケモンを選択',1);if(s&&s[0]&&k){mv(s[0].u,k);x.msg.push('エネルギーを1個つけ替えた')}}}}]});
+  if(en.length&&ks.length){const s=await pk('つけ替えるエネルギーを1個選ぶ',en,1);if(s&&s[0]){await dragE(s,ks,{ttl:'ボルトサイクロン：ベンチポケモンにドラッグ',min:1,cancel:false});x.msg.push('エネルギーを1個つけ替えた')}}}}]});
 Object.assign(FX,{
  'ダークボール':async c=>{const p=me(),bot=p.deck.slice(-7);if(!bot.length)return err('山札がありません');
   const t=await pk('山札の下から7枚から、ポケモンを1枚選ぶ（相手に見せます）',bot,1,0,y=>y.t==='pke');if(!t)return;
@@ -1390,8 +1393,8 @@ mon('モモワロウex',{hp:190,type:'悪',rc:1,weak:'闘',
 Object.assign(FX,{
  'Nのポイントアップ':async c=>{const p=me(),ks=BN.filter(k=>p.piles[k].length&&/^N(の|ん)/.test(lastOf(p.piles[k]).name)),pool=p.trash.filter(isBE);
   if(!ks.length)return err('ベンチに「Nのポケモン」がいません');if(!pool.length)return err('トラッシュに基本エネルギーがありません');
-  const k=await ask(null,ks,p,'エネルギーをつけるベンチの「Nのポケモン」を選択');if(!k)return;const t=await pk('トラッシュから基本エネルギーを1枚選ぶ',pool,1);if(!t)return;
-  fin(c,()=>t.forEach(y=>mv(y.u,k)));log(`Nのポイントアップ：${t[0].name}を${lastOf(p.piles[k]).name}につけました`)},
+  const t=await pk('トラッシュから基本エネルギーを1枚選ぶ',pool,1);if(!t)return;const pr=await dragE(t,ks,{ttl:'Nのポイントアップ：ベンチの「Nのポケモン」にドラッグ',min:1});if(!pr)return;
+  fin(c);log(`Nのポイントアップ：${t[0].name}を${lastOf(p.piles[pr[0].k]).name}につけました`)},
  'ツールスクラッパー':async c=>{const all=[me(),P[1-cur]].flatMap((q)=>OWN(q).filter(k=>q.piles[k].some(y=>y.t==='tool')).map(k=>({q,k})));
   if(!all.length)return err('場にポケモンのどうぐがついていません');
   const t=await pk('トラッシュするポケモンのどうぐを2枚まで選ぶ',all.map(({q,k})=>q.piles[k].find(y=>y.t==='tool')),Math.min(2,all.length),0);if(!t)return;
@@ -1489,12 +1492,12 @@ mon('ルギアV',{hp:220,type:'無',rc:2,weak:'雷',res:'闘',
  at:[{n:'かぜよみ',dt:'',cost:['無'],chk:x=>x.p.hand.length?null:'手札がありません',run:async x=>{const s=await pk('トラッシュする手札を1枚選ぶ',x.p.hand,1);if(!s)return false;mv(s[0].u,'trash');for(let i=0;i<3;i++)draw1(x.p);x.msg.push('手札1枚をトラッシュして3枚引いた')}},
   {n:'エアロダイブ',dt:'130',cost:[...'無無無無'],run:async x=>{hit(x,'battle',130);await optStadTrash(x)}}]});
 mon('ルギアVSTAR',{hp:280,type:'無',rc:2,weak:'雷',res:'闘',st:'1進化',
- ab:{n:'アッセンブルスター',vs:1,ok:x=>!x.p.trash.some(y=>y.t==='pke'&&!isRule(y))?'トラッシュにルールを持たないポケモンがいません':(room(x.p)?null:'ベンチに空きがありません'),
-  run:async x=>{const s=await pk('トラッシュからポケモン（ルールを持つポケモンをのぞく）を2枚まで選び、ベンチに出す',x.p.trash,Math.min(2,room(x.p)),1,y=>y.t==='pke'&&!isRule(y));if(!s)return false;s.forEach(y=>{const k=freeBench(x.p);if(k)mv(y.u,k)})}},
+ ab:{n:'アッセンブルスター',vs:1,ok:x=>!x.p.trash.some(y=>y.t==='pke'&&!isRule(y)&&(mi(y)||{}).type==='無')?'トラッシュに無色ポケモン（ルールを持つポケモンをのぞく）がいません':(room(x.p)?null:'ベンチに空きがありません'),
+  run:async x=>{const s=await pk('トラッシュから無色ポケモン（ルールを持つポケモンをのぞく）を2枚まで選び、ベンチに出す',x.p.trash,Math.min(2,room(x.p)),1,y=>y.t==='pke'&&!isRule(y)&&(mi(y)||{}).type==='無');if(!s)return false;s.forEach(y=>{const k=freeBench(x.p);if(k)mv(y.u,k)})}},
  at:[{n:'ストームダイブ',dt:'220',cost:[...'無無無無'],run:async x=>{hit(x,'battle',220);await optStadTrash(x)}}]});
 mon('アーケオス',{hp:150,type:'無',rc:1,weak:'雷',res:'闘',st:'2進化',
- ab:{n:'プライマルターボ',ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const k=await ask(null,OWN(x.p),x.p,'特殊エネルギーをつける自分のポケモンを選択',1);if(!k)return false;const top=lastOf(x.p.piles[k]);
-  const s=await pk(`山札から特殊エネルギーを2枚まで選び、${top.name}につける`,x.p.deck,2,0,y=>isSE(y)&&eneOK(y,top));if(!s)return false;s.forEach(y=>mv(y.u,k));shuffle(x.p.deck)}},
+ ab:{n:'プライマルターボ',ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const s=await pk('山札から特殊エネルギーを2枚まで選ぶ',x.p.deck,2,0,isSE);if(!s)return false;
+  if(s.length)await dragE(s,OWN(x.p),{ttl:'プライマルターボ：ポケモン1匹にドラッグ',same:1,min:s.length,cancel:false});shuffle(x.p.deck)}},
  at:[{n:'スピードウイング',dt:'120',cost:[...'無無無'],run:async x=>{hit(x,'battle',120)}}]});
 mon('バンギラスV',{hp:230,type:'悪',rc:3,weak:'草',
  at:[{n:'やまなだれ',dt:'60',cost:[...'悪無無'],run:async x=>{hit(x,'battle',60);x.o.trash.push(...x.o.deck.splice(0,2));x.msg.push('相手の山札を上から2枚トラッシュ')}},
@@ -1552,7 +1555,7 @@ mon('ミカルゲ',{hp:60,type:'超',rc:1,weak:'悪',res:'闘',
 /* ---- ミュウ（フュージョン） ---- */
 mon('ミュウV',{hp:180,type:'超',rc:0,weak:'悪',res:'闘',
  at:[{n:'エナジーミックス',dt:'',cost:['超'],run:async x=>{const ks=OWN(x.p).filter(k=>tagOf(lastOf(x.p.piles[k]))==='フュージョン');if(!ks.length){x.msg.push('「フュージョン」のポケモンがいません');return}
-   const k=await ask(null,ks,x.p,'エネルギーをつける「フュージョン」のポケモンを選択',1);if(!k)return false;const top=lastOf(x.p.piles[k]);const s=await pk('山札からエネルギーを1枚選ぶ',x.p.deck,1,0,y=>y.t==='ene'&&eneOK(y,top));if(!s)return false;s.forEach(y=>mv(y.u,k));shuffle(x.p.deck);x.msg.push(`${top.name}にエネルギーをつけた`)}},
+   const s=await pk('山札からエネルギーを1枚選ぶ',x.p.deck,1,0,y=>y.t==='ene');if(!s)return false;if(s.length)await dragE(s,ks,{ttl:'エナジーミックス：「フュージョン」のポケモンにドラッグ',min:1,cancel:false});shuffle(x.p.deck);x.msg.push('エネルギーをつけた')}},
   {n:'サイコジャンプ',dt:'70',cost:[...'超無'],run:async x=>{hit(x,'battle',70);if(await yn('のぞむなら：このポケモンとついているカードを山札にもどして切りますか？')){backToDeck(x);x.msg.push('山札にもどした')}}}]});
 mon('ミュウVMAX',{hp:310,type:'超',rc:0,weak:'悪',res:'闘',st:'1進化',
  at:[{n:'クロスフュージョン',dt:'',cost:[...'無無'],run:async x=>{const op=[];BN.forEach(k=>{const t=lastOf(x.p.piles[k]);if(!t||tagOf(t)!=='フュージョン')return;((mi(t)||{}).at||[]).forEach(a=>{if(a.n!=='クロスフュージョン'&&!a.gx&&!a.vs&&!op.some(o=>o.a===a))op.push({t,a})})});
@@ -1583,19 +1586,21 @@ mon('キルリア#1',{hp:80,type:'超',rc:1,weak:'鋼',st:'1進化',
  at:[{n:'ミラージュステップ',dt:'',cost:['超'],run:async x=>{const rm=room(x.p);if(!rm){x.msg.push('ベンチに空きがありません');return}const s=await pk('山札から「キルリア」を3枚まで選び、ベンチに出す',x.p.deck,Math.min(3,rm),0,y=>nk(y.name)==='キルリア');if(!s)return false;s.forEach(y=>{const k=freeBench(x.p);if(k)mv(y.u,k)});shuffle(x.p.deck);x.msg.push(`キルリア${s.length}枚をベンチに出した`)}}]});
 mon('サーナイトex',{hp:310,type:'超',rc:2,weak:'悪',res:'闘',st:'2進化',
  ab:{n:'サイコエンブレイス',many:1,ok:x=>!x.p.trash.some(y=>y.name==='基本超エネルギー')?'トラッシュに基本超エネルギーがありません':(OWN(x.p).some(k=>(mi(lastOf(x.p.piles[k]))||{}).type==='超')?null:'超ポケモンがいません'),
-  run:async x=>{const ks=OWN(x.p).filter(k=>(mi(lastOf(x.p.piles[k]))||{}).type==='超');const k=await ask(null,ks,x.p,'基本超エネルギーをつける自分の超ポケモンを選択',1);if(!k)return false;const e=x.p.trash.find(y=>y.name==='基本超エネルギー');mv(e.u,k);const t=lastOf(x.p.piles[k]);t.dm=(t.dm||0)+20;render();log(`サイコエンブレイス：${t.name}に基本超エネルギーをつけ、ダメカン2個`)}},
+  run:async x=>{const p=x.p,es=p.trash.filter(y=>y.name==='基本超エネルギー');   /* 連続使用：トラッシュの基本超エネルギーを並べ、ドラッグするたびに1回ぶん（つけてダメカン2個）。完了で終わる */
+   const ks=()=>OWN(p).filter(k=>{const t=lastOf(p.piles[k]);return(mi(t)||{}).type==='超'&&(t.dm||0)<hpOf(p.piles[k])});
+   const pr=await dragE(es,ks,{ttl:'サイコエンブレイス：基本超エネルギーを超ポケモンにドラッグ（何回でも・終わったら完了）',onPlace:(c,k)=>{const t=lastOf(p.piles[k]);t.dm=(t.dm||0)+20;log(`サイコエンブレイス：${t.name}に基本超エネルギーをつけ、ダメカン2個`)}});
+   if(!pr||!pr.length)return false}},
  at:[{n:'ミラクルフォース',dt:'190',cost:[...'超超無'],run:async x=>{hit(x,'battle',190);const c=x.c;c.psn=0;c.brn=0;c.slp=0;c.cf=0;c.par=0}}]});
 mon('サーナイト',{hp:140,type:'超',rc:2,weak:'鋼',st:'2進化',
  ab:{n:'アルカナシャイン',ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const t2=x.p.deck.slice(0,2);const s=await pk('山札の上2枚：つける基本エネルギーを選ぶ（残りは手札に加える）',t2,t2.length,0,isBE);if(!s)return false;
-  for(const y of s){const k=await ask(null,OWN(x.p),x.p,`${y.name}をつける自分のポケモンを選択`,1);if(k)mv(y.u,k)}t2.filter(y=>!s.includes(y)).forEach(y=>mv(y.u,'hand',1))}},
+  if(s.length)await dragE(s,OWN(x.p),{ttl:'アルカナシャイン：エネルギーをポケモンにドラッグ',min:s.length,cancel:false});t2.filter(y=>!s.includes(y)).forEach(y=>mv(y.u,'hand',1))}},
  at:[{n:'ブレインウェーブ',dt:'60＋',cost:[...'無無無'],run:async x=>{const n=eunits(x.p.piles.battle);x.msg.push(`エネルギー${n}個`);hit(x,'battle',60+30*n)}}]});
 mon('クレセリア',{hp:120,type:'超',rc:1,weak:'悪',res:'闘',
  at:[{n:'ムーンライトリバース',dt:'',cost:['超'],run:async x=>{let n=0;OWN(x.p).forEach(k=>{const t=lastOf(x.p.piles[k]),m=Math.min(2,Math.floor((t.dm||0)/10));t.dm-=10*m;n+=m});if(!n){x.msg.push('動かせるダメカンがありません');return}
    const k=await ask(null,OWN(x.o),x.o,`ダメカン${n}個をのせる相手のポケモンを選択`,1);const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10*n;x.msg.push(`${t.name}にダメカン${n}個をのせ替えた`)}},
   {n:'ルナブラスト',dt:'110',cost:[...'超超無'],run:async x=>{hit(x,'battle',110)}}]});
 mon('ザシアンV',{hp:220,type:'超',rc:2,weak:'鋼',
- ab:{n:'けんのほうこう',endT:1,ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const k=await ask(null,OWN(x.p),x.p,'超エネルギーをつける自分のポケモンを選択',1);if(!k)return false;const top=lastOf(x.p.piles[k]);
-  const s=await pk('山札から超エネルギーを1枚選ぶ',x.p.deck,1,0,y=>y.t==='ene'&&(y.name==='基本超エネルギー'||unitsOf(y,top).some(u=>u==='*'||u.includes('超')))&&eneOK(y,top));if(!s)return false;s.forEach(y=>mv(y.u,k));shuffle(x.p.deck)}},
+ ab:{n:'けんのほうこう',endT:1,ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const s=await pk('山札からエネルギーを1枚選ぶ',x.p.deck,1,0,y=>y.t==='ene');if(!s)return false;if(s.length)await dragE(s,OWN(x.p),{ttl:'けんのほうこう：エネルギーをポケモンにドラッグ',min:1,cancel:false});shuffle(x.p.deck)}},
  at:[{n:'ストームスラッシュ',dt:'60＋',cost:[...'無無無'],run:async x=>{const n=ens(x.p.piles.battle).filter(y=>unitsOf(y,x.c).some(u=>u==='*'||u.includes('超'))).length;x.msg.push(`超エネルギー${n}個`);hit(x,'battle',60+30*n)}}]});
 mon('ミュウ',{hp:60,type:'超',rc:1,weak:'悪',res:'闘',
  ab:{n:'ふしぎなしっぽ',ok:x=>x.k!=='battle'?'バトル場にいるときだけ使えます':(x.p.deck.length?null:'山札がありません'),run:async x=>{const t6=x.p.deck.slice(0,6);const s=await pk('山札の上6枚：グッズを1枚選ぶ（相手に見せて手札に加える）',t6,1,0,y=>y.t==='tr');if(!s)return false;s.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck)}},
@@ -1607,7 +1612,7 @@ Object.assign(FX,{
   const k=await ask(c,ks,p,'バトル場と入れ替えるベンチポケモンを選択');if(!k)return;fin(c,()=>{swap(k);const b=lastOf(p.piles[k]);b.dm=Math.max(0,(b.dm||0)-30)});log('いれかえカート：入れ替えて30回復')},
  'ミラージュゲート':async c=>{const p=me();if(lostN(p)<7)return err('自分のロストゾーンにカードが7枚以上ないと使えません');
   const s=await pk('山札から、ちがうタイプの基本エネルギーを2枚まで選ぶ',p.deck,2,0,isBE);if(!s)return;if(s.length===2&&s[0].name===s[1].name)return err('ちがうタイプの基本エネルギーを選んでください');
-  const dst=[];for(const y of s){const k=await ask(c,OWN(p),p,`${y.name}をつける自分のポケモンを選択`,1);dst.push(k)}fin(c,()=>{s.forEach((y,i)=>{if(dst[i])mv(y.u,dst[i])});shuffle(p.deck)});log('ミラージュゲート：'+(s.map(y=>y.name).join('、')||'なし')+'をつけた')},
+  if(s.length){const pr=await dragE(s,OWN(p),{ttl:'ミラージュゲート：エネルギーをポケモンにドラッグ',min:s.length});if(!pr)return;STG.commit=1}fin(c,()=>shuffle(p.deck));log('ミラージュゲート：'+(s.map(y=>y.name).join('、')||'なし')+'をつけた')},
  'ロストスイーパー':async c=>{const p=me(),o=p.hand.filter(y=>y.u!==c.u),pool=[];P.forEach(q=>{OWN(q).forEach(k=>q.piles[k].forEach(y=>{if(y.t==='tool')pool.push(y)}));q.piles.stadium.forEach(y=>pool.push(y))});
   if(!o.length)return err('ロストゾーンに置く手札がありません');if(!pool.length)return err('場にポケモンのどうぐ・スタジアムがありません');
   const d=await pk('ロストゾーンに置く手札を1枚選択',o,1);if(!d)return;act(()=>{toLost(p,d[0].u);STG.commit=1});await stgPause();
@@ -1623,8 +1628,8 @@ Object.assign(FX,{
  'バーネット博士':async c=>{const p=me(),t=await pk('山札からトラッシュするカードを2枚まで選ぶ',p.deck,2,0);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'trash'));shuffle(p.deck)});log('バーネット博士：'+(t.map(y=>y.name).join('、')||'なし')+'をトラッシュ')},
  'エネルギー転送':async c=>{const p=me(),t=await pk('山札から基本エネルギーを1枚選ぶ',p.deck,1,0,isBE);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('エネルギー転送：'+(t.map(y=>y.name).join('')||'なし'))},
  'メロン':async c=>{const p=me(),ks=OWN(p).filter(k=>isV(lastOf(p.piles[k]))),pool=p.trash.filter(y=>y.t==='ene');let s=null,k=null;
-  if(ks.length&&pool.length){k=await ask(c,ks,p,'エネルギーをつける自分の「ポケモンV」を選択');if(!k)return;const top=lastOf(p.piles[k]);s=await pk('トラッシュからエネルギーを1枚選ぶ',pool,1,0,y=>eneOK(y,top));if(!s)return}
-  fin(c,()=>{(s||[]).forEach(y=>mv(y.u,k));for(let i=0;i<3;i++)draw1(p)});log('メロン：'+(s&&s[0]?s[0].name+'をつけて':'')+'3枚引いた')},
+  if(ks.length&&pool.length){s=await pk('トラッシュからエネルギーを1枚選ぶ',pool,1);if(!s)return;const pr=await dragE(s,ks,{ttl:'メロン：自分の「ポケモンV」にドラッグ',min:1});if(!pr)return;STG.commit=1}
+  fin(c,()=>{for(let i=0;i<3;i++)draw1(p)});log('メロン：'+(s&&s[0]?s[0].name+'をつけて':'')+'3枚引いた')},
  'コルニの気合い':c=>{fin(c,()=>drawTo(me(),6));log('コルニの気合い：手札が6枚になるように引いた')},
  'カイ':async c=>{const p=me(),a=await pk('山札からポケモンを1枚選ぶ',p.deck,1,0,y=>y.t==='pke');if(!a)return;const b=await pk('山札からグッズを1枚選ぶ',p.deck,1,0,y=>y.t==='tr');if(!b)return;fin(c,()=>{[...a,...b].forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('カイ：'+([...a,...b].map(y=>y.name).join('、')||'なし')+'を手札に')},
  'モミ':c=>{const p=me();fin(c,()=>OWN(p).forEach(k=>{const t=lastOf(p.piles[k]);if(stageOf(t)!=='たね'&&(t.dm||0)>0){t.dm=0;ens(p.piles[k]).forEach(y=>mv(y.u,'trash'))}}));log('モミ：進化ポケモンを回復し、エネルギーをトラッシュ')},
@@ -1633,8 +1638,8 @@ Object.assign(FX,{
  'ウッウロボ':async c=>{const p=me(),o=p.hand.filter(y=>y.u!==c.u&&y.t==='tr');if(!o.length)return err('トラッシュする手札のグッズがありません');const d=await pk('トラッシュする手札のグッズを1枚選択',o,1);if(!d)return;act(()=>{d.forEach(y=>mv(y.u,'trash'));STG.commit=1});await stgPause();
   const h=await coin();if(!h){fin(c);log('ウッウロボ：ウラ');return}const t=await pk('山札から好きなカードを1枚選ぶ',p.deck,1,0);fin(c,()=>{(t||[]).forEach(y=>mv(y.u,'hand',1));shuffle(p.deck)});log('ウッウロボ：オモテ')},
  'カミツレのきらめき':async c=>{const p=me(),ks=OWN(p).filter(k=>tagOf(lastOf(p.piles[k]))==='フュージョン');if(!ks.length)return err('「フュージョン」のポケモンがいません');const sel=[];
-  for(let i=0;i<Math.min(2,ks.length);i++){const k=await ask(c,ks.filter(z=>!sel.includes(z)),p,`フュージョンエネルギーをつけるポケモンを選択（${i+1}/2）`,i>0?0:1);if(!k)break;sel.push(k)}
-  const fe=p.deck.filter(y=>/^フュージョンエネルギー/.test(y.name));fin(c,()=>{sel.forEach((k,i)=>{if(fe[i])mv(fe[i].u,k)});shuffle(p.deck)});log(`カミツレのきらめき：フュージョンエネルギー${Math.min(sel.length,fe.length)}枚をつけた`)},
+  const fe=p.deck.filter(y=>/^フュージョンエネルギー/.test(y.name)).slice(0,Math.min(2,ks.length));const pr=await dragE(fe,ks,{ttl:'カミツレのきらめき：「フュージョン」のポケモンにドラッグ（1匹に1枚）',distinct:1});if(!pr)return;
+  fin(c,()=>shuffle(p.deck));log(`カミツレのきらめき：フュージョンエネルギー${pr.length}枚をつけた`)},
  'レベルボール':async c=>{const p=me(),t=await pk('山札からHP90以下のポケモンを1枚選ぶ',p.deck,1,0,y=>y.t==='pke'&&((mi(y)||{}).hp||999)<=90);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('レベルボール：'+(t.map(y=>y.name).join('')||'なし'))},
  '霧の水晶':async c=>{const p=me(),t=await pk('山札から超タイプのたねポケモンか基本超エネルギーを1枚選ぶ',p.deck,1,0,y=>y.name==='基本超エネルギー'||(isBas(y)&&(mi(y)||{}).type==='超'));if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('霧の水晶：'+(t.map(y=>y.name).join('')||'なし'))},
  'ツツジ':c=>{const o=P[1-cur];if(o.side.length>3)return err('相手のサイドの残り枚数が3枚以下のときにしか使えません');fin(c,()=>P.forEach((q,i)=>{if(q.phase==='none')return;q.deck.push(...q.hand.splice(0));shuffle(q.deck);for(let j=0;j<(i===cur?6:2);j++)draw1(q)}));log('ツツジ：おたがい手札を山札にもどし、自分は6枚・相手は2枚引いた')}
@@ -1647,6 +1652,21 @@ const STAU={
  'ボウルタウン':{ok:p=>freeBench(p)?null:'ベンチに空きがありません',run:async p=>{const t=await pk('山札からたねポケモン（ルールを持つポケモンをのぞく）を1枚選び、ベンチに出す',p.deck,1,0,y=>isBas(y)&&!isRule(y));if(!t)return false;t.forEach(y=>{mv(y.u,freeBench(p));hazard(y)});shuffle(p.deck)}}};
 async function useStad(){const p=me(),n=nk(stadName()),S=STAU[n];if(!S)return;if(p.phase!=='play')return err('対戦中のみ使えます');G.su=G.su||{};if(G.su[cur]===G.turn)return err('この番はすでに使いました');
  const b=S.ok&&S.ok(p);if(b)return err(b);HS.push(JSON.stringify([P,G,cur]));let r;try{r=await S.run(p)}catch(e){console.error(e)}if(r===false){HS.pop();return}G.su[cur]=G.turn;if(NET.on)DIRTY=1;render();log(`P${cur+1}がスタジアム「${stadName()}」の効果を使用`)}
+
+/* ---- 効果でエネルギーをつける：手札をどけて、つけるエネルギーを手札の位置に並べ、盤面のポケモンへドラッグしてつける ----
+   ks＝つけられる場所（配列、または (カード,これまでの組)=>配列）。o.min＝最低何枚つけるか、o.distinct＝1匹に1枚まで、o.same＝全部同じポケモンに */
+let ATT=null,ATTBACK=0;
+const attAllow=(c,A=ATT)=>{let ks=typeof A.ks==='function'?A.ks(c,A.pairs):A.ks;const p=P[A.i];ks=ks.filter(k=>p.piles[k]&&p.piles[k].length);
+ if(A.o.distinct)ks=ks.filter(k=>!A.pairs.some(z=>z.k===k));if(A.o.same&&A.pairs.length)ks=ks.filter(k=>k===A.pairs[0].k);return ks};
+function dragE(cards,ks,o={}){cards=(cards||[]).filter(Boolean);const A={i:cur,cards:cards.slice(),ks,o,pairs:[]};const mx=Math.min(o.max??cards.length,cards.length),mn=Math.min(o.min??0,mx);
+ if(!cards.length)return Promise.resolve([]);
+ if(PREVM||isCpu(cur)){for(const c of cards){if(A.pairs.length>=mx)break;const k=attAllow(c,A)[0];if(!k)continue;mv(c.u,k);A.pairs.push({c,k});if(o.onPlace)o.onPlace(c,k)}return Promise.resolve(A.pairs)}
+ return new Promise(r=>{A.r=r;A.mx=mx;A.mn=mn;ATT=A;closeAll();render()})}
+function attEnd(ok){const A=ATT;if(!A)return;if(!ok&&A.pairs.length)return;if(ok&&A.pairs.length<A.mn&&A.cards.some(c=>attAllow(c,A).length))return err(`あと${A.mn-A.pairs.length}枚つけてください`);ATT=null;ATTBACK=1;render();A.r(ok?A.pairs:null)}
+function attDrop(c,x,y){const A=ATT;if(!A)return;const tg=[...document.querySelectorAll(`#mat [data-a=pile][data-p="${A.i}"]`)].find(el=>{const r=el.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom});if(!tg)return err('自分のポケモンの上にドラッグしてください');
+ const k=tg.dataset.k;if(!attAllow(c,A).includes(k))return err('そのポケモンにはつけられません');
+ act(()=>{mv(c.u,k);if(A.o.onPlace)A.o.onPlace(c,k)});A.pairs.push({c,k});A.cards=A.cards.filter(z=>z!==c);log(`${c.name}を${lastOf(P[A.i].piles[k]).name}につけた`);
+ if(A.pairs.length>=A.mx||!A.cards.some(z=>attAllow(z,A).length)){if(A.pairs.length>=A.mn||!A.cards.length)return attEnd(1)}render()}
 /* ---- ダメージ計算・きぜつ ---- */
 function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
  if(k!=='battle'&&(tm.tera||tm.bnc))return 0;if(k!=='battle'&&manaOn(x.o))return 0;
@@ -1916,10 +1936,11 @@ function animate(pv,hc,sd){if(NOFLY){NOFLY=0;return}const CI={},LOC={};
   if(o){if(n.dm>o.dm)dnum(n.r,'-'+(n.dm-o.dm),0,el);else if(n.dm<o.dm&&o.a==='pile'&&n.a==='pile')dnum(n.r,'+'+(o.dm-n.dm),1);
    if(o.a==='pile'&&n.a==='pile'&&o.st!==n.st){const cd=el.querySelector(':scope>.card');if(cd)A(cd,[{transform:ROT(o.st)},{transform:ROT(n.st)}],{duration:560,easing:'cubic-bezier(.3,.7,.25,1)'})}   /* ねむり・マヒ・こんらん：横向き・逆さへなめらかに回す */
    if(o.a==='hand'&&n.a==='hand'){const dx=o.r.left-n.r.left,dy=o.r.top-n.r.top;if(Math.abs(dx)+Math.abs(dy)>2)A(el,[{transform:`translate(${dx}px,${dy}px)`},{transform:'translate(0,0)'}],{duration:300,easing:'cubic-bezier(.25,.8,.25,1)'});continue}   /* 手札が増減したら、残りのカードは新しい位置へすべるように動く */if(Math.abs(o.r.left-n.r.left)+Math.abs(o.r.top-n.r.top)<6)continue;hideFly(el,cardH(c),o.r,n.r,d++)}
+  else if(n.a==='hand'&&ATTBACK)continue;   /* 効果でエネルギーをつけ終わって手札が戻るとき：引いたアピールはしない */
   else if(n.a==='hand'&&pv.z[n.p]){let src=pv.z[n.p];if(sd[n.p]>0&&pv.s[n.p]){sd[n.p]--;src=pv.s[n.p]}else if(LS.tr.has(n.p+':'+u)){const z=trR(n.p);if(z)src=z}DRW.push({el,c,src,dst:n.r})}
   else if(n.a==='pile'&&!(MP()&&+n.p===1-VW())){const i=+n.p,src=LS.tr.has(i+':'+u)?trR(i):LS.dk.has(i+':'+u)?pv.z[i]:null;if(src&&src.width)hideFly(el,cardH(c),src,n.r,d++)}   // 山札・トラッシュから直接場に出たカード（なかよしポフィン等）
   else if(MP()&&+n.p===1-VW()&&n.a!=='hand'&&oppFly(el,c,n,pv,hc,d))d++}
- for(const u in pv.m){if(nw[u]||pv.m[u].a!=='hand'||!LOC[u])continue;const[i,k]=LOC[u],s=document.querySelector(`#mat [data-a="pile"][data-p="${i}"][data-k="${k}"]`);if(s)attachFly(CI[u],DROPR&&DROPR.u===CI[u].u?DROPR.r:pv.m[u].r,s,d++*90,i,k)}
+ for(const u in pv.m){if(nw[u]||(pv.m[u].a!=='hand'&&pv.m[u].a!=='attc')||!LOC[u])continue;const[i,k]=LOC[u],s=document.querySelector(`#mat [data-a="pile"][data-p="${i}"][data-k="${k}"]`);if(s)attachFly(CI[u],DROPR&&DROPR.u===CI[u].u?DROPR.r:pv.m[u].r,s,d++*90,i,k)}
  const RETEND=retFx(pv,RDW);
  for(const key in LOC){if(LS.loc[key]||pv.m[key])continue;const[i,k]=LOC[key],s=document.querySelector(`#mat [data-a="pile"][data-p="${i}"][data-k="${k}"]`);if(!s)continue;   /* 山札・トラッシュから直接つけたエネルギー等（アカマツ・ポイントアップ等） */
   const src=LS.tr.has(key)?trR(i):LS.dk.has(key)?pv.z[i]:null;if(src&&src.width)attachFly(CI[key],src,s,d++*110,i,k)}
@@ -1990,7 +2011,7 @@ function decor(){const M=$('#mat');if(!M)return;const key=[PCM(),RT(),VPW,VPH,be
   const d=document.createElement('div');d.className='tray '+cls;d.style.cssText=`left:${(l-mr.left)/mr.width*100}%;top:${(t-mr.top)/mr.height*100}%;width:${(r-l)/mr.width*100}%;height:${(b-t)/mr.height*100}%;--tc:${PCOL[i]}`;M.prepend(d)};
  [0,1].forEach(i=>{const q=x=>[...M.querySelectorAll(x)];box(q(`.slot[data-a=pile][data-p="${i}"]:not([data-k=battle])`),'tb',i);box(q(`.slot[data-a=deck][data-p="${i}"],.slot[data-a=trash][data-p="${i}"]`),'tz',i);box(q(`.slot[data-a=sidez][data-p="${i}"],.slot[data-a=sidez][data-p="${i}"] .fan>div`),'tz',i)});DECK0=key;DECH=[...M.querySelectorAll('.tray')].map(e=>e.outerHTML).join('')}
 function render(){if(SIMQ)return;const hs=$('.hand'),sc=hs?hs.scrollLeft:0,pv=snapDom(),c0=VW();render0();decor();applyHide();const h2=$('.hand');if(h2)h2.scrollLeft=sc;hArrows(h2);
- const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;shufCheck();flipCheck();LS=snapLoc();revPlay();netSend();if(!SIMQ&&P.some(q=>q.phase==='mull'||q.mrev)||G.mdraw)setTimeout(()=>{mullCheck();mrevCheck();mdrawAsk()},0);if(G.over){if(!RSHOWN){RSHOWN=1;setTimeout(showResult,1900)}}else RSHOWN=0}
+ const hc=P.map(p=>p.hand.length),sn=P.map(p=>p.side.length),sd=sn.map((n,i)=>Math.max(0,LASTSC[i]-n)),skip=VW()!==LASTCUR||c0!==VW();if(!skip)animate(pv,hc,sd);ATTBACK=0;LASTCUR=VW();LASTHC=hc;LASTSC=sn;DROPR=null;shufCheck();flipCheck();LS=snapLoc();revPlay();netSend();if(!SIMQ&&P.some(q=>q.phase==='mull'||q.mrev)||G.mdraw)setTimeout(()=>{mullCheck();mrevCheck();mdrawAsk()},0);if(G.over){if(!RSHOWN){RSHOWN=1;setTimeout(showResult,1900)}}else RSHOWN=0}
 const fxWait=(ex=150)=>sleep(Math.max(0,FXEND-Date.now())+ex);   // 動き（ドロー・サイド等）が終わるまで待つ
 async function turnSwitch(){if(G.over)return;if(SIMQ&&SIMSTOP){SIMEND=1;return}if(!SIMQ&&TURNEND)TURNEND(cur);
  /* ポケモンチェックは番と番の間（番を渡す前・今の盤面のまま）。サイドを取って手札に入るまで待ってから切り替える */
@@ -2246,7 +2267,7 @@ function surrender(){if(G.over)return;if(!confirm('投了しますか？'))retur
 /* ベンチ→バトル場に出たかを記録（サンダー「アサルトサンダー」用）：前回の描画でベンチにいたカードが今バトル場のいちばん上なら toA=この番 */
 let LASTPOS=[{},{}];function posTrack(){P.forEach((q,i)=>{if(!q||!q.piles)return;const t=lastOf(q.piles.battle);if(t&&LASTPOS[i][t.u]==='b')t.toA=G.turn;const m={};BN.forEach(k=>{const z=lastOf(q.piles[k]);if(z)m[z.u]='b'});if(t)m[t.u]='a';LASTPOS[i]=m})}
 /* プリズムスター：トラッシュには行かず、ロストゾーンに置く */
-function lostSweep(){P.forEach((q,i)=>{if(!q||!q.trash)return;for(let j=q.trash.length-1;j>=0;j--)if(isPrism(q.trash[j])){const c=q.trash.splice(j,1)[0];(q.lost=q.lost||[]).push(c);if(!SIMQ)log(`${c.name}はロストゾーンに置かれた（プリズムスター）`)}})}
+function lostSweep(){P.forEach((q,i)=>{if(!q||!q.piles)return;['battle',...BN].forEach(k=>{const pl=q.piles[k],t=pl&&lastOf(pl);if(!t||t.t!=='pke')return;for(let j=pl.length-2;j>=0;j--){const y=pl[j];if(y.t==='ene'&&/^(いちげき|れんげき|フュージョン)エネルギー/.test(y.name)&&!eneOK(y,t)){pl.splice(j,1);q.trash.push(y);if(!SIMQ)log(`${y.name}は「${tagOf(y)}」のポケモン以外についたので、トラッシュした`)}}})});P.forEach((q,i)=>{if(!q||!q.trash)return;for(let j=q.trash.length-1;j>=0;j--)if(isPrism(q.trash[j])){const c=q.trash.splice(j,1)[0];(q.lost=q.lost||[]).push(c);if(!SIMQ)log(`${c.name}はロストゾーンに置かれた（プリズムスター）`)}})}
 /* 確認用（何も動かさない）：トラッシュ一覧・手札一覧・カードの拡大 */
 function peek(title,cs){list(title,cs,c=>menu(c,[]),[],0,null,()=>{$('#ov5').className=''},0,'#ov5')}
 function peekAct(t){const a=t.dataset.a,q=P[+t.dataset.p];
@@ -2257,7 +2278,7 @@ function peekAct(t){const a=t.dataset.a,q=P[+t.dataset.p];
  else if(a==='pile'&&q){const c=lastOf(q.piles[t.dataset.k]);if(c&&t.dataset.u)menu(c,[])}
  else if(a==='stad'){const c=lastOf(P[+t.dataset.p].piles.stadium);if(c)menu(c,[])}
  else if(a==='lost')openLost(VW())}
-$('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;{const hs=ev.target.closest('[data-a=hscrl]');if(hs){const h=$('.hand');if(h)h.scrollBy({left:+hs.dataset.d*h.clientWidth*.7,behavior:'smooth'});return}}{const t0=ev.target.closest('[data-a=ohall],[data-a=lost]');if(t0&&!SEL){peekAct(t0);return}}
+$('#mat').onclick=ev=>{if(Date.now()-NOCLK<400)return;if(ATT){const t=ev.target.closest('[data-a]');if(t&&t.dataset.a==='attok')attEnd(1);else if(t&&t.dataset.a==='attno')attEnd(0);else if(t&&t.dataset.a==='attc'){const c=ATT.cards.find(x=>x.u===t.dataset.u);if(c)detail(c)}return}{const hs=ev.target.closest('[data-a=hscrl]');if(hs){const h=$('.hand');if(h)h.scrollBy({left:+hs.dataset.d*h.clientWidth*.7,behavior:'smooth'});return}}{const t0=ev.target.closest('[data-a=ohall],[data-a=lost]');if(t0&&!SEL){peekAct(t0);return}}
  if(SEL){const t=ev.target.closest('[data-a]');if(!t)return;const a=t.dataset.a,r=SEL.r;
   if(a==='selc'){SEL=null;render();r(null)}else if(a==='pile'&&+t.dataset.p===SEL.i&&SEL.ks.includes(t.dataset.k)){SEL=null;render();r(t.dataset.k)}else if(a==='logs')openLog();
   else peekAct(t);return}   // 選択中でも、トラッシュ・手札・場のカードを確認できる
