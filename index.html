@@ -645,7 +645,7 @@ function board(i,f){const p=P[i],o=[],hid=f&&P.some(x=>['setup','wait','mull','b
  sl(...LY([w8?-6:8,1300,w8?140:150],[150,755,115]),`data-a="sidez" data-p="${i}"`,sideH(SIDEFLY&&SIDEFLY.p===i?Math.min(SIDEFLY.n||0,p.side.length):p.side.length));
  {const dn=p.deck.length+(SIDEFLY&&SIDEFLY.p===i?Math.max(0,Math.min(6,p.side.length)-(SIDEFLY.l||0)):0);sl(...LY([w8?782:762,1170,w8?140:150],[1310,755,115]),`data-a="deck" data-p="${i}"`,dn?back()+cn(dn):'')}
  sl(...LY([w8?792:775,1465,w8?128:130],[1440,755,115]),`data-a="trash" data-p="${i}" data-u="${p.trash.length?lastOf(p.trash).u:''}"`,p.trash.length?cardH(lastOf(p.trash))+cn(p.trash.length):'');
- if(!f&&ATT&&ATT.i===i){o.push(`<div class="hand attm">${ATT.cards.map(c=>`<div class="hc attc" data-a="attc" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div><div class="hbtn" style="${PCM()?'left:88.5%;top:85.5%':'left:2%;top:77.1%'}">${ATT.pairs.length>=ATT.mn?`<button data-a="attok" class="pri">${ATT.pairs.length?'完了':'つけない'}</button>`:''}${!ATT.pairs.length&&ATT.o.cancel!==false?`<button data-a="attno">やめる</button>`:''}</div>`);return o.join('')}
+ if(!f&&ATT&&ATT.i===i){o.push(`<div class="hand attm">${ATT.cards.map(c=>`<div class="hc attc" data-a="attc" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div><div class="hbtn" style="${PCM()?'left:70.2%;top:69.3%':'left:2%;top:77.1%'}">${ATT.pairs.length>=ATT.mn?`<button data-a="attok" class="pri">${ATT.pairs.length?'完了':'つけない'}</button>`:''}${!ATT.pairs.length&&ATT.o.cancel!==false?`<button data-a="attno">やめる</button>`:''}</div>`);return o.join('')}
  o.push(f?`<div class="oh">${p.hand.map(()=>back()).join('')}</div>`:`<div class="hand${ATTBACK&&i===VW()?' attm':''}">${p.hand.map(c=>`<div class="hc" data-a="hand" data-p="${i}" data-u="${c.u}">${cardH(c)}</div>`).join('')}</div>`);
  o.push(`<div class="hcnt" ${f&&!MP()?`data-a="ohall" data-p="${i}"`:''} style="${f&&!MP()?'pointer-events:auto;cursor:pointer;':''}${PCM()?(f?'left:1%;top:.4%':'left:1%;top:86%'):(f?'left:2%;top:.6%':'left:2%;top:84.3%')}">P${i+1} 手札 ${p.hand.length}枚</div>`);if(!f)o.push(`<div class="hbtn" style="${PCM()?'left:88.5%;top:85.5%':'left:2%;top:77.1%'}"><button data-a="hsort">整理</button><button data-a="hall">全手札</button><button class="au${AS?' pri':''}" data-a="hauto">自動整理：${AS?'ON':'OFF'}</button></div>`);return o.join('')}
 function hud(){const V=VW(),p=P[V],ed=!MP()&&G.mode==='edit',pd=P.findIndex(x=>x.phase==='setup'||x.phase==='bench'),tl=turnLabel(p);
@@ -1432,6 +1432,9 @@ const mikaOn=()=>P.some(q=>OWN(q).some(k=>{const z=lastOf(q.piles[k]);return nk(
 const manaOn=q=>OWN(q).some(k=>{const z=lastOf(q.piles[k]);return nk(z.name)==='マナフィ'&&!noAb(z)});
 const odoriOn=q=>OWN(q).some(k=>{const z=lastOf(q.piles[k]);return nk(z.name)==='オドリドリ'&&!noAb(z)});
 const lostN=p=>(p.lost||[]).length;
+/* エネルギーのタイプ：特殊エネルギーがタイプのエネルギーとしてはたらくのは「ポケモンについているとき」だけ。
+   手札・山札・トラッシュなど場以外では、[水]エネルギー＝基本水エネルギーのみ（れんげきエネルギー等は含まない） */
+const offE=T=>y=>y.t==='ene'&&y.name==='基本'+T+'エネルギー';
 const toLost=(q,u)=>{const c=find(q,u);if(!c)return;c.dm=0;(q.lost=q.lost||[]).push(c);return c};
 const numPick=(mx,ttl)=>PREVM?Promise.resolve(mx):new Promise(r=>menu(null,[...Array(mx)].map((_,i)=>[`${i+1}個`,()=>r(i+1)]),ttl,1));
 /* ダメカンを相手のポケモンに好きなようにのせる（1匹ずつ選んで、のせる数を決める） */
@@ -1525,7 +1528,7 @@ mon('インテレオンV',{hp:200,type:'水',rc:2,weak:'雷',
   {n:'アクアバレット',dt:'120',cost:[...'水水無'],run:async x=>{hit(x,'battle',120);const ks=BN.filter(k=>x.o.piles[k].length);if(ks.length){const k=await ask(null,ks,x.o,'20ダメージを与える相手のベンチポケモンを選択',1);if(k)hit(x,k,20)}}}]});
 mon('インテレオンVMAX',{hp:320,type:'水',rc:2,weak:'雷',st:'1進化',
  ab:{n:'ダブルシューター',ok:x=>!x.p.hand.some(y=>y.name==='基本水エネルギー')?'手札に水エネルギーがありません':(BN.some(k=>x.o.piles[k].length&&!fusShield(x.o.piles[k]))?null:'ダメカンをのせられる相手のベンチポケモンがいません'),
-  run:async x=>{const s=await pk('トラッシュする手札の水エネルギーを1枚選ぶ',x.p.hand.filter(y=>y.name==='基本水エネルギー'),1);if(!s)return false;mv(s[0].u,'trash');
+  run:async x=>{const s=await pk('トラッシュする手札の水エネルギーを1枚選ぶ',x.p.hand.filter(offE('水')),1);if(!s)return false;mv(s[0].u,'trash');
    let ks=BN.filter(k=>x.o.piles[k].length&&!fusShield(x.o.piles[k]));const m=Math.min(2,ks.length);
    for(let i=0;i<m;i++){const k=await ask(null,ks,x.o,`ダメカン2個をのせる相手のベンチポケモンを選択（${i+1}/${m}）`,1);if(!k)break;const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+20;ks=ks.filter(z=>z!==k);render()}}},
  at:[{n:'キョダイウズマキ',dt:'70＋',cost:[...'水無'],run:async x=>{const en=ens(x.p.piles.battle);let b=0;
@@ -1604,7 +1607,7 @@ mon('クレセリア',{hp:120,type:'超',rc:1,weak:'悪',res:'闘',
    const k=await ask(null,OWN(x.o),x.o,`ダメカン${n}個をのせる相手のポケモンを選択`,1);const t=lastOf(x.o.piles[k]);t.dm=(t.dm||0)+10*n;x.msg.push(`${t.name}にダメカン${n}個をのせ替えた`)}},
   {n:'ルナブラスト',dt:'110',cost:[...'超超無'],run:async x=>{hit(x,'battle',110)}}]});
 mon('ザシアンV',{hp:220,type:'超',rc:2,weak:'鋼',
- ab:{n:'けんのほうこう',endT:1,ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const s=await pk('山札からエネルギーを1枚選ぶ',x.p.deck,1,0,y=>y.t==='ene');if(!s)return false;if(s.length)await dragE(s,OWN(x.p),{ttl:'けんのほうこう：エネルギーをポケモンにドラッグ',min:1,cancel:false});shuffle(x.p.deck)}},
+ ab:{n:'けんのほうこう',endT:1,ok:x=>x.p.deck.length?null:'山札がありません',run:async x=>{const s=await pk('山札から超エネルギーを1枚選ぶ',x.p.deck,1,0,offE('超'));if(!s)return false;if(s.length)await dragE(s,OWN(x.p),{ttl:'けんのほうこう：エネルギーをポケモンにドラッグ',min:1,cancel:false});shuffle(x.p.deck)}},
  at:[{n:'ストームスラッシュ',dt:'60＋',cost:[...'無無無'],run:async x=>{const n=ens(x.p.piles.battle).filter(y=>unitsOf(y,x.c).some(u=>u==='*'||u.includes('超'))).length;x.msg.push(`超エネルギー${n}個`);hit(x,'battle',60+30*n)}}]});
 mon('ミュウ',{hp:60,type:'超',rc:1,weak:'悪',res:'闘',
  ab:{n:'ふしぎなしっぽ',ok:x=>x.k!=='battle'?'バトル場にいるときだけ使えます':(x.p.deck.length?null:'山札がありません'),run:async x=>{const t6=x.p.deck.slice(0,6);const s=await pk('山札の上6枚：グッズを1枚選ぶ（相手に見せて手札に加える）',t6,1,0,y=>y.t==='tr');if(!s)return false;s.forEach(y=>mv(y.u,'hand'));shuffle(x.p.deck)}},
@@ -1632,8 +1635,8 @@ Object.assign(FX,{
  '活力の壺':async c=>{const p=me(),pool=p.trash.filter(y=>/^いちげきエネルギー/.test(y.name));if(!pool.length)return err('トラッシュにいちげきエネルギーがありません');const t=await pk('トラッシュから「いちげきエネルギー」を2枚まで選ぶ',pool,Math.min(2,pool.length),1);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'deckB'));shuffle(p.deck)});log(`活力の壺：いちげきエネルギー${t.length}枚を山札にもどした`)},
  'バーネット博士':async c=>{const p=me(),t=await pk('山札からトラッシュするカードを2枚まで選ぶ',p.deck,2,0);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'trash'));shuffle(p.deck)});log('バーネット博士：'+(t.map(y=>y.name).join('、')||'なし')+'をトラッシュ')},
  'エネルギー転送':async c=>{const p=me(),t=await pk('山札から基本エネルギーを1枚選ぶ',p.deck,1,0,isBE);if(!t)return;fin(c,()=>{t.forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('エネルギー転送：'+(t.map(y=>y.name).join('')||'なし'))},
- 'メロン':async c=>{const p=me(),ks=OWN(p).filter(k=>isV(lastOf(p.piles[k]))),pool=p.trash.filter(y=>y.t==='ene');let s=null,k=null;
-  if(ks.length&&pool.length){s=await pk('トラッシュからエネルギーを1枚選ぶ',pool,1);if(!s)return;const pr=await dragE(s,ks,{ttl:'メロン：自分の「ポケモンV」にドラッグ',min:1});if(!pr)return;STG.commit=1}
+ 'メロン':async c=>{const p=me(),ks=OWN(p).filter(k=>isV(lastOf(p.piles[k]))),pool=p.trash.filter(offE('水'));let s=null,k=null;
+  if(ks.length&&pool.length){s=await pk('トラッシュから水エネルギーを1枚選ぶ',pool,1);if(!s)return;const pr=await dragE(s,ks,{ttl:'メロン：自分の「ポケモンV」にドラッグ',min:1});if(!pr)return;STG.commit=1}
   fin(c,()=>{for(let i=0;i<3;i++)draw1(p)});log('メロン：'+(s&&s[0]?s[0].name+'をつけて':'')+'3枚引いた')},
  'コルニの気合い':c=>{fin(c,()=>drawTo(me(),6));log('コルニの気合い：手札が6枚になるように引いた')},
  'カイ':async c=>{const p=me(),a=await pk('山札からポケモンを1枚選ぶ',p.deck,1,0,y=>y.t==='pke');if(!a)return;const b=await pk('山札からグッズを1枚選ぶ',p.deck,1,0,y=>y.t==='tr');if(!b)return;fin(c,()=>{[...a,...b].forEach(y=>mv(y.u,'hand'));shuffle(p.deck)});log('カイ：'+([...a,...b].map(y=>y.name).join('、')||'なし')+'を手札に')},
