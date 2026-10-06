@@ -1484,8 +1484,8 @@ mon('ギラティナV',{hp:220,type:'龍',rc:2,
    s.forEach(y=>mv(y.u,'hand',1));t4.filter(y=>!s.includes(y)).forEach(y=>toLost(x.p,y.u));x.msg.push(`${s.length}枚を手札に、${t4.length-s.length}枚をロストゾーンへ`)}},
   {n:'ひきさく',dt:'160',cost:[...'草超無'],run:async x=>{hit(x,'battle',160,{ign:1})}}]});
 mon('ギラティナVSTAR',{hp:280,type:'龍',rc:2,st:'1進化',
- at:[{n:'ロストインパクト',dt:'280',cost:[...'草超無'],run:async x=>{hit(x,'battle',280);const all=OWN(x.p).flatMap(k=>ens(x.p.piles[k]));if(!all.length)return;const s=all.length<=2?all:await pk('ロストゾーンに置くエネルギーを2個選ぶ（自分の場）',all,2);(s||all.slice(0,2)).forEach(y=>toLost(x.p,y.u));x.msg.push('エネルギー2個をロストゾーンへ')}},
-  {n:'スターレクイエム',dt:'',vs:1,cost:[...'草超'],chk:x=>lostN(x.p)>=10?null:'自分のロストゾーンにカードが10枚以上ないと使えません',run:async x=>{const t=lastOf(x.o.piles.battle);if(t){t.dm=Math.max(t.dm||0,hpOf(x.o.piles.battle));x.msg.push(`${t.name}をきぜつさせる`)}}}]});
+ at:[{n:'ロストインパクト',dt:'280',cost:[...'草超無'],run:async x=>{hit(x,'battle',280);const s=await pickFieldE(x.p,OWN(x.p),2,'ロストインパクト',1);s.forEach(y=>toLost(x.p,y.u));x.msg.push('エネルギー2個をロストゾーンへ')}},
+  {n:'スターレクイエム',dt:'',vs:1,cost:[...'草超'],chk:x=>lostN(x.p)>=10?null:'自分のロストゾーンにカードが10枚以上ないと使えません',run:async x=>{const t=lastOf(x.o.piles.battle);if(t){t.ko=1;x.msg.push(`${t.name}をきぜつさせる（ダメージではない）`)}}}]});
 
 /* ---- ルギア ---- */
 mon('ルギアV',{hp:220,type:'無',rc:2,weak:'雷',res:'闘',
@@ -1667,6 +1667,12 @@ function attDrop(c,x,y){const A=ATT;if(!A)return;const tg=[...document.querySele
  const k=tg.dataset.k;if(!attAllow(c,A).includes(k))return err('そのポケモンにはつけられません');
  act(()=>{mv(c.u,k);if(A.o.onPlace)A.o.onPlace(c,k)});A.pairs.push({c,k});A.cards=A.cards.filter(z=>z!==c);log(`${c.name}を${lastOf(P[A.i].piles[k]).name}につけた`);
  if(A.pairs.length>=A.mx||!A.cards.some(z=>attAllow(z,A).length)){if(A.pairs.length>=A.mn||!A.cards.length)return attEnd(1)}render()}
+/* 場のエネルギーを選ぶ：ポケモンを選ぶ→そのポケモンについているエネルギーから選ぶ（決定）。複数のポケモンから選べる。must=0なら「完了」で途中終了 */
+async function pickFieldE(q,ks,n,ttl,must,flt=()=>true){const got=[];
+ while(got.length<n){const has=ks.filter(k=>q.piles[k]&&ens(q.piles[k]).some(y=>flt(y)&&!got.includes(y)));if(!has.length)break;
+  const k=await ask(null,has,q,`${ttl}：エネルギーをはがすポケモンを選択（${got.length}/${n}）`,must?1:0,'完了');if(!k)break;
+  const pool=ens(q.piles[k]).filter(y=>flt(y)&&!got.includes(y));const s=await pk(`${lastOf(q.piles[k]).name}のエネルギーを選ぶ（あと${n-got.length}個まで）`,pool,Math.min(n-got.length,pool.length),0);if(s)got.push(...s)}
+ return got}
 /* ---- ダメージ計算・きぜつ ---- */
 function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
  if(k!=='battle'&&(tm.tera||tm.bnc))return 0;if(k!=='battle'&&manaOn(x.o))return 0;
@@ -1677,7 +1683,7 @@ function calc(x,k,n,o){const t=lastOf(x.o.piles[k]),tm=mi(t)||{},am=mi(x.c)||{};
  if(n>0&&!(o&&o.ign&&k==='battle')){const dpl=x.o.piles[k];if(isV(x.c)&&hasE(dpl,/^Vガードエネルギー/))n-=30;if(tagOf(t)==='フュージョン'&&odoriOn(x.o))n-=20}
  return Math.max(0,n)}
 function hit(x,k,n,o){const t=lastOf(x.o.piles[k]);if(!t)return 0;const d=calc(x,k,n,o);t.dm=(t.dm||0)+d;x.msg.push(`${t.name}に${d}ダメージ${k==='battle'?'':'（ベンチ）'}`);return d}
-async function koScan(o){const i=P.indexOf(o),ks=['battle',...BN].filter(k=>{const h=hpOf(o.piles[k]);return h&&(lastOf(o.piles[k]).dm||0)>=h});
+async function koScan(o){const i=P.indexOf(o),ks=['battle',...BN].filter(k=>{const h=hpOf(o.piles[k]),t=lastOf(o.piles[k]);return h&&((t.dm||0)>=h||t.ko)});
  for(const k of ks.filter(k=>k!=='battle')){if(G.over)break;await doKO(i,k,1)}if(!G.over&&ks.includes('battle'))await doKO(i,'battle');judge()}
 /* ---- 勝利条件（3つ）：①サイドを取り切る ②相手が自分の番の開始時に山札を引けない ③相手の場にポケモンが1匹もいない
    同時に満たしたら「満たした条件が多い方」の勝ち。同数なら両者敗北（引き分け）。G.win = 0 / 1 / -1(両者敗北) ---- */
@@ -1687,7 +1693,7 @@ function judge(){if(G.over||G.defer)return 0;const a=winCond(0),b=winCond(1);if(
  G.over=1;G.win=a.length>b.length?0:b.length>a.length?1:-1;G.why=[a,b];
  const t=G.win<0?'両者が同時に勝利条件を満たしたため、両者敗北（引き分け）':`P${G.win+1}の勝利！（${(G.win?b:a).join('・')}）`;log(t);banner(G.win<0?'両者敗北（引き分け）':`P${G.win+1}の勝利！`);return 1}
 async function doKO(i,k,np){const q=P[i],t=lastOf(q.piles[k]);if(!t)return;const n=prize(t),m=P[1-i];
-  const gift=G.akw===i&&hasE(q.piles[k],/^ギフトエネルギー/);act(()=>{const pl=q.piles[k].splice(0);if(stadName()==='ロストシティ')pl.forEach(y=>{if(y.t==='pke'){y.dm=0;(q.lost=q.lost||[]).push(y)}else q.trash.push(y)});else q.trash.push(...pl);q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n));if(gift)drawTo(q,7)});if(gift)log(`ギフトエネルギー：P${i+1}は手札が7枚になるように引いた`);
+  const gift=G.akw===i&&!t.ko&&hasE(q.piles[k],/^ギフトエネルギー/);act(()=>{const pl=q.piles[k].splice(0);if(stadName()==='ロストシティ')pl.forEach(y=>{if(y.t==='pke'){y.dm=0;(q.lost=q.lost||[]).push(y)}else q.trash.push(y)});else q.trash.push(...pl);q.koTurn=G.turn;m.hand.push(...m.side.splice(0,n));if(gift)drawTo(q,7)});if(gift)log(`ギフトエネルギー：P${i+1}は手札が7枚になるように引いた`);
   log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）`);
   if(judge()||G.over)return;
   if(k==='battle'&&!np){if(!fixing){fixing=1;try{if(await trimBench(i))render()}finally{fixing=0}}await promote(i)}}
@@ -1736,7 +1742,7 @@ async function useAttack(a){const p=me(),o=P[1-cur],c=lastOf(p.piles.battle);if(
   if(conf){if(a.gx)mkUse('gx');if(a.vs)mkUse('vs');c.dm=(c.dm||0)+30;G.atk=G.turn;render();log(`${c.name}は混乱でワザに失敗。自分に30ダメージ`);TE=1;try{await sleep(900);await koScan(p);await sleep(300);await turnSwitch()}finally{TE=0}return}
   const pre={};OWN(o).forEach(k=>{const t=lastOf(o.piles[k]);pre[t.u]=t.dm||0});
   useOn(c,'atk',a.n);let r;try{r=await a.run(x)}finally{useOff()}if(r===false){HS.pop();return}
- OWN(o).forEach(k=>{const pl=o.piles[k],t=lastOf(pl);if(hasTool(pl,'災いの箱')&&isV(t)&&!pre[t.u]&&(t.dm||0)>=hpOf(pl)&&!noAbBase(t)){x.c.dm=(x.c.dm||0)+80;x.msg.push(`災いの箱：${x.c.name}にダメカン8個`)}});
+ OWN(o).forEach(k=>{const pl=o.piles[k],t=lastOf(pl);if(hasTool(pl,'災いの箱')&&isV(t)&&!t.ko&&!pre[t.u]&&(t.dm||0)>=hpOf(pl)&&!noAbBase(t)){x.c.dm=(x.c.dm||0)+80;x.msg.push(`災いの箱：${x.c.name}にダメカン8個`)}});
  if(a.gx)mkUse('gx');if(a.vs)mkUse('vs');G.atk=G.turn;if(x.self)await promote(cur);render();log(`${c.name}の${a.n}！ ${x.msg.join('、')}`);
  TE=1;try{await sleep(900);G.akw=P.indexOf(o);try{await koScan(o)}finally{delete G.akw}if(!G.over)await koScan(p);await sleep(300);await turnSwitch()}finally{TE=0}}
 /* 特性・ワザの処理中は、相手（CPU戦・オンライン）の画面に「何を使っているか」を出す */
