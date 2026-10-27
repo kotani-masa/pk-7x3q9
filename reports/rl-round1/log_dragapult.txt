@@ -1,0 +1,12 @@
+[dragapult vs zoroark+rayquaza] gen 1/10 best=0.423 (0.40 / 0.47) mean=0.372 2.5分
+[dragapult vs zoroark+rayquaza] gen 2/10 best=0.373 (0.34 / 0.44) mean=0.348 4.9分
+[dragapult vs zoroark+rayquaza] gen 3/10 best=0.383 (0.35 / 0.45) mean=0.354 7.3分
+[dragapult vs zoroark+rayquaza] gen 4/10 best=0.387 (0.35 / 0.46) mean=0.363 10.0分
+[dragapult vs zoroark+rayquaza] gen 5/10 best=0.450 (0.39 / 0.57) mean=0.399 12.5分
+[dragapult vs zoroark+rayquaza] gen 6/10 best=0.400 (0.37 / 0.46) mean=0.364 14.9分
+[dragapult vs zoroark+rayquaza] gen 7/10 best=0.397 (0.30 / 0.59) mean=0.368 17.3分
+[dragapult vs zoroark+rayquaza] gen 8/10 best=0.373 (0.32 / 0.48) mean=0.336 19.8分
+[dragapult vs zoroark+rayquaza] gen 9/10 best=0.357 (0.31 / 0.45) mean=0.340 22.2分
+[dragapult vs zoroark+rayquaza] gen 10/10 best=0.427 (0.36 / 0.56) mean=0.411 24.3分
+check 500試合/相手: 調整前 0.335 (0.264 / 0.476) → 調整後 0.356 (0.270 / 0.528)
+採用: /tmp/claude-0/-home-claude/388da4fb-bf1a-53f8-9e3a-ca9249173019/scratchpad/rlD/ai/params/params_dragapult.js
