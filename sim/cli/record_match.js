@@ -1,0 +1,3 @@
+'use strict';
+const fs=require('node:fs'),{Sim}=require('../lib/headless'),D=require('../lib/decks');
+(async()=>{const [a='zoroark',b='dragapult',seed='42']=process.argv.slice(2),oi=process.argv.indexOf('--out'),out=oi>=0?process.argv[oi+1]:'match-'+seed+'.pokeca.json';if(!D[a]||!D[b])throw Error('Unknown deck');const r=await new Sim().play({decks:[D[a],D[b]],seed:Number(seed),record:true,log:true});fs.writeFileSync(out,JSON.stringify(r.record));console.log(JSON.stringify({file:out,winner:r.win,turn:r.turn,complete:r.record.complete,events:r.record.events.length}));})().catch(e=>{console.error(e);process.exitCode=1});

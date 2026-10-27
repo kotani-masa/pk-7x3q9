@@ -20,7 +20,7 @@ CPU戦を遊ぶためのフォルダではありません。AIを検証・調整
 
 ```bash
 node sim/run.js test
-node sim/run.js eval 100 20000
+node sim/run.js eval 1000 40000
 node sim/run.js verify-info
 node sim/run.js verify-hidden
 node sim/run.js optimize --only zoroark --rounds 1 --gens 4 --pop 6 --games 20 --seed 1
@@ -31,3 +31,12 @@ node sim/run.js showlog zoroark dragapult 1234 N N
 `optimize` は `ai/params/params_zoroark.js` を書き換え、経過を `sim/results/opt_log.json` に保存します。対戦に使うデッキは `decks/*.json` です。
 ゾロアークの価値関数はまだ学習していません。既存の `collect`・`train`・`train-all` はドラパルトとメガレックウザ用です。
 従来の `node sim/optimize.js` などのパスは変更しました。今後は `run.js` から実行してください。
+
+再現用の記録生成と復元：
+
+```bash
+node sim/run.js record zoroark dragapult 42 --out match42.pokeca.json
+node sim/run.js replay match42.pokeca.json --compare-ai
+```
+
+評価のデフォルトは各相手1,000試合です。再現用記録の詳細は `../docs/MATCH_LOGS.md` を参照してください。

@@ -11,14 +11,14 @@ function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; le
 const DRIVER = `
 ;(function(){
 sideFly=function(){SIDEFLY=null;FLIPEND=0;FXEND=0;};render=function(){};banner=function(){};coinAnim=function(){return Promise.resolve()};
-act=function(fn,re){ACTN++;fn();re&&re()};
+act=function(fn,re){ACTN++;fn();matchCheckpoint('mutation');re&&re()};
 window.__AUD=[{att:0,ex:0},{att:0,ex:0}];
 ATTACHHOOK=(i,c,k)=>{if(c.t!=='ene')return;const pl=P[i].piles[k],t=lastOf(pl),nm=nk(t.name),seen=new Set();let mx=0;const add=n=>{const m=MON[n]||MON[n+'#0'];if(m&&m.at)for(const a of m.at)mx=Math.max(mx,a.cost.length)};add(nm);
   const kids=n=>{for(const ch in EVO)if(nk(EVO[ch])===n&&!seen.has(nk(ch))){seen.add(nk(ch));add(nk(ch));kids(nk(ch))}};kids(nm);const m0=MON[nm]||MON[nm+'#0']||{};
   __AUD[i].att++;if(eunits(pl)>Math.max(mx,m0.rc||0)){__AUD[i].ex++;(__AUD[i].s=__AUD[i].s||[]).push(t.name+' 付属'+pl.slice(0,-1).filter(x=>x.t==='ene').map(x=>x.name.replace(/エネルギー/,'')).join('/')+' 上限'+Math.max(mx,m0.rc||0)+' '+(k==='battle'?'バトル':'ベンチ'))}};
 window.__REC=null;
 TURNEND=(i)=>{if(!window.__REC)return;const c=CPUX.ctl[i];if(c&&c.features&&P[i].phase==='play')__REC.push([i,c.features(cj(cpuView(i,'turn'))),G.turn])};
-window.__run=async function(cfg){window.__REC=cfg.rec?[]:null;
+window.__run=async function(cfg){window.__REC=cfg.rec?[]:null;if(!cfg.record)window.PokecaMatchRecorder=null;
   CPU.on=1;CPU.who=[1,1];CPU.srch=cfg.srch?1:0;NET.on=0;G.mode='play';CPU.d=cfg.simD!==undefined?cfg.simD:0;HS={push(){},pop(){},shift(){},length:0};
   P[0].cards=cfg.decks[0];P[1].cards=cfg.decks[1];
   for(const d of cfg.decks)for(const c of d)if(c.var!==undefined)VMAP[c.id]=c.var;
@@ -36,7 +36,8 @@ window.__run=async function(cfg){window.__REC=cfg.rec?[]:null;
     else if(P[c].phase==='play'&&G.act===c)await cpuTurn(c);else break;
     if(G.turn>(cfg.maxTurn||90)){G.over=1;G.win=-2;break}
   }
-  return {rec:__REC,aud:__AUD,over:G.over,g:guard,win:G.win,turn:G.turn,fp:G.fp,side:[P[0].side.length,P[1].side.length],why:G.why||null,deck:[P[0].deck.length,P[1].deck.length],log:cfg.log?LGS.slice():undefined};
+  matchCheckpoint('match-end');
+  return {record:cfg.record&&window.PokecaMatchRecorder?window.PokecaMatchRecorder.export():undefined,rec:__REC,aud:__AUD,over:G.over,g:guard,win:G.win,turn:G.turn,fp:G.fp,side:[P[0].side.length,P[1].side.length],why:G.why||null,deck:[P[0].deck.length,P[1].deck.length],log:cfg.log?LGS.slice():undefined};
 };
 window.CPUAI=window.__bridge;window.__dbg=function(s){return eval(s)};
 })();
@@ -48,8 +49,10 @@ class Sim {
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const ms = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
     let main = ms.map(m => m[1]).sort((a,b) => b.length-a.length)[0].replace(/\nrender\(\);\s*$/, '\n');
+    const buildInfo=fs.existsSync(path.join(ROOT,'debug/build_info.js'))?fs.readFileSync(path.join(ROOT,'debug/build_info.js'),'utf8'):'';
+    const diagnostics = fs.readFileSync(path.join(ROOT,'debug/match_recorder.js'),'utf8');
     const legacy = fs.readFileSync(path.join(AIDIR, 'legacy/legacy_cpu.js'), 'utf8');
-    this.engine = new vm.Script('render=function(){};\n' + main + '\n' + legacy + '\n' + DRIVER, { filename: 'engine.js' });
+    this.engine = new vm.Script(buildInfo + '\n' + diagnostics + '\nrender=function(){};\n' + main + '\n' + legacy + '\n' + DRIVER, { filename: 'engine.js' });
     this.aiFiles = (opts.aiFiles || ['core/ai_core.js', 'decks/ai_dragapult.js', 'decks/ai_rayquaza.js', 'decks/ai_zoroark.js', 'params/params_zoroark.js', 'params/params_dragapult.js', 'params/params_rayquaza.js', 'models/value_model.js', 'data/ai_refs.js']).filter(f => fs.existsSync(path.join(AIDIR, f)));
     this.aiSources = this.aiFiles.map(f => fs.readFileSync(path.join(AIDIR, f), 'utf8'));
   }
@@ -79,10 +82,10 @@ class Sim {
     vm.runInContext(`window.__bridge=${ai ? `{__marshal:true,
       detect:cards=>JSON.parse(__aiHost('detect',-1,JSON.stringify(cards))),ref:t=>JSON.parse(__aiHost('ref',-1,JSON.stringify(t))),
       create:(name,opts)=>{const id=JSON.parse(__aiHost('create',-1,JSON.stringify({name,opts})));const call=(m,...a)=>JSON.parse(__aiHost(m,id,JSON.stringify(a)));
-        return {setup:v=>call('setup',v),bench:v=>call('bench',v),decide:v=>call('decide',v),pk:(v,q)=>call('pk',v,q),ask:(v,q)=>call('ask',v,q),attach:(v,q)=>call('attach',v,q),menu:(v,q)=>call('menu',v,q),order:v=>call('order',v),result:(a,ok,e)=>call('result',a,ok,e),features:v=>call('features',v),value:v=>call('value',v),candidates:(v,K)=>call('candidates',v,K),commit:a=>call('commit',a),hasValue:()=>call('hasValue')}}}` : 'undefined'};`, ctx);
+        return {setup:v=>call('setup',v),bench:v=>call('bench',v),decide:v=>call('decide',v),pk:(v,q)=>call('pk',v,q),ask:(v,q)=>call('ask',v,q),attach:(v,q)=>call('attach',v,q),menu:(v,q)=>call('menu',v,q),order:v=>call('order',v),result:(a,ok,e)=>call('result',a,ok,e),features:v=>call('features',v),value:v=>call('value',v),candidates:(v,K)=>call('candidates',v,K),commit:a=>call('commit',a),explain:()=>call('explain'),hasValue:()=>call('hasValue')}}}` : 'undefined'};`, ctx);
     this.engine.runInContext(ctx);
     this.ctx = ctx;
-    const r = await ctx.__run({ decks: cfg.decks, opt: cfg.opt, maxTurn: cfg.maxTurn, log: cfg.log, rec: cfg.rec, srch: cfg.srch, simD: cfg.simD });
+    const r = await ctx.__run({ decks: cfg.decks, opt: cfg.opt, maxTurn: cfg.maxTurn, log: cfg.log, rec: cfg.rec, record: cfg.record, srch: cfg.srch, simD: cfg.simD });
     return JSON.parse(JSON.stringify(r));
   }
 }

@@ -12,6 +12,7 @@
 |---|---|
 | `index.html` | エミュレータ本体 |
 | `ai/` | 対戦中に読み込むAI。サブフォルダ別の説明は `ai/README.md` |
+| `debug/` | 1試合分の再現用記録とソース指紋 |
 | `sim/` | 開発用の自動対戦・テスト・学習ツール。CPU戦だけなら実行不要 |
 | `docs/` | ゾロアークAIの説明、従来のAI設計資料、Windows向け説明 |
 
@@ -21,9 +22,10 @@ Node.jsで、このフォルダから実行します。追加パッケージの�
 
 ```bash
 node sim/run.js test
-node sim/run.js eval 100 20000
+node sim/run.js eval 1000 40000
 node sim/run.js optimize --only zoroark --rounds 1 --gens 4 --pop 6 --games 20
 ```
 
 コマンド一覧は `node sim/run.js help`、詳しい使い方は `sim/README.md`、AIの対応範囲と検証結果は `docs/ZOROARK.md` を参照してください。
-GitHubの公開版にはまだ反映していません。
+
+CPU対戦の記録は、バトルログの「解析用ログを保存」から取得できます。次の試合開始時に前の記録が消えます。記録の復元とAI比較は `docs/MATCH_LOGS.md` を参照してください。

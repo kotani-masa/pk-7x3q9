@@ -5,25 +5,25 @@
   "results": [
     {
       "opponent": "dragapult",
-      "wins": 59,
-      "losses": 41,
+      "wins": 61,
+      "losses": 39,
       "draws": 0,
       "timeouts": 0,
       "unfinished": 0,
       "errors": 0,
-      "meanTurns": 13.78,
-      "winRate": 0.59
+      "meanTurns": 12.96,
+      "winRate": 0.61
     },
     {
       "opponent": "rayquaza",
-      "wins": 83,
-      "losses": 17,
+      "wins": 90,
+      "losses": 10,
       "draws": 0,
       "timeouts": 0,
       "unfinished": 0,
       "errors": 0,
-      "meanTurns": 11.56,
-      "winRate": 0.83
+      "meanTurns": 10.79,
+      "winRate": 0.9
     }
   ]
 }
