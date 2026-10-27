@@ -1,0 +1,31 @@
+{
+  "seed": 40000,
+  "gamesPerOpponent": 1000,
+  "search": false,
+  "results": [
+    {
+      "opponent": "dragapult",
+      "wins": 668,
+      "losses": 332,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 13.013,
+      "winRate": 0.668
+    },
+    {
+      "opponent": "rayquaza",
+      "wins": 908,
+      "losses": 92,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.62,
+      "winRate": 0.908
+    }
+  ],
+  "policy": "zoroark-policy-3",
+  "build": "6ed185dca03a7a7c"
+}
