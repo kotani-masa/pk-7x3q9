@@ -1,6 +1,19 @@
 {
  "note": "7.0.2でsim/resultsを整理。各試合の全記録など大きなファイルは削除し、要点をここにまとめた。元ファイルは GitHub の commit 69c56c1（7.0.1）に残っている。",
  "releases": {
+  "7.0.3": {
+   "summary": "標準メガレックウザを新リスト（伝説の溶岩洞4）に変更。溶岩洞とポケモンいれかえの判断を追加",
+   "seed": "5100000-5101999",
+   "gamesEach": 2000,
+   "search": false,
+   "rayquazaWinRate": {
+    "newListNoLavaSwitchLogic_vsFrozenV6": 0.341,
+    "newList_vsFrozenV6": 0.361,
+    "newList_vsZoroark7_0_2": 0.345
+   },
+   "pairedDiffLogic": "+2.1pt ±0.9pt",
+   "errors": 0
+  },
   "7.0.2": {
    "summary": "レックウザの手順修正（メガガルーラ起点のドロー、ラティアスの先取り、動けない時のジャッジマン）と、ゾロアークの次世代修正（くさりもちのサイドプラン判定、リーリエ前の展開）",
    "rayquazaVsFrozenV6Zoroark": {

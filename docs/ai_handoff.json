@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "release": "7.0.2",
-  "previousRelease": "7.0.1",
+  "release": "7.0.3",
+  "previousRelease": "7.0.2",
   "versionFile": "VERSION",
   "versionPolicy": "docs/DEVELOPMENT.md#3-バージョン",
-  "changeType": "patch: policy fixes for Rayquaza, next-generation Zoroark fixes, benchmark loads frozen v6 Zoroark explicitly, repository cleanup",
-  "notes": "docs/CHANGELOG.md (7.0.2)",
+  "changeType": "patch: standard Mega Rayquaza list changed (Zero Cavity x4 -> Legendary Lava Cave x4); AI plays Lava Cave and Pokémon Switch; cpuView exposes own hand card half (L/R)",
+  "notes": "docs/CHANGELOG.md (7.0.3, 7.0.2)",
   "history": "Earlier handoff files (AI_HANDOFF.md, RAYQUAZA_7.0.1.md, ai_handoff_7.0.0.json) were merged into docs/CHANGELOG.md; originals are in GitHub commit 69c56c1.",
   "changedFiles": [
     "ai/decks/ai_rayquaza.js",
@@ -97,5 +97,23 @@
     "Rayquaza losses still come from energy starvation and giving up 3-prize Megas; prize-aware exposure is the next target.",
     "Next generation: freeze the 7.0.2 opponents and improve Zoroark against them; keep v6 as an anchor."
   ],
-  "tests": "node sim/run.js test; node sim/run.js verify-info; node sim/run.js verify-hidden"
+  "tests": "node sim/run.js test; node sim/run.js verify-info; node sim/run.js verify-hidden",
+  "deck": {
+    "engineCode": "std:mrayquaza-lava",
+    "renamedFrom": "8cK8GK-AACWUC-8D8Gcx",
+    "sim": "sim/lib/decks.js, sim/decks/rayquaza.json"
+  },
+  "evaluation7_0_3": {
+    "summary": "標準メガレックウザを新リスト（伝説の溶岩洞4）に変更。溶岩洞とポケモンいれかえの判断を追加",
+    "seed": "5100000-5101999",
+    "gamesEach": 2000,
+    "search": false,
+    "rayquazaWinRate": {
+      "newListNoLavaSwitchLogic_vsFrozenV6": 0.341,
+      "newList_vsFrozenV6": 0.361,
+      "newList_vsZoroark7_0_2": 0.345
+    },
+    "pairedDiffLogic": "+2.1pt ±0.9pt",
+    "errors": 0
+  }
 }

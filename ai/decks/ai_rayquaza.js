@@ -19,7 +19,7 @@
     sRQBenchD: 70, sPC: 88, sGGBench: 55, sSugri: 92, sCipher: 22, sLantern2: 55, sAZ: 50, sTF: 96,
     // 補充・加速の設定をコメントから分離する（未定義による行動消失を防ぐ）。
     sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
-    kgLead: 40, kgPivot: 70, ltAhead: 95, judgeStuck: 70,   // ラティアスがいる時のメガガルーラ起点のドロー
+    kgLead: 40, kgPivot: 70, ltAhead: 95, judgeStuck: 70, sLava: 86, sSwitchPoke: 88,   // ラティアスがいる時のメガガルーラ起点のドロー
   };
   const space = {
     first: [0, 1], sBench: [40, 85], benchCap: [3, 5], sAbil: [50, 90], aBase: [25, 70], aEnableNow: [20, 75], aEnableSoon: [5, 50], aBattle: [0, 25], sRetreat: [40, 90], rMargin: [10, 120], sBoss: [80, 110],
@@ -31,6 +31,14 @@
   function heavyFront(cx){const a=cx.myB.battle;if(!a||ip(cx,LT))return false;const d=cx.D(a)||{};return (d.rc||0)>=2&&a.eu.length<d.rc&&!(cx.T!==1&&cx.myBest('battle').d>0);}
   /* 手札からラティアスに届くか（ラティアス本体・使えるハイパーボール・使えるシアノ） */
   function ltReach(cx){if(ih(cx,LT))return true;if(cx.lg.goods&&cx.hand.some(h=>nrm(h.name)==='ハイパーボール')&&cx.hand.length>=3)return true;return !!(cx.lg.sup&&cx.hand.some(h=>nrm(h.name)==='シアノ'));}
+  /* 伝説の溶岩洞：手札に左と右がそろって初めて出せる。相手の1進化・2進化ポケモンの特性（ゾロアークのとりひき、ドロンチのていさつしれい等）をなくす。
+     自分のポケモンはたねポケモン中心で、ファイアローexのエキサイトダイブは手札から使う特性なので影響を受けない */
+  const LAVA = '伝説の溶岩洞';
+  function lavaPair(cx){const hs=cx.hand.filter(h=>nrm(h.name)===LAVA);if(hs.length<2)return false;const hv=new Set(hs.map(h=>h.half).filter(Boolean));return hv.size?hv.size>=2:true;}
+  function lavaValue(cx){if(cx.v.stadium&&nrm(cx.v.stadium.name)===LAVA)return 0;let v=0;
+    for(const k of Object.keys(cx.opB)){const p=cx.opB[k],d=cx.D(p)||{};if(['1進化','2進化'].includes(cx.stage(p))&&d.ab&&!d.ab.passive)v+=1;}
+    if(cx.v.stadium&&cx.v.stadium.own!==cx.v.me)v+=0.5;   // 相手のスタジアム（Nの城など）を消す
+    return v;}
   function needsPivot(cx){const a=cx.myB.battle;return !!a&&!ip(cx,LT)&&(cx.D(a)?.rc||0)>0&&cx.bench().some(k=>cx.myBest(k).d>0);}
   function frontThreat(cx,k){const board=cx.myB;try{cx.myB={...board,battle:board[k]};return cx.threat('battle').any;}finally{cx.myB=board;}}
   function rampageRoute(cx){const total=U.sumEu(cx.myB),fire=cx.hand.filter(c=>etype(c.name)==='炎').length,availableHO=cx.keys().some(k=>nrm(cx.myB[k].name)===HO&&!cx.fl.abU.includes(cx.myB[k].u))||cx.has(HO)&&cx.lg?.room>0,ho=availableHO?Math.min(2,fire):0,aka=cx.lg?.sup&&cx.has('アカマツ')?1:0,manual=!cx.fl.eat&&(cx.eneHand.length||aka)?1:0;return ip(cx,RQ)>0&&cx.opB.battle&&50*(total+ho+manual+aka)>=cx.rem(cx.opB.battle)&&(ho>0||aka>0);}
@@ -107,6 +115,9 @@
       switch (n) {
         case 'ボスの指令': if(rampageRoute(cx))return 0;return undefined;
         case 'シアノ': { const ex = [RQ, KG, TF, TP, HO, MW, LT, FZ].reduce((s, x) => s + cx.expDeck(x), 0); return me.deckN > 6 && ex >= 1 ? (hs <= P.cyanoMaxHand ? P.sCyano : 35) * (0.6 + 0.4 * np) : 0; }
+        case 'ポケモンいれかえ': { const lg = cx.lg; if (lg.retreat && lg.retreat.cost === 0) return 0; const d = cx.opB.battle, now = cx.T !== 1 && cx.canAtkNow('battle') ? cx.myBest('battle').d : 0; let bk = null, bd = now;
+          for (const k of cx.bench()) { if (!cx.canAtkNow(k)) continue; const x = cx.myBest(k).d; if (x > bd && (!now || (d && x >= cx.rem(d)))) { bd = x; bk = k; } }
+          if (!bk) return 0; cx.C.note.swapTo = bk; return P.sSwitchPoke; }   // にげるにエネルギーが要る時、攻撃できる控えと入れ替える
         case 'ジャッジマン': { if (me.deckN <= 6) return 0; if (needsPivot(cx) && !ltReach(cx)) return P.judgeStuck; return undefined; }   // 前が動けず、ラティアスにも届かない：手札を入れ替えて探す
         case 'エネルギーつけかえ': { const w = switchPlan(cx); if (!w) return 0; cx.C.note.sw = w; return w.sc >= 100 ? P.sSwitch : 25; }
         case 'ガラスのラッパ': { const tr = cx.v.self.trash.filter(t => U.BE.test(t.name)).length; return tera(cx) && cx.bench().length && tr ? P.sTrumpet + Math.min(2, tr) * 4 : 0; }
@@ -124,7 +135,7 @@
         default: return undefined;
       }
     },
-    stadiumScore(cx, c) { const P = cx.P; if(nrm(c.name)==='ゼロの大空洞')return tera(cx)&&cx.bench().length>=5&&cx.hand.some(h=>h.t==='pke'&&nrm(h.name)!==PC)?P.sZero:0; return 0; },
+    stadiumScore(cx, c) { const P = cx.P; if(nrm(c.name)===LAVA){const v=lavaValue(cx);return lavaPair(cx)&&v>0?P.sLava+Math.min(3,v)*5:0;} if(nrm(c.name)==='ゼロの大空洞')return tera(cx)&&cx.bench().length>=5&&cx.hand.some(h=>h.t==='pke'&&nrm(h.name)!==PC)?P.sZero:0; return 0; },
     toolScore(cx, c, k) { const p = cx.myB[k], P = cx.P; const big = /^メガ/.test(p.name); return P.sCape + (big ? 12 : 0) + (k === 'battle' ? 8 : 0) - (p.tl.length ? 100 : 0); },
     attachScore(cx, c, k, base) {
       const n = nrm(cx.myB[k].name); if (n === LT || n === FZ || n === MW) return base * 0.15;
@@ -163,7 +174,7 @@
         case RQ: return have(cx, RQ) ? 55 : 100; case KG: return have(cx,KG)?45:110; case TF: return have(cx,RQ)+have(cx,KG)>0 && !have(cx, TF) ? 125 : 45; case TP: return have(cx, TP) ? 40 : 66;
         case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case GG: return (cx.op ? cx.op.prizeN : 6) <= 4 ? 55 : 25; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx,LT)?15:needsPivot(cx)?150:heavyFront(cx)?cx.P.ltAhead:46; case FZ: return 25;
         case 'シアノ': return cx.fl.sup ? 40 : 88; case 'ボスの指令': return 74 + (cx.gust() && cx.gust().ko ? 20 : 0); case 'アカマツ': return 58; case 'ジャッジマン': return 45;
-        case 'エネルギーつけかえ': return 62; case 'ガラスのラッパ': return tera(cx) ? 60 : 30; case 'ぼうけんのランタン': return 50; case 'ゼロの大空洞': return tera(cx) ? 58 : 25;
+        case 'エネルギーつけかえ': return 62; case 'ガラスのラッパ': return tera(cx) ? 60 : 30; case 'ぼうけんのランタン': return 50; case 'ゼロの大空洞': return tera(cx) ? 58 : 25; case LAVA: return cx.hand.some(h=>nrm(h.name)===LAVA) ? 48 : 34;
         case 'スペシャルレッドカード': return 36; case 'ハイパーボール': return 44; case 'ヒーローマント': return 30;
         default: return 30;
       }
@@ -171,7 +182,7 @@
     junk(cx, c) {
       const n = nrm(c.name);
       if (c.t === 'ene') return cx.eneHand.length > 3 ? 8 : 30; if (n === RQ) return 96 - ih(cx, RQ) * 15; if (n === TF) return 74; if (n === HO) return 66; if (n === TP) return 60; if (n === KG) return 62;
-      if (n === 'シアノ') return 58; if (n === 'ボスの指令') return 62; if (c.t === 'sta') return 14; if (n === LT || n === FZ || n === MW || n === PC || n === GG) return 20; if (n === CM) return 16; if (n === SG) return 34; if (n === 'ジャッジマン') return 28;
+      if (n === 'シアノ') return 58; if (n === 'ボスの指令') return 62; if (n === LAVA) return cx.hand.filter(h=>nrm(h.name)===LAVA).length >= 2 ? 40 : 18; if (c.t === 'sta') return 14; if (n === LT || n === FZ || n === MW || n === PC || n === GG) return 20; if (n === CM) return 16; if (n === SG) return 34; if (n === 'ジャッジマン') return 28;
       return 26;
     },
     /* 価値関数への追加特徴量：エネルギー総数と「相手の主力を1撃で倒すまでのあと何個」、メガレックウザの準備、テラスタル/大空洞、ダメージを負った高賞金の露出 */
@@ -189,6 +200,7 @@
       any2: (cx, q) => C.topBy(C.pool(q), c => R.strategies.rayquaza.want(cx, c), 2).map(c => c.u),
     },
     askH: {
+      swapIn: (cx, q) => { const k = cx.C.note.swapTo; return k && q.ks.includes(k) ? k : C.ASKH.swapIn(cx, q); },
       moveSrc: (cx, q) => { const w = cx.C.note.sw; return w && q.ks.includes(w.s) ? w.s : q.ks[0]; },
       moveDst: (cx, q) => { const w = cx.C.note.sw; return w && q.ks.includes(w.d) ? w.d : q.ks[0]; },
     },

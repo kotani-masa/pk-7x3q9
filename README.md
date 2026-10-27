@@ -1,6 +1,6 @@
 # ポケカエミュレータ ＋ CPU AI
 
-配布版 **7.0.2**（番号は `VERSION`）。変更点は `docs/CHANGELOG.md` を参照してください。
+配布版 **7.0.3**（番号は `VERSION`）。変更点は `docs/CHANGELOG.md` を参照してください。
 
 ## CPUと対戦する
 
