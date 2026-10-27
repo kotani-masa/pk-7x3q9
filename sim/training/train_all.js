@@ -1,5 +1,5 @@
 'use strict';
-/* parallel.js の出力を全部まとめて学習し、ai/value_model.js を更新する
+/* parallel.js の出力を全部まとめて学習し、ai/models/value_model.js を更新する
    node sim/train_all.js runs/data1 [--max 400000]   （--max: デッキタイプごとの最大局面数。メモリ節約） */
 const fs=require('fs'),path=require('path'),{execFileSync}=require('child_process');
 const dir=process.argv[2];if(!dir){console.log('使い方: node sim/train_all.js <出力ディレクトリ> [--max 400000]');process.exit(1)}

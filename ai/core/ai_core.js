@@ -162,7 +162,8 @@
       // 信念：デッキリスト − 見えている自分のカード ＝ 山札∪サイド
       const m = {}, add = (n, k) => { n = nrm(n); m[n] = (m[n] || 0) + k; };
       for (const c of this.deck) add(c.name, c.n);
-      const S = v.self; for (const c of S.hand) add(c.name, -1); for (const c of (S.stage || [])) add(c.name, -1); // 使用待機中のカードも見えている for (const c of S.trash) add(c.name, -1);
+      const S = v.self; for (const c of S.hand) add(c.name, -1); for (const c of (S.stage || [])) add(c.name, -1); // 使用待機中のカードも見えている
+      for (const c of S.trash) add(c.name, -1);
       for (const k in S.board) { const p = S.board[k]; add(p.name, -1); p.en.forEach(n => add(n, -1)); p.tl.forEach(n => add(n, -1)); p.un.forEach(n => add(n, -1)); }
       if (v.stadium && v.stadium.own === v.me) add(v.stadium.name, -1);
       for (const n in m) if (m[n] < 0) m[n] = 0; this.unacc = m;

@@ -1,6 +1,6 @@
 'use strict';
 /* このPCの速さを測る。結果（下の表示をそのままコピー）を Claude に送ってください。 */
-const os=require('os');const {Sim}=require('./headless');const D=require('./decks');
+const os=require('os');const {Sim}=require('../lib/headless');const D=require('../lib/decks');
 (async()=>{
  const cpus=os.cpus();console.log('=== このPCの情報 ===');console.log('OS:',os.type(),os.release(),'| Node.js',process.version);console.log('CPU:',cpus[0].model.trim(),'| 論理コア数',cpus.length);console.log('メモリ: 合計',(os.totalmem()/2**30).toFixed(1)+'GB / 空き',(os.freemem()/2**30).toFixed(1)+'GB');
  const s=new Sim();const time=async(n,opt)=>{const t0=Date.now();for(let i=0;i<n;i++)await s.play({decks:[D.dragapult,D.rayquaza],opt:[opt,{}],seed:500+i});return(Date.now()-t0)/n};

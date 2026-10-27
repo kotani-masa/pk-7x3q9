@@ -1,6 +1,6 @@
 'use strict';
 /* 隠れた情報の不変性テスト：相手の手札・山札・サイドの「並び」を入れ替えても、先読み（段階2：相手の手札を仮定して2ターン先まで）の評価が変わらないことを確認する */
-const {Sim}=require('./headless');const D=require('./decks');
+const {Sim}=require('../lib/headless');const D=require('../lib/decks');
 (async()=>{const s=new Sim();let same=0,diff=0,tot=0;const ex=[];
  for(let k=0;k<(+process.env.NC||8);k++){const [a,b]=[['dragapult','rayquaza'],['rayquaza','dragapult'],['dragapult','dragapult'],['rayquaza','rayquaza']][k%4];
   await s.play({decks:[D[a],D[b]],opt:[{},{}],seed:(+process.env.SB||700)+k,maxTurn:6+k%3});const d=s.ctx.__dbg;

@@ -1,6 +1,6 @@
 'use strict';
 /* 価値関数の学習：ロジスティック回帰（L2正則化・ニュートン法）。デッキタイプ別（相手タイプは特徴量）。
-   使い方: node value_train.js train.json[,train2.json] test.json  → 検証してから全データで再学習し ai/value_model.js を出力 */
+   使い方: node value_train.js train.json[,train2.json] test.json  → 検証してから全データで再学習し ai/models/value_model.js を出力 */
 const fs=require('fs'),path=require('path');
 const NAMES=['先頭:サイド差','自サイド残','相手サイド残','自サイド≤2','相手サイド≤2','自場数','相手場数','自バトル残HP率','自バトル賞金','相手バトル残HP率','相手バトル賞金','自ダメカン計','相手ダメカン計','自エネ計','相手エネ計','自バトルエネ','相手バトルエネ','即戦力1','即戦力2','即戦力数','被ダメ見込','KO危険','KO危険×賞金','ベンチ露出賞金','次KO可','次KO可×賞金','自手札','相手手札','自山札少','自山札','ターン','先攻','自ベンチ賞金','相手ベンチ賞金','相手=レックウザ','相手=ドラパ'];
 const load=fs.existsSync?f=>f.split(',').flatMap(x=>JSON.parse(fs.readFileSync(x,'utf8'))):null;
@@ -31,5 +31,5 @@ if(require.main===module){const [tr,te]=[process.argv[2],process.argv[3]];const 
   console.log(`${ty}: 学習${a.length}局面 / 検証${b.length}局面  logloss ${ll(ps,ys).toFixed(4)} (定数 ${ll(pm,ys).toFixed(4)}, サイド差のみ ${ll(p0,ys).toFixed(4)})  AUC ${auc(ps,ys).toFixed(3)} (サイド差のみ ${auc(p0,ys).toFixed(3)})  正解率 ${(100*ps.reduce((s,p,i)=>s+((p>.5)===(ys[i]>.5)&&ys[i]!==.5?1:0),0)/ys.filter(y=>y!==.5).length).toFixed(1)}%`);
   const idx=m.w.slice(0,36).map((w,i)=>[Math.abs(w),i,w]).sort((u,v)=>v[0]-u[0]).slice(0,6);console.log('   影響の大きい特徴:',idx.map(([_,i,w])=>`${NAMES[i]}(${w>0?'+':''}${w.toFixed(2)})`).join(' '));
   const all=[...a,...b];out[ty]=Object.assign(fit(all.map(r=>expand(r[2])),all.map(r=>r[3]),10),{ex:EXB})}
- if(process.argv[4]==='--write'){fs.writeFileSync(path.join(__dirname,'../ai/value_model.js'),`/* 自動生成：sim/value_train.js（自己対戦${A.length+B.length}局面から学習した勝率予測。ロジスティック回帰） */\n(function (G) { const R = G.CPUAI = G.CPUAI || {}; R.value = ${JSON.stringify(out)}; })(typeof window !== 'undefined' ? window : globalThis);\n`);console.log('→ ai/value_model.js を出力')}}
+ if(process.argv[4]==='--write'){fs.writeFileSync(path.join(__dirname,'../../ai/models/value_model.js'),`/* 自動生成：sim/value_train.js（自己対戦${A.length+B.length}局面から学習した勝率予測。ロジスティック回帰） */\n(function (G) { const R = G.CPUAI = G.CPUAI || {}; R.value = ${JSON.stringify(out)}; })(typeof window !== 'undefined' ? window : globalThis);\n`);console.log('→ ai/models/value_model.js を出力')}}
 module.exports={fit,pred,auc,ll,NAMES};

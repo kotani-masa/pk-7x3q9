@@ -17,9 +17,9 @@ const rayquaza = [ // あなたの実際のリスト（公式デッキコード 
   ['シアノ', 3, 'sup'], ['リーリエの決心', 1, 'sup'], ['アカマツ', 2, 'sup'], ['暗号マニアの解読', 1, 'sup'], ['ジャッジマン', 2, 'sup'], ['ボスの指令', 3, 'sup'], ['AZの安らぎ', 1, 'sup'],
   ['ゼロの大空洞', 3, 'sta'], ['基本炎エネルギー', 9, 'ene'], ['基本雷エネルギー', 4, 'ene'],
 ];
-const D = { dragapult: mk(dragapult), rayquaza: mk(rayquaza) };
+const D = { dragapult: mk(dragapult), rayquaza: mk(rayquaza), zoroark: require('../decks/zoroark.json') };
 /* sim/decks/<type>.json があればそちらを優先（実際のデッキを import_decks.js で取り込んだ場合） */
-if (require.main !== module) { const fs = require('fs'); for (const k in D) { const f = __dirname + '/decks/' + k + '.json'; if (fs.existsSync(f)) D[k] = JSON.parse(fs.readFileSync(f, 'utf8')); } }
+if (require.main !== module) { const fs = require('fs'); for (const k in D) { const f = __dirname + '/../decks/' + k + '.json'; if (fs.existsSync(f)) D[k] = JSON.parse(fs.readFileSync(f, 'utf8')); } }
 for (const k in D) { const n = D[k].reduce((s, c) => s + c.n, 0); if (n !== 60) throw new Error(k + ' = ' + n); }
-if (require.main === module) { const fs = require('fs'); for (const k in D) fs.writeFileSync(__dirname + '/decks/' + k + '.json', JSON.stringify(D[k], null, 1)); console.log('written'); }
+if (require.main === module) { const fs = require('fs'); for (const k in D) fs.writeFileSync(__dirname + '/../decks/' + k + '.json', JSON.stringify(D[k], null, 1)); console.log('written'); }
 module.exports = D;

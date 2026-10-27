@@ -6,7 +6,7 @@
      --outdir 出力先（チャンクごとに c_<番号>.json）            --seed0  チャンク番号の開始値（別の実行と被らないように） */
 const fs=require('fs'),os=require('os'),path=require('path'),{fork}=require('child_process');
 const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};
-const PROCS=+arg('procs',Math.max(1,Math.floor(os.cpus().length/2)-1)),HOURS=+arg('hours',1),GAMES=+arg('games',100),SEARCH=arg('search','2'),OUT=arg('outdir','runs/data1'),SEED0=+arg('seed0',1000),MAX=+arg('chunks',1e9);
+const PROCS=+arg('procs',Math.max(1,Math.floor(os.cpus().length/2)-1)),HOURS=+arg('hours',1),GAMES=+arg('games',100),SEARCH=arg('search','2'),OUT=arg('outdir',path.join(__dirname,'../results/runs/data1')),SEED0=+arg('seed0',1000),MAX=+arg('chunks',1e9);
 fs.mkdirSync(OUT,{recursive:true});for(const f of fs.readdirSync(OUT))if(f.endsWith('.tmp'))fs.unlinkSync(path.join(OUT,f));   // 途中で切れたファイルは捨てる
 const t0=Date.now(),end=t0+HOURS*3600e3;let next=0,running=0,done=0,pos=0,stop=false;const kids=new Set();
 const have=f=>fs.existsSync(path.join(OUT,f));

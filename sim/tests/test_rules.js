@@ -1,6 +1,6 @@
 'use strict';
 /* ルール微調整の検証：①ハイパーボールの処理順 ②強制マリガンと手札公開 ③開始時の裏向き(hid)と同時公開 ④情報制限 */
-const {Sim}=require('./headless');const D=require('./decks');
+const {Sim}=require('../lib/headless');const D=require('../lib/decks');
 (async()=>{const s=new Sim();const orig=s.makeAI.bind(s);let checks=[],mullLogs=0;
  s.makeAI=sd=>{const c=orig(sd);const d=c.__dispatch;c.__dispatch=(m,id,j)=>{
    if(m==='pk'){const a=JSON.parse(j);if(/山札からポケモンを1枚選択/.test(a[1].title)&&checks.length<3){const me=a[0].me;

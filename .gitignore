@@ -1,0 +1,4 @@
+sim/results/opt_log.json
+sim/results/report.json
+sim/results/data_*.json
+sim/results/runs/

@@ -1,0 +1,29 @@
+{
+  "seed": 20000,
+  "gamesPerOpponent": 100,
+  "search": false,
+  "results": [
+    {
+      "opponent": "dragapult",
+      "wins": 59,
+      "losses": 41,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 13.78,
+      "winRate": 0.59
+    },
+    {
+      "opponent": "rayquaza",
+      "wins": 83,
+      "losses": 17,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.56,
+      "winRate": 0.83
+    }
+  ]
+}

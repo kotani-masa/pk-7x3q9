@@ -8,29 +8,30 @@
    ・全候補に同じ乱数シードを使う（共通乱数法）。世代ごとにシードを変えて過学習を防ぐ
    使い方: node optimize.js [--rounds 2] [--gens 8] [--pop 12] [--games 30] [--seed 1] */
 const fs = require('fs'), path = require('path');
-const { Sim, mulberry32 } = require('./headless');
-const { evalMatch } = require('./evalm');
-const ROOT = path.resolve(__dirname, '..');
+const { Sim, mulberry32 } = require('../lib/headless');
+const { evalMatch } = require('../lib/evalm');
+const ROOT = path.resolve(__dirname, '../..');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? +process.argv[i + 1] : d; };
 const ROUNDS = arg('rounds', 2), GENS = arg('gens', 8), POP = arg('pop', 12), GAMES = arg('games', 30), SEED = arg('seed', 1);
 const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1] : null, ROUND0 = arg('round0', 0);
-const INT = new Set(['benchCap', 'dreepyTarget', 'duskTarget', 'cyanoMaxHand', 'judgeMine', 'judgeOpp', 'hoFire', 'first']);
+const INT = new Set(['benchCap', 'dreepyTarget', 'duskTarget', 'cyanoMaxHand', 'judgeMine', 'judgeOpp', 'lineTarget', 'drawReserve', 'hoFire', 'first']);
 
 /* 戦略定義（defaults/space）を取り出す：AIコンテキストで登録内容を読む */
-const sim = new Sim({ aiFiles: ['ai_core.js', 'ai_dragapult.js', 'ai_rayquaza.js'] });
+const sim = new Sim({ aiFiles: ['core/ai_core.js', 'decks/ai_dragapult.js', 'decks/ai_rayquaza.js', 'decks/ai_zoroark.js'] });
 const vm = require('vm');
 const ctx0 = sim.makeAI(1);
 const DEF = {}, SPACE = {};
-for (const n of ['dragapult', 'rayquaza']) { DEF[n] = JSON.parse(vm.runInContext(`JSON.stringify(window.CPUAI.strategies.${n}.defaults)`, ctx0)); SPACE[n] = JSON.parse(vm.runInContext(`JSON.stringify(window.CPUAI.strategies.${n}.space)`, ctx0)); }
+for (const n of ['dragapult', 'rayquaza', 'zoroark']) { DEF[n] = JSON.parse(vm.runInContext(`JSON.stringify(window.CPUAI.strategies.${n}.defaults)`, ctx0)); SPACE[n] = JSON.parse(vm.runInContext(`JSON.stringify(window.CPUAI.strategies.${n}.space)`, ctx0)); }
 const names = n => Object.keys(SPACE[n]);
 const decode = (n, x) => { const o = { ...DEF[n] }; names(n).forEach((k, i) => { const [lo, hi] = SPACE[n][k]; let v = lo + Math.min(1, Math.max(0, x[i])) * (hi - lo); if (INT.has(k)) v = Math.round(v); o[k] = INT.has(k) ? v : Math.round(v * 100) / 100; }); return o; };
 const encode = (n, o) => names(n).map(k => { const [lo, hi] = SPACE[n][k]; return Math.min(1, Math.max(0, ((o[k] === undefined ? DEF[n][k] : o[k]) - lo) / (hi - lo))); });
-const load = n => { const f = path.join(ROOT, `ai/params_${n}.js`); if (!fs.existsSync(f)) return { ...DEF[n] }; const m = fs.readFileSync(f, 'utf8').match(/=\s*(\{[\s\S]*?\});/); return m ? { ...DEF[n], ...JSON.parse(m[1]) } : { ...DEF[n] }; };
-const save = (n, o, note) => fs.writeFileSync(path.join(ROOT, `ai/params_${n}.js`), `/* 自動生成：sim/optimize.js（自己対戦で調整したパラメータ）${note || ''} */\n(function (G) { const R = G.CPUAI = G.CPUAI || {}; R.tuned = R.tuned || {}; R.tuned.${n} = ${JSON.stringify(o)}; })(typeof window !== 'undefined' ? window : globalThis);\n`);
+const load = n => { const f = path.join(ROOT, `ai/params/params_${n}.js`); if (!fs.existsSync(f)) return { ...DEF[n] }; const m = fs.readFileSync(f, 'utf8').match(/=\s*(\{[\s\S]*?\});/); return m ? { ...DEF[n], ...JSON.parse(m[1]) } : { ...DEF[n] }; };
+const save = (n, o, note) => fs.writeFileSync(path.join(ROOT, `ai/params/params_${n}.js`), `/* 自動生成：sim/optimize.js（自己対戦で調整したパラメータ）${note || ''} */\n(function (G) { const R = G.CPUAI = G.CPUAI || {}; R.tuned = R.tuned || {}; R.tuned.${n} = ${JSON.stringify(o)}; })(typeof window !== 'undefined' ? window : globalThis);\n`);
 const gauss = r => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
 
 /* 候補 cand（デッキ n）の適合度：3つの組み合わせでの平均勝率 */
 async function fitness(n, cand, cur, seed) {
+  if(n==='zoroark'){const A={deck:n,opt:{params:cand}},rates=[];for(const other of ['dragapult','rayquaza','zoroark'])rates.push((await evalMatch(sim,A,{deck:other,opt:{params:cur[other]}},GAMES,seed+rates.length*100000)).rate);return {f:rates.reduce((a,b)=>a+b,0)/rates.length,cross:rates[0],mirror:rates[2],anchor:rates[1]};}
   const other = n === 'dragapult' ? 'rayquaza' : 'dragapult', A = { deck: n, opt: { params: cand } };
   const cross = await evalMatch(sim, A, { deck: other, opt: { params: cur[other] } }, GAMES, seed);
   const mirror = await evalMatch(sim, A, { deck: n, opt: { params: cur[n] } }, GAMES, seed + 100000);
@@ -62,12 +63,13 @@ async function optimizeDeck(n, cur, round, log) {
 }
 
 (async () => {
-  const cur = { dragapult: load('dragapult'), rayquaza: load('rayquaza') }, log = [];
+  const cur = { dragapult: load('dragapult'), rayquaza: load('rayquaza'), zoroark: load('zoroark') }, log = [];
   const t0 = Date.now();
   for (let r = ROUND0; r < ROUND0 + ROUNDS; r++) {
     if (!ONLY || ONLY === 'dragapult') await optimizeDeck('dragapult', cur, r, log);
+    if (ONLY === 'zoroark') await optimizeDeck('zoroark', cur, r, log);
     if (!ONLY || ONLY === 'rayquaza') await optimizeDeck('rayquaza', cur, r, log);
-    fs.writeFileSync(path.join(__dirname, 'opt_log.json'), JSON.stringify(log, null, 1));
+    fs.writeFileSync(path.join(__dirname, '../results/opt_log.json'), JSON.stringify(log, null, 1));
     console.log(`== round ${r + 1} 完了 (${((Date.now() - t0) / 60000).toFixed(1)}分) ==`);
   }
 })().catch(e => { console.log('ERR', e.stack); });

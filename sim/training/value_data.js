@@ -1,9 +1,9 @@
 'use strict';
 /* 価値関数の学習データ生成：自己対戦で「自分の番の終わりの局面(特徴量)」と「その番のプレイヤーが最終的に勝ったか」を記録 */
-const fs=require('fs');const {Sim}=require('./headless');const D=require('./decks');
+const fs=require('fs'),path=require('path');const {Sim}=require('../lib/headless');const D=require('../lib/decks');
 const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};
-const SM=arg('search','0'),SRCH=SM!=='0',SCFG=SM==='2'?{K:5,S:3,S2:4,T:3,prior:2}:{K:4,S:2,prior:3},N=+arg('games',600),SEED=+arg('seed',1),OUT=arg('out','data_a.json');
-(async()=>{const s=new Sim({aiFiles:['ai_core.js','ai_dragapult.js','ai_rayquaza.js','params_dragapult.js','params_rayquaza.js','value_model.js']});
+const SM=arg('search','0'),SRCH=SM!=='0',SCFG=SM==='2'?{K:5,S:3,S2:4,T:3,prior:2}:{K:4,S:2,prior:3},N=+arg('games',600),SEED=+arg('seed',1),OUT=arg('out',path.join(__dirname,'../results/data_a.json'));
+(async()=>{const s=new Sim({aiFiles:['core/ai_core.js','decks/ai_dragapult.js','decks/ai_rayquaza.js','params/params_dragapult.js','params/params_rayquaza.js','models/value_model.js']});
  const M=[['dragapult','rayquaza',0,0],['rayquaza','dragapult',0,0],['dragapult','dragapult',0,0],['rayquaza','rayquaza',0,0],['dragapult','rayquaza',0,1],['rayquaza','dragapult',0,1],['dragapult','rayquaza',1,0],['rayquaza','dragapult',1,0]];
  const rows=[];const t0=Date.now();
  for(let g=0;g<N;g++){const [a,b,la,lb]=M[g%M.length];

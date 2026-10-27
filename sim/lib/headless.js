@@ -4,13 +4,13 @@
    ・AI（ai/*.js）は別の vm コンテキストに隔離。盤面オブジェクトには一切触れず、JSONで複製された「見える情報」だけを受け取る
      → AIが隠れた情報（相手の手札・山札の順序・サイドの中身）を読めないことを構造的に保証する */
 const fs = require('fs'), vm = require('vm'), path = require('path');
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '../..');
 
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
 const DRIVER = `
 ;(function(){
-render=function(){};banner=function(){};coinAnim=function(){return Promise.resolve()};
+sideFly=function(){SIDEFLY=null;FLIPEND=0;FXEND=0;};render=function(){};banner=function(){};coinAnim=function(){return Promise.resolve()};
 act=function(fn,re){ACTN++;fn();re&&re()};
 window.__AUD=[{att:0,ex:0},{att:0,ex:0}];
 ATTACHHOOK=(i,c,k)=>{if(c.t!=='ene')return;const pl=P[i].piles[k],t=lastOf(pl),nm=nk(t.name),seen=new Set();let mx=0;const add=n=>{const m=MON[n]||MON[n+'#0'];if(m&&m.at)for(const a of m.at)mx=Math.max(mx,a.cost.length)};add(nm);
@@ -27,6 +27,10 @@ window.__run=async function(cfg){window.__REC=cfg.rec?[]:null;
   const w=Math.random()<.5?0:1;G.fp=cpuOrder(w)?w:1-w;
   let guard=0;
   while(!G.over&&guard++<6000){
+    // Visual timers must not block the UI-free runner; keep the actual start/draw sequence.
+    SIDEFLY=null;FLIPEND=0;FXEND=0;MULLQ.length=0;
+    mullCheck();if(G.mdraw)mdrawAsk();
+    if(TE || (G.act===undefined&&!P.some(p=>p.phase==='setup'))){await new Promise(r=>setTimeout(r,0));continue;}
     const c=CTRL();
     if(P[c].phase==='setup')await cpuSetup(c);
     else if(P[c].phase==='play'&&G.act===c)await cpuTurn(c);else break;
@@ -43,10 +47,10 @@ class Sim {
     const AIDIR = opts.aiDir || path.join(ROOT, 'ai');
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     const ms = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
-    let main = ms[ms.length - 1][1].replace(/\nrender\(\);\s*$/, '\n');
-    const legacy = fs.readFileSync(path.join(AIDIR, 'legacy_cpu.js'), 'utf8');
-    this.engine = new vm.Script(main + '\n' + legacy + '\n' + DRIVER, { filename: 'engine.js' });
-    this.aiFiles = (opts.aiFiles || ['ai_core.js', 'ai_dragapult.js', 'ai_rayquaza.js', 'params_dragapult.js', 'params_rayquaza.js', 'value_model.js', 'ai_refs.js']).filter(f => fs.existsSync(path.join(AIDIR, f)));
+    let main = ms.map(m => m[1]).sort((a,b) => b.length-a.length)[0].replace(/\nrender\(\);\s*$/, '\n');
+    const legacy = fs.readFileSync(path.join(AIDIR, 'legacy/legacy_cpu.js'), 'utf8');
+    this.engine = new vm.Script('render=function(){};\n' + main + '\n' + legacy + '\n' + DRIVER, { filename: 'engine.js' });
+    this.aiFiles = (opts.aiFiles || ['core/ai_core.js', 'decks/ai_dragapult.js', 'decks/ai_rayquaza.js', 'decks/ai_zoroark.js', 'params/params_zoroark.js', 'params/params_dragapult.js', 'params/params_rayquaza.js', 'models/value_model.js', 'data/ai_refs.js']).filter(f => fs.existsSync(path.join(AIDIR, f)));
     this.aiSources = this.aiFiles.map(f => fs.readFileSync(path.join(AIDIR, f), 'utf8'));
   }
   /* AIコンテキスト：盤面のグローバル(P,G,...)が存在しない空の世界で、AIコードだけを実行する */
@@ -63,11 +67,11 @@ class Sim {
   async play(cfg) {
     const seed = cfg.seed >>> 0, rng = mulberry32(seed);
     const ai = this.aiSources.length ? (this._ai || (this._ai = this.makeAI(seed))) : null; if (ai) vm.runInContext('window.__hold.length=0', ai);
-    const el = new Proxy({ style: {}, dataset: {}, classList: { add() { }, remove() { } }, innerHTML: '', textContent: '' }, { get: (t, k) => k in t ? t[k] : (typeof k === 'string' ? function () { return el; } : undefined), set: (t, k, v) => (t[k] = v, true) });
+    const el = new Proxy({ style: {setProperty() {},removeProperty() {}}, dataset: {}, classList: { add() { }, remove() { } }, getBoundingClientRect:()=>({width:0,height:0,left:0,top:0}),innerHTML: '', textContent: '' }, { get: (t, k) => k in t ? t[k] : (typeof k === 'string' ? function () { return el; } : undefined), set: (t, k, v) => (t[k] = v, true) });
     const ctx = vm.createContext({
       console, setTimeout: (f) => setImmediate(f), clearTimeout() { }, setInterval() { return 0; }, clearInterval() { },
-      document: { querySelector: () => el, querySelectorAll: () => [], createElement: () => el, body: el, documentElement: el },
-      localStorage: {}, navigator: {}, innerWidth: 400, innerHeight: 900, alert() { }, confirm: () => true, prompt: () => null,
+      document: { getElementById:()=>null,addEventListener() {}, querySelector: () => el, querySelectorAll: () => [], createElement: () => el, body: el, documentElement: el },
+      location:{search:'',protocol:'file:',origin:'null',pathname:'/'},localStorage: {}, navigator: {}, innerWidth: 400, innerHeight: 900, alert() { }, confirm: () => true, prompt: () => null,
       addEventListener() { }, RTCPeerConnection: function () { }, requestAnimationFrame: (f) => setImmediate(f),
     });
     ctx.window = ctx; vm.runInContext('Math', ctx).random = rng;
@@ -75,7 +79,7 @@ class Sim {
     vm.runInContext(`window.__bridge=${ai ? `{__marshal:true,
       detect:cards=>JSON.parse(__aiHost('detect',-1,JSON.stringify(cards))),ref:t=>JSON.parse(__aiHost('ref',-1,JSON.stringify(t))),
       create:(name,opts)=>{const id=JSON.parse(__aiHost('create',-1,JSON.stringify({name,opts})));const call=(m,...a)=>JSON.parse(__aiHost(m,id,JSON.stringify(a)));
-        return {setup:v=>call('setup',v),decide:v=>call('decide',v),pk:(v,q)=>call('pk',v,q),ask:(v,q)=>call('ask',v,q),menu:(v,q)=>call('menu',v,q),order:v=>call('order',v),result:(a,ok,e)=>call('result',a,ok,e),features:v=>call('features',v),value:v=>call('value',v),candidates:(v,K)=>call('candidates',v,K),commit:a=>call('commit',a),hasValue:()=>call('hasValue')}}}` : 'undefined'};`, ctx);
+        return {setup:v=>call('setup',v),bench:v=>call('bench',v),decide:v=>call('decide',v),pk:(v,q)=>call('pk',v,q),ask:(v,q)=>call('ask',v,q),attach:(v,q)=>call('attach',v,q),menu:(v,q)=>call('menu',v,q),order:v=>call('order',v),result:(a,ok,e)=>call('result',a,ok,e),features:v=>call('features',v),value:v=>call('value',v),candidates:(v,K)=>call('candidates',v,K),commit:a=>call('commit',a),hasValue:()=>call('hasValue')}}}` : 'undefined'};`, ctx);
     this.engine.runInContext(ctx);
     this.ctx = ctx;
     const r = await ctx.__run({ decks: cfg.decks, opt: cfg.opt, maxTurn: cfg.maxTurn, log: cfg.log, rec: cfg.rec, srch: cfg.srch, simD: cfg.simD });

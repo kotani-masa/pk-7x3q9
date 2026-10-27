@@ -1,7 +1,7 @@
 /* ai_dragapult.js — クラハンドラパ用プレイアルゴリズム
    方針：ドラメシヤ→ドロンチ(ていさつしれい)→ドラパルトex を最速で完成させ、ファントムダイブ(200＋ダメカン6個ばらまき)と
    ヨノワール/サマヨールのカースドボムで「サイドをまとめ取り」。スボミーのグッズロックとクラッシュハンマーで相手の展開を遅らせる。
-   ※ 数値の閾値は defaults にまとめてあり、sim/optimize.js の自己対戦で調整する（ai/params_dragapult.js に出力）。 */
+   ※ 数値の閾値は defaults にまとめてあり、sim/optimize.js の自己対戦で調整する（ai/params/params_dragapult.js に出力）。 */
 (function (root) {
   'use strict';
   const R = root.CPUAI, U = R.util, nrm = U.nrm, payable = U.payable, cnt = U.cnt, C = R.core;
