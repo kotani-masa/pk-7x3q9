@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "release": "7.0.1",
+  "previousRelease": "7.0.0",
+  "legacyPreviousLabel": "v7",
+  "versionFile": "VERSION",
+  "versionPolicy": "docs/VERSIONING.md",
+  "changeType": "patch: fixes to existing Rayquaza policy; no new deck or incompatible log format",
+  "sourceNotes": "docs/RAYQUAZA_7.0.1.md",
+  "previousDevelopmentRecord": [
+    "docs/AI_HANDOFF.md",
+    "docs/ai_handoff_7.0.0.json"
+  ],
+  "changedPolicy": "ai/decks/ai_rayquaza.js",
+  "unchanged": [
+    "index.html",
+    "ai/decks/ai_zoroark.js",
+    "ai/decks/ai_dragapult.js",
+    "ai/params/params_rayquaza.js",
+    "ai/params/params_dragapult.js",
+    "decklists"
+  ],
+  "teacherLogs": [
+    {
+      "name": "match-mvqydt1t-2.pokeca.json",
+      "cpu": "zoroark",
+      "manual": "rayquaza",
+      "use": "Ho-Oh/Akamatsu/transfer 300 damage route and final gust target"
+    },
+    {
+      "name": "match-mvqxzisd-3.pokeca.json",
+      "cpu": "rayquaza",
+      "manual": "zoroark",
+      "use": "stranded active and missed three-card Hyper Ball"
+    },
+    {
+      "name": "match-mvqxubyt-2.pokeca.json",
+      "cpu": "rayquaza",
+      "manual": "zoroark",
+      "use": "split attachments leave Mega unable to attack before giving up three prizes"
+    }
+  ],
+  "changes": [
+    "Prioritize a Latias pivot when the active blocks a ready attacker.",
+    "Allow Hyper Ball with exactly two discardable cards.",
+    "Avoid redundant Terapagos and premature stadium use.",
+    "Value Talonflame search while retreating.",
+    "Reserve and sequence Ho-Oh acceleration, Akamatsu, manual energy, and transfer.",
+    "Pick distinct Akamatsu energy names from the complete legal pool.",
+    "Delay a premature Boss that would consume the supporter needed for a larger knockout.",
+    "Avoid exposing a nonlethal Mega to a knockout while Talonflame can keep attacking.",
+    "Evaluate incoming damage as if the promoted candidate were active, not still on the bench."
+  ],
+  "evaluation": {
+    "baseline": "sim/baselines/7.0.0/ai",
+    "opponent": "unchanged v6 Zoroark",
+    "file": "sim/results/rayquaza_7.0.1_final.json",
+    "seedRange": [
+      2300000,
+      2300999
+    ],
+    "gamesPerVersion": 1000,
+    "search": false,
+    "summary": {
+      "baselineWins": 127,
+      "currentWins": 157,
+      "nPerVersion": 1000,
+      "paired": {
+        "gained": 89,
+        "lost": 59,
+        "p": 0.016841422756845137
+      },
+      "errors": 0,
+      "unfinished": 0
+    }
+  },
+  "tests": "node sim/run.js test",
+  "reproduce": "node sim/cli/eval_rayquaza_patch.js 1000 2300000 rayquaza_7.0.1_final.json",
+  "build": "762d0d37d23bda19",
+  "limits": [
+    "Regression cases reconstruct a single decision branch, not a whole human match.",
+    "A fixed-opponent benchmark does not establish human-level or general deck strength.",
+    "Resource and opponent-response evaluations remain heuristic."
+  ],
+  "validation": {
+    "testSuite": "passed",
+    "regressionEngineCases": 2,
+    "restoredUploadedBranches": 3,
+    "informationCalls": 112348,
+    "deckOrderLeaks": 0,
+    "hiddenStateInvariancePassed": 22
+  }
+}

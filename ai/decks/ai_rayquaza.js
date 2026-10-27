@@ -16,7 +16,9 @@
     first: 1, sEvo: 88, sBench: 65, benchCap: 5, sAbil: 70, aBase: 45, aEnableNow: 45, aEnableSoon: 25, aProg: 9, aBattle: 6, aDoomed: 30, aLillie: 60,
     sRetreat: 64, rEnergy: 20, rMargin: 40, sBoss: 96, sJudge: 55, judgeMine: 2, judgeOpp: 5, sLillie: 90, lillieHand: 12, sHyper: 60, sRed: 82, cyanoMin: 30,
     pReady: 1, pRisk: 70, pHp: 20, sCyano: 84, cyanoMaxHand: 6, sLantern: 68, sSwitch: 90, sTrumpet: 78, sAka: 78, sRQBench: 92, sMWBench: 85, sHOBench: 84, sTPBench: 75, sKGBench: 60, sLTBench: 55,
-    sRQBenchD: 70, sPC: 88, sGGBench: 55, sSugri: 92, sCipher: 22, sLantern2: 55, sAZ: 50, sTF: 96,   // キチキギスの「さかてにとる」(3枚ドロー)は、他の手札消費系アビリティより先に使う（新しい選択肢が見える） sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
+    sRQBenchD: 70, sPC: 88, sGGBench: 55, sSugri: 92, sCipher: 22, sLantern2: 55, sAZ: 50, sTF: 96,
+    // 補充・加速の設定をコメントから分離する（未定義による行動消失を防ぐ）。
+    sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
   };
   const space = {
     first: [0, 1], sBench: [40, 85], benchCap: [3, 5], sAbil: [50, 90], aBase: [25, 70], aEnableNow: [20, 75], aEnableSoon: [5, 50], aBattle: [0, 25], sRetreat: [40, 90], rMargin: [10, 120], sBoss: [80, 110],
@@ -24,15 +26,21 @@
     sHOBench: [50, 95], sRQBenchD: [20, 100], sGGBench: [20, 90], sSugri: [50, 100], sTPBench: [40, 90], sKGBench: [30, 85], sLTBench: [20, 80], sTF: [50, 95], sHOab: [60, 100], sZero: [40, 95], sCape: [10, 80], pRisk: [20, 140], latiasPenalty: [20, 120], cyanoMin: [15, 60], sRisky: [0, 40],
   };
 
+  function needsPivot(cx){const a=cx.myB.battle;return !!a&&!ip(cx,LT)&&(cx.D(a)?.rc||0)>0&&cx.bench().some(k=>cx.myBest(k).d>0);}
+  function frontThreat(cx,k){const board=cx.myB;try{cx.myB={...board,battle:board[k]};return cx.threat('battle').any;}finally{cx.myB=board;}}
+  function rampageRoute(cx){const total=U.sumEu(cx.myB),fire=cx.hand.filter(c=>etype(c.name)==='炎').length,availableHO=cx.keys().some(k=>nrm(cx.myB[k].name)===HO&&!cx.fl.abU.includes(cx.myB[k].u))||cx.has(HO)&&cx.lg?.room>0,ho=availableHO?Math.min(2,fire):0,aka=cx.lg?.sup&&cx.has('アカマツ')?1:0,manual=!cx.fl.eat&&(cx.eneHand.length||aka)?1:0;return ip(cx,RQ)>0&&cx.opB.battle&&50*(total+ho+manual+aka)>=cx.rem(cx.opB.battle)&&(ho>0||aka>0);}
+
+  function fireReserve(cx){const fire=cx.hand.filter(c=>etype(c.name)==='炎').length,be=cx.attachBest;return fire>0&&be&&etype(cx.card(be.u)?.name)==='炎'&&!cx.has('アカマツ')&&!cx.has('エネルギーつけかえ')?1:0;}
   /* エネルギーつけかえの最良の動かし方：動かした先が「今この番に技を打てる」ようになる組み合わせ */
   function switchPlan(cx) {
     let best = null;
     for (const s of cx.keys()) { const sp = cx.myB[s]; const eneS = sp.en.filter(n => U.BE.test(n)); if (!eneS.length) continue;
       for (const d of cx.keys()) { if (d === s) continue; const dp = cx.myB[d];
         for (const en of [...new Set(eneS)]) { const ty = etype(en); let sc = 0;
-          const canAtk = d === 'battle' && cx.T !== 1 && dp.na !== cx.T;
+          const canAtk = (d==='battle'||cx.lg?.retreat?.cost===0&&cx.lg.retreat.ks.includes(d)) && cx.T!==1 && dp.na!==cx.T;
           for (const a of cx.atks(dp)) { if (payable(a.cost, dp.eu) || !payable(a.cost, dp.eu.concat([ty]))) continue; const dm = cx.dmg(cx.myB, d, a, cx.opB, 'battle', {}) || 0; sc = Math.max(sc, (canAtk ? 100 : 30) + dm / 10); }
-          if (s === 'battle' && sc && cx.myBest('battle').d > 0) sc = 0; // 今の攻撃手段を壊さない
+          if(s==='battle'&&sc&&cx.myBest('battle').d>0&&!(cx.lg?.retreat?.cost===0&&cx.lg.retreat.ks.includes(d)))sc=0;
+          if(s==='battle'&&nrm(sp.name)===TF&&nrm(dp.name)===RQ&&cx.myBest('battle').d>0&&cx.myBest(d,[ty]).d<cx.rem(cx.opB.battle)&&frontThreat(cx,d)>=cx.rem(dp))sc=0; // 今の攻撃手段を壊さない
           if (sc > (best ? best.sc : 0)) best = { s, d, en, sc }; } } }
     return best;
   }
@@ -59,9 +67,9 @@
     label: 'メガレックウザ', defaults, space,
     detect: cards => cards.some(c => nrm(c.name) === RQ),
     setup(cx, bs) {
-      const sc = c => { const n = nrm(c.name); return n === TF ? 78 : n === PC ? 64 : n === LT ? 60 : n === TP ? 48 : n === HO ? 44 : n === FZ ? 30 : n === MW ? 26 : n === KG ? 20 : n === GG ? 10 : n === RQ ? 8 : 25; };   // ファイアロー最優先（記事：先攻2ターン目のかぎづめハントが理想）
+      const sc = c => { const n = nrm(c.name); return n===TF?100:n===LT?90:n===KG?(bs.some(x=>nrm(x.name)===LT)?80:40):n===TP?60:n===HO?44:n===FZ?30:n===MW?26:n===PC?15 : n === GG ? 10 : n === RQ ? 8 : 25; };   // ファイアロー最優先（記事：先攻2ターン目のかぎづめハントが理想）
       const s = bs.slice().sort((a, b) => sc(b) - sc(a)), act = s[0], bench = [];
-      for (const c of s.slice(1)) { const n = nrm(c.name); if ((n === HO || n === TP || n === LT) && bench.length < 3) bench.push(c.u); } // ベンチに出た時の特性を使いたいメガ・ニャースは手札に残す
+      const seen=new Set([nrm(act.name)]);for(const c of s.slice(1)){const n=nrm(c.name);if([HO,TP,LT].includes(n)&&!seen.has(n)&&bench.length<3){bench.push(c.u);seen.add(n);}} // ベンチに出た時の特性を使いたいメガ・ニャースは手札に残す
       return { active: act.u, bench };
     },
     benchScore(cx, c) {
@@ -69,10 +77,10 @@
       switch (n) {
         case RQ: return opD ? P.sRQBenchD : P.sRQBench;   // ダメカンをばらまくドラパ相手は、3サイドのメガを早く出すと狙われる
         case MW: return (!cx.fl.sup && cx.lg.sup && !cx.hand.some(h => h.t === 'sup') ? P.sMWBench : 30) - (opD ? P.sRisky : 0);
-        case HO: return ip(cx, HO) ? 0 : P.sHOBench;
-        case TP: return ip(cx, TP) ? 10 : P.sTPBench;
+        case HO: return ip(cx,HO)?0:cx.hand.filter(c=>etype(c.name)==='炎').length>=2?190:P.sHOBench;
+        case TP: return ip(cx,TP)?0:P.sTPBench;
         case KG: return ip(cx, KG) ? 0 : P.sKGBench;
-        case LT: return ip(cx, LT) ? 0 : P.sLTBench;
+        case LT: return ip(cx,LT)?0:needsPivot(cx)?140:P.sLTBench;
         case PC: return pcPlan(cx, 1) > 0 ? P.sPC : 0;      // 特性を使う場面があるときだけ
         case GG: return ip(cx, GG) ? 0 : (opDeckN(cx) >= 2 ? P.sGGBench : 20);   // 相手が2サイド以上取っていると、無色5のコストが実質軽くなる想定
         case FZ: return cx.me.koTurn === cx.T - 1 && cx.me.deckN > 10 ? P.sFezBench : 0;
@@ -82,7 +90,9 @@
     habScore(cx, c) { return cx.lg.room > 0 ? cx.P.sTF : 0; },
     abScore(cx, b, p) {
       const n = nrm(p.name), P = cx.P;
-      if (n === KG) return cx.me.deckN > 6 ? P.sKG : 0; if (n === FZ) return cx.me.deckN > 12 ? 93 : 0;
+      if (n === KG) return cx.me.deckN > 4 ? P.sKG : 0; if (n === FZ) return cx.me.deckN > 4 ? 110 : 0;
+      if(n===HO)cx.C.note.hoReserve=fireReserve(cx);
+      if(n===HO&&cx.hand.filter(c=>etype(c.name)==='炎').length-fireReserve(cx)>=2)return 180;
       if (n === HO) { const be = cx.attachBest, bc = be && cx.card(be.u), ty = bc ? etype(bc.name) : '';
         return be && ty === '炎' && be.k !== 'battle' && be.s >= 55 ? Math.max(20, be.s - 5) : P.sHOab; }   // 手札の炎エネルギーが少なく、ベンチの本命アタッカーに貼れる時は、ためるより手貼りを優先
       return P.sAbil;
@@ -90,11 +100,12 @@
     trainerScore(cx, c) {
       const n = nrm(c.name), P = cx.P, hs = cx.hand.length - 1, me = cx.me, np = needPiece(cx);
       switch (n) {
+        case 'ボスの指令': if(rampageRoute(cx))return 0;return undefined;
         case 'シアノ': { const ex = [RQ, KG, TF, TP, HO, MW, LT, FZ].reduce((s, x) => s + cx.expDeck(x), 0); return me.deckN > 6 && ex >= 1 ? (hs <= P.cyanoMaxHand ? P.sCyano : 35) * (0.6 + 0.4 * np) : 0; }
         case 'エネルギーつけかえ': { const w = switchPlan(cx); if (!w) return 0; cx.C.note.sw = w; return w.sc >= 100 ? P.sSwitch : 25; }
         case 'ガラスのラッパ': { const tr = cx.v.self.trash.filter(t => U.BE.test(t.name)).length; return tera(cx) && cx.bench().length && tr ? P.sTrumpet + Math.min(2, tr) * 4 : 0; }
-        case 'アカマツ': return me.deckN > 6 && hs <= 5 && (cx.expDeck('基本炎エネルギー') + cx.expDeck('基本雷エネルギー')) >= 1 ? P.sAka : 0;
-        case 'ハイパーボール': return hs >= 3 ? P.sHyper * (0.4 + 0.6 * np) - (hs <= 3 ? 15 : 0) : 0;
+        case 'アカマツ': if(rampageRoute(cx)&&me.deckN>4)return 140;return me.deckN > 6 && hs <= 5 && (cx.expDeck('基本炎エネルギー') + cx.expDeck('基本雷エネルギー')) >= 1 ? P.sAka : 0;
+        case 'ハイパーボール': if(hs>=2&&needsPivot(cx)&&cx.pDeck(LT)>0)return 185;return hs >= 2 ? P.sHyper * (0.4 + 0.6 * np) - (hs <= 3 ? 15 : 0) : 0;
         case 'ゼロの大空洞': return 0;
         case 'スグリ': { const me = cx.myB.battle, d = cx.opB.battle; if (!me || !d || cx.T === 1) return 0; cx.C.note.sg = 0;
           if (/(ex|V)$/.test(d.name)) { const cur = cx.myBest('battle', null, 1).d; let w30 = 0; for (const a of cx.atks(me)) if (U.payable(a.cost, me.eu)) w30 = Math.max(w30, cx.dmg(cx.myB, 'battle', a, cx.opB, 'battle', { lo: 1, plus30: true }) || 0);
@@ -107,10 +118,15 @@
         default: return undefined;
       }
     },
-    stadiumScore(cx, c) { const P = cx.P; if (nrm(c.name) === 'ゼロの大空洞') return tera(cx) ? P.sZero : (ih(cx, TP) ? 40 : 0); return 0; },
+    stadiumScore(cx, c) { const P = cx.P; if(nrm(c.name)==='ゼロの大空洞')return tera(cx)&&cx.bench().length>=5&&cx.hand.some(h=>h.t==='pke'&&nrm(h.name)!==PC)?P.sZero:0; return 0; },
     toolScore(cx, c, k) { const p = cx.myB[k], P = cx.P; const big = /^メガ/.test(p.name); return P.sCape + (big ? 12 : 0) + (k === 'battle' ? 8 : 0) - (p.tl.length ? 100 : 0); },
     attachScore(cx, c, k, base) {
       const n = nrm(cx.myB[k].name); if (n === LT || n === FZ || n === MW) return base * 0.15;
+      const p=cx.myB[k];if(k==='battle'&&needsPivot(cx)&&p.eu.length<(cx.D(p)?.rc||0))return 190;
+      const focus=cx.keys().filter(j=>nrm(cx.myB[j].name)===RQ).sort((a,b)=>cx.myB[b].eu.length-cx.myB[a].eu.length)[0];
+      if(n===RQ){const cost=['雷','炎','無'],before=U.short(cost,p.eu),after=U.short(cost,p.eu.concat([etype(c.name)]));if(after<before)return 110+(k===focus?25:0)+(after===0?40:0);}
+      if([TF,TP].includes(n)&&p.eu.length<2)return 95+(k==='battle'?20:0);
+      if([KG,HO].includes(n))return base;
       const t = etype(c.name); if (t === '雷' && eneCount(cx, '雷') - 1 >= 1 && cx.myB[k].eu.includes('雷')) base -= 8;
       return base;
     },
@@ -120,6 +136,14 @@
       if (a.n === 'むげんのやいば' && !x.ko) s -= cx.P.latiasPenalty; if (a.n === 'しっぽをまく') s -= 40; if (a.n === 'かぎづめハント') s += 25; if (a.n === 'シャイニングフェザー') s += 25;
       return s;
     },
+    retreatScore(cx){if(!cx.lg.retreat)return 0;const now=cx.canAtkNow('battle')&&cx.T!==1?cx.myBest('battle').d:0;let best=null;
+      for(const k of cx.lg.retreat.ks){const p=cx.myB[k];if(!cx.canAtkNow(k))continue;const next=cx.myBest(k).d;if(!next)continue;let gain=next-now-cx.lg.retreat.cost*cx.P.rEnergy;
+        if(nrm(p.name)===TF&&nrm(cx.myB.battle.name)!==TF&&cx.me.deckN>3)gain+=80;
+        if(nrm(p.name)===RQ&&nrm(cx.myB.battle.name)===TF&&now>0&&next<cx.rem(cx.opB.battle))gain-=frontThreat(cx,k)>=cx.rem(p)?180:40;
+        if(next>=cx.rem(cx.opB.battle)&&now<cx.rem(cx.opB.battle))gain+=300;
+        if(!best||gain>best.gain)best={k,gain};}
+      if(best&&best.gain>=cx.P.rMargin){cx.C.note.retreatTo=best.k;return cx.P.sRetreat+best.gain/10;}return 0;},
+    benchForce(cx,c){return nrm(c.name)===LT&&needsPivot(cx);},
     promoteAdj(cx, k, p) { const n = nrm(p.name); return n === KG ? 8 : n === TF ? 10 : n === TP ? Math.min(30, cx.bench().length * 6) : n === LT ? -10 : 0; },
     want(cx, c) {
       const n = nrm(c.name);
@@ -127,8 +151,8 @@
         if (t === '水') return have(cx, PC) && eneCount(cx, '水') === 0 ? 70 : 12; return 25; }
       const np = needPiece(cx);
       switch (n) {
-        case RQ: return have(cx, RQ) ? 55 : 100; case KG: return have(cx, KG) ? 45 : 72; case TF: return megaOnBoard(cx) && !have(cx, TF) ? 82 : 45; case TP: return have(cx, TP) ? 40 : 66;
-        case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case GG: return (cx.op ? cx.op.prizeN : 6) <= 4 ? 55 : 25; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx, LT) ? 15 : 46; case FZ: return 25;
+        case RQ: return have(cx, RQ) ? 55 : 100; case KG: return have(cx,KG)?45:110; case TF: return have(cx,RQ)+have(cx,KG)>0 && !have(cx, TF) ? 125 : 45; case TP: return have(cx, TP) ? 40 : 66;
+        case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case GG: return (cx.op ? cx.op.prizeN : 6) <= 4 ? 55 : 25; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx,LT)?15:needsPivot(cx)?150:46; case FZ: return 25;
         case 'シアノ': return cx.fl.sup ? 40 : 88; case 'ボスの指令': return 74 + (cx.gust() && cx.gust().ko ? 20 : 0); case 'アカマツ': return 58; case 'ジャッジマン': return 45;
         case 'エネルギーつけかえ': return 62; case 'ガラスのラッパ': return tera(cx) ? 60 : 30; case 'ぼうけんのランタン': return 50; case 'ゼロの大空洞': return tera(cx) ? 58 : 25;
         case 'スペシャルレッドカード': return 36; case 'ハイパーボール': return 44; case 'ヒーローマント': return 30;
@@ -150,7 +174,8 @@
         H('シアノ'), H('ボスの指令'), H('エネルギーつけかえ'), cx.hand.filter(c => etype(c.name) === '炎').length / 3, (cx.expDeck('基本雷エネルギー') + cx.expDeck('基本炎エネルギー')) / 10, pcPlan(cx, 0) > 0 ? 1 : 0];
     },
     pkH: {
-      handFire: (cx, q) => C.pool(q).slice(0, Math.min(q.n, cx.P.hoFire)).map(c => c.u),
+      akaPair:(cx,q)=>{const ordered=C.pool(q).slice().sort((a,b)=>R.strategies.rayquaza.want(cx,b)-R.strategies.rayquaza.want(cx,a)),seen=new Set(),out=[];for(const c of ordered){if(!seen.has(c.name)){seen.add(c.name);out.push(c.u);if(out.length===2)break;}}return out;},
+      handFire:(cx,q)=>C.pool(q).slice(0,Math.min(q.n,cx.P.hoFire,Math.max(1,C.pool(q).length-(cx.C.note.hoReserve||0)))).map(c=>c.u),
       moveEne: (cx, q) => { const w = cx.C.note.sw; const t = w ? etype(w.en) : ''; const m = C.pool(q).find(c => etype(c.name) === t); return m ? [m.u] : C.pool(q).slice(0, 1).map(c => c.u); },
       any2: (cx, q) => C.topBy(C.pool(q), c => R.strategies.rayquaza.want(cx, c), 2).map(c => c.u),
     },

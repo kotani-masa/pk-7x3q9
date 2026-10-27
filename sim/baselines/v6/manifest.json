@@ -1,0 +1,16 @@
+{
+  "label": "v6 original opponents and fixed Zoroark",
+  "upstream": "c626f6f82c5f81d3adb0882a1265a83f120653d2",
+  "hashes": {
+    "ai/params/params_rayquaza.js": "be3738493149069c6946928952bd3c02ba493f55047456269139e3248e23e115",
+    "ai/params/params_dragapult.js": "024d1461b5474891f65b9694958ff96a09b21b286ec853af36a6c09692ad13f3",
+    "ai/params/params_zoroark.js": "246330655d741642cbc3e83629809095b8af437cf21083ca26d7593c93829058",
+    "ai/models/value_model.js": "4f8e7d2eeeefc85d043e8d24a12d95541d267a77fff569f2e544df9704a57572",
+    "ai/core/ai_core.js": "4e2b9a3fb55d5ed714cc0f9434450a98326162c853db0237f07e5cb8ccab1f41",
+    "ai/data/ai_refs.js": "561ad1ad125dbb61dc663d9561dee49e702f2ae0bdad546db11701f8a40a4ff8",
+    "ai/legacy/legacy_cpu.js": "47c151fbd135e631eb63c31b66cd2c69db0409621245fa86d2a78fa7177d74c2",
+    "ai/decks/ai_dragapult.js": "27d1fe1c82c91f5c3826b3cb1f87dd87e522c77cf1f5b1f22a5e483e8330868d",
+    "ai/decks/ai_zoroark.js": "4b24821a3e5592d7fc9498fe8434697874571f4045b4358bb34442ba35d374db",
+    "ai/decks/ai_rayquaza.js": "7fe93a38a254d29c4a30441f04720f5f2c5d0d6dce92d8271cf3ece782bc678b"
+  }
+}

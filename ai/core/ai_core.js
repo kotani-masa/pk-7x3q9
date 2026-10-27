@@ -28,6 +28,7 @@
   /* 技ごとの基本ダメージ（数値で表せない技の計算式。カード効果＝公開情報） */
   const SCALE = new Set(['ストームエメラルダ']), NOM = { 'マシンガンコンボ': 250, 'ストームエメラルダ': 250, 'ユニオンビート': 120, 'ぎゃっきょうテール': 120, 'きあいタックル': 120, 'とうしのつばさ': 60 };   // 数値で表せない技の目安ダメージ   // ダメージが盤面のエネルギー総数に比例する技
   const FORM = {
+    'ランページサンダー':()=>250, 'ひきさく':()=>70, 'パワーレイジ':(cx,sb,k)=>2*sb[k].dm, 'イノセントフレイム':()=>170,
     'マシンガンコンボ': () => 250, 'ストームエメラルダ': (cx, sb) => 50 * (sumEu(sb) + cx._xe),
     'ユニオンビート': (cx, sb) => 30 * (Object.keys(sb).length - 1), 'ぎゃっきょうテール': (cx, sb, k, db) => 60 * cnt(Object.values(db), p => isEx(p.name)),
     'きあいタックル': (cx, sb, k, db, dk) => 90 + (cx.stage(db[dk]) === '1進化' ? 90 : 0), 'とうしのつばさ': (cx, sb, k, db, dk) => 20 + (isEx(db[dk].name) ? 90 : 0),
@@ -68,7 +69,7 @@
       if (o.lo && atk.n === 'マシンガンコンボ') b = 200; if (b <= 0) return 0;
       if (dk !== 'battle' && (Dd.tera || Dd.bnc)) return 0;
       if (!o.ign && ((d.sh === turn && this.stage(a) === 'たね' && A && A.type !== '無') || d.dg === turn)) return 0;
-      if (dk === 'battle') { if (o.plus30 && /(ex|V)$/.test(d.name)) b += 30; if (Dd.weak && A && Dd.weak === A.type) b *= 2; if (Dd.res && A && Dd.res === A.type) b -= 30; }
+      if (dk === 'battle') { if(a.psn&&this.v.stadium?.name!=='ジャミングタワー'&&(a.tl||[]).includes('くさりもち'))b+=40; if (o.plus30 && /(ex|V)$/.test(d.name)) b += 30; if (Dd.weak && A && Dd.weak === A.type) b *= 2; if (Dd.res && A && Dd.res === A.type) b -= 30; }
       return Math.max(0, b);
     }
     /* 自分のポケモン k の、今使える技の最大ダメージ（対 相手バトル場）。extra=追加エネルギー単位 */
@@ -79,7 +80,8 @@
     threat(dk, xe) {
       xe = xe === undefined ? 1 : xe; let act = 0, any = 0; if (!this.op) return { act, any };
       for (const k in this.opB) { const p = this.opB[k], Dd = this.D(p); if (!Dd || !Dd.at) continue;
-        for (const a of Dd.at) { if (!payable(a.cost, p.eu.concat(xe ? ['*'] : []))) continue; this._xe = xe;
+        const copy=(this.st.name!=='dragapult'||this.P.readCopiedThreat)&&nrm(p.name)==='Nのゾロアークex',eu=p.eu.concat(xe?['*']:[]),ats=copy?Object.entries(this.opB).filter(([j,q])=>j!==k&&/^Nの/.test(q.name)&&nrm(q.name)!=='Nのゾロアークex').flatMap(([j,q])=>(this.D(q)?.at||[])):Dd.at;
+        for (const a of ats) { if (!(copy?payable(['悪','悪'],eu):payable(a.cost,eu))) continue; this._xe = xe;
           const d = this.dmg(this.opB, k, a, this.myB, dk, { turn: this.T + 1 }); this._xe = 0; if (k === 'battle') act = Math.max(act, d); any = Math.max(any, d); } }
       return { act, any };
     }
@@ -210,6 +212,9 @@
       let r = h ? h(cx, q) : null; if (!r) r = q.pool.filter(c => c.ok).slice(0, Math.max(q.min, Math.min(q.n, q.min))).map(c => c.u);
       return r;
     }
+    attach(v,q){const cx=this.ctx(v,q),c=q.card||{name:'',t:'ene'};if(this.st.name==='dragapult'&&!this.prm.smartAttach)return q.ks[0];
+      if(/つけ替え先/.test(q.title)&&this.note.sw&&q.ks.includes(this.note.sw.d))return this.note.sw.d;
+      return best(q.ks,k=>{let score=attachBase(cx,c,k);if(this.st.attachScore){const v=this.st.attachScore(cx,c,k,score);if(v!==undefined)score=v;}return score;});}
     ask(v, q) {
       const cx = this.ctx(v, q), kind = route(ASKR, q.title), h = (this.st.askH && this.st.askH[kind]) || ASKH[kind];
       let r = h ? h(cx, q) : undefined; if (r === undefined) r = q.ks[0]; return r;
@@ -231,8 +236,6 @@
     for (const e of lg.evo) { const c = cx.card(e.u), s = st.evoScore ? st.evoScore(cx, c, e.k) : undefined; push('evo' + e.u + e.k, s === undefined ? P.sEvo : s, { t: 'play', u: e.u, k: e.k }); }
     const nb = cx.bench().length;
     for (const u of lg.bench) { const c = cx.card(u); let s = st.benchScore ? st.benchScore(cx, c, nb) : P.sBench; if (nb >= P.benchCap && !(st.benchForce && st.benchForce(cx, c))) s = 0; push('bn' + u, s, { t: 'play', u, k: 'bench' }); }
-    for (const b of lg.abil) { const s = st.abScore ? st.abScore(cx, b, cx.myB[b.k]) : P.sAbil; push('ab' + b.u, s === undefined ? P.sAbil : s, { t: 'ab', k: b.k, u: b.u }); }
-    for (const u of lg.habs) { const c = cx.card(u), s = st.habScore ? st.habScore(cx, c) : 60; push('hab' + u, s, { t: 'hab', u }); }
     const seen = new Set();
     // エネルギー：最も良い（カード×つける先）を1つだけ候補にする
     let be = null; const ents = [];
@@ -240,6 +243,8 @@
       for (const k of lg.att[c.u]) { let s = attachBase(cx, c, k); if (st.attachScore) { const t = st.attachScore(cx, c, k, s); if (t !== undefined) s = t; } ents.push({ s, u: c.u, k }); if (!be || s > be.s) be = { s, u: c.u, k }; } }
     if (cx.wide) for (const e of ents.sort((a, b) => b.s - a.s).slice(0, 5)) push('en' + e.u + e.k, Math.max(e.s, P.aFloor === undefined ? 4 : P.aFloor), { t: 'play', u: e.u, k: e.k });   // 先読み用：エネルギーは布石なので、付け先を全て候補にする
     cx.attachBest = be;
+    for (const b of lg.abil) { const s = st.abScore ? st.abScore(cx, b, cx.myB[b.k]) : P.sAbil; push('ab' + b.u, s === undefined ? P.sAbil : s, { t: 'ab', k: b.k, u: b.u }); }
+    for (const u of lg.habs) { const c = cx.card(u), s = st.habScore ? st.habScore(cx, c) : 60; push('hab' + u, s, { t: 'hab', u }); }
     for (const c of cx.hand) {
       if (c.t === 'sup' && !lg.sup) continue; if (c.t === 'tr' && !lg.goods) continue;
       if (c.t === 'sup' || c.t === 'tr') { let s = st.trainerScore ? st.trainerScore(cx, c) : undefined; if (s === undefined) s = coreTrainer(cx, c); push('tr' + c.u, s || 0, { t: 'play', u: c.u }); }
@@ -328,7 +333,7 @@
   const PKH = {
     discard2: (cx, q) => topBy(pool(q), c => -st_junk(cx, c), q.n).map(c => c.u),
     searchPoke: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),
-    cyano: (cx, q) => topBy(pool(q).filter(c => st_want(cx, c) >= cx.P.cyanoMin), c => st_want(cx, c), q.n).map(c => c.u),
+    cyano: (cx,q)=>{const hand=cx.hand,available=pool(q).slice(),picked=[];try{cx.hand=hand.slice();for(let i=0;i<q.n&&available.length;i++){available.sort((a,b)=>st_want(cx,b)-st_want(cx,a));const c=available.shift();if(st_want(cx,c)<cx.P.cyanoMin)break;picked.push(c.u);cx.hand.push(c);}}finally{cx.hand=hand;}return picked;},
     akaPair: (cx, q) => { const s = topBy(pool(q), c => st_want(cx, c), 9), o = []; const seen = new Set(); for (const c of s) if (!seen.has(c.name)) { seen.add(c.name); o.push(c.u); } return o.slice(0, 2); },
     akaKeep: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),
     cipher: (cx, q) => topBy(pool(q), c => st_want(cx, c), 2).map(c => c.u),

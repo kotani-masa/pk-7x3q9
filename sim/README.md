@@ -40,3 +40,7 @@ node sim/run.js replay match42.pokeca.json --compare-ai
 ```
 
 評価のデフォルトは各相手1,000試合です。再現用記録の詳細は `../docs/MATCH_LOGS.md` を参照してください。
+
+## 固定v6相手への対抗AI調整
+
+`node sim/run.js rivals train` で候補を選別し、`node sim/run.js rivals eval` で旧新を比較します。`train` はパラメータファイルを上書きします。手順・制約・採用結果は `../docs/AI_HANDOFF.md` を参照してください。

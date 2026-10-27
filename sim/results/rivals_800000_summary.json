@@ -1,0 +1,23 @@
+{
+  "phase": "second preliminary independent evaluation, later retired",
+  "seed": 800000,
+  "n": 1000,
+  "fullCandidateGameArraysRetained": false,
+  "reason": "Superseded during a concurrent diagnostic run; retain this summary instead of reconstructing missing per-game data.",
+  "results": [
+    {
+      "type": "dragapult",
+      "baselineWins": 286,
+      "candidateWins": 310,
+      "gained": 146,
+      "lost": 122
+    },
+    {
+      "type": "rayquaza",
+      "baselineWins": 89,
+      "candidateWins": 135,
+      "gained": 84,
+      "lost": 38
+    }
+  ]
+}
