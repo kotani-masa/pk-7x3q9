@@ -2332,7 +2332,7 @@ function mdrawAsk(){const m=G.mdraw;if(!m||MDASK||G.act!==undefined||SIMQ)return
  const done=k=>{MDASK=0;const q=P[w];act(()=>{for(let i=0;i<k;i++)draw1(q);log(`P${w+1}は、相手のマリガンぶん${k}枚引きました（最大${m.n}枚）`);G.mdraw=null;G.mdDone=1;
    if(k&&q.hand.some(isBas)&&freeBench(q)){if(isCpu(w))cpuBenchAll(w);else{q.phase='bench';log(`P${w+1}：引いたたねポケモンをベンチに出せます`)}}});   // 引いたカードを見せてから、ベンチに出す／バトルスタート
   if(q.phase!=='bench')setTimeout(()=>{if(G.act===undefined&&!G.over)act(()=>finishSetup())},Math.max(0,FXEND-Date.now())+200)};
- if(isCpu(w))return done(m.n);MDASK=1;if(!MP()&&cur!==w){cur=w;render()}menu(null,Array.from({length:m.n+1},(_,k)=>[`${k}枚引く`,()=>done(k)]).reverse(),`追加で引く枚数（最大${m.n}枚）`,1)}
+ if(isCpu(w))return done(m.n);MDASK=1;if((!MP()||(CPU.on&&!NET.on))&&cur!==w){cur=w;render()}menu(null,Array.from({length:m.n+1},(_,k)=>[`${k}枚引く`,()=>done(k)]).reverse(),`追加で引く枚数（最大${m.n}枚）`,1)}
 /* マリガン：相手がサイドを置いたら（相手もマリガン中なら同時に）、手札を公開して引き直す。たねポケモンが来るまでくり返す */
 function mullCheck(){if(SIMQ||G.act!==undefined)return;const ctl=i=>!NET.on||i===NET.me;
  const el=[0,1].filter(i=>{const q=P[i],o=P[1-i];return q&&q.phase==='mull'&&ctl(i)&&o&&['wait','mull','none'].includes(o.phase)});if(!el.length)return;
@@ -2666,10 +2666,12 @@ async function coinToss(){log('先攻・後攻をコインで決めます（オ�
  G.fp=first;log(`先攻：P${first+1}${first?'（CPU）':'（あなた）'}`)}
 async function cpuBegin(code){cur=0;if(code){let d=getDeck(code);if(!d)return err('そのデッキのデータがありません');if(d===P[0].cards)d=JSON.parse(JSON.stringify(d));P[1].cards=d;P[1].code=code}
  if(!P[1].cards.length)return err('CPUのデッキがありません');CPU.on=1;CPU.who=[0,1];cpuSpd();NET.on=0;G.mode='play';HS=[];await askVars();
- [0,1].forEach(z=>{cur=z;start()});cur=0;cpuBind();G.mode='play';render();await showMissing([1]);
+ cur=0;cpuBind();G.mode='play';render();await showMissing([1]);
  if(!AIR())log('注意：ai/ フォルダのAIファイルが読み込まれていません（CPUは最低限の動きになります）');
  else log(`CPUのデッキタイプ：${CPUX.type[1]||'未対応（旧アルゴリズム）'} ／ あなたのデッキ：${CPUX.type[0]||'未判定'}`);
- await coinToss();clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
+ // 先攻・後攻はコインで決めてから手札を配る（start() は G.fp を消すので、配った後に戻す）
+ [0,1].forEach(z=>{P[z].hand=[];P[z].side=[];P[z].phase='';for(const k in P[z].piles)P[z].piles[k]=[]});render();
+ await coinToss();const fp=G.fp;[0,1].forEach(z=>{cur=z;start()});G.fp=fp;cur=0;cpuBind();render();clearInterval(CPU.iv);CPU.iv=setInterval(cpuCheck,600);render()}
 function cpuStart(){if(!P[0].cards.length)return err('先に、あなた（P1）のデッキを読み込んでください');
  const items=hist().filter(x=>!!getDeck(x.c)).map(x=>[x.n,()=>cpuBegin(x.c)]);
  if(P[1].cards.length)items.unshift(['P2に読み込み済みのデッキを使う',()=>cpuBegin(null)]);

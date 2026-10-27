@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "release": "7.0.3",
-  "previousRelease": "7.0.2",
+  "release": "7.0.4",
+  "previousRelease": "7.0.3",
   "versionFile": "VERSION",
   "versionPolicy": "docs/DEVELOPMENT.md#3-バージョン",
-  "changeType": "patch: standard Mega Rayquaza list changed (Zero Cavity x4 -> Legendary Lava Cave x4); AI plays Lava Cave and Pokémon Switch; cpuView exposes own hand card half (L/R)",
-  "notes": "docs/CHANGELOG.md (7.0.3, 7.0.2)",
+  "changeType": "patch: CPU-match setup fixes (human extra-draw choice after CPU mulligan, coin toss before dealing)",
+  "notes": "docs/CHANGELOG.md (7.0.4, 7.0.3, 7.0.2)",
   "history": "Earlier handoff files (AI_HANDOFF.md, RAYQUAZA_7.0.1.md, ai_handoff_7.0.0.json) were merged into docs/CHANGELOG.md; originals are in GitHub commit 69c56c1.",
   "changedFiles": [
     "ai/decks/ai_rayquaza.js",
