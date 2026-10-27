@@ -13,8 +13,8 @@ console.log('PASS rivals: acceleration selects the Rayquaza missing its Lightnin
 console.log('PASS rivals: copied Rampage and Mochi are included in public threat estimates');
 {const c=R.create('rayquaza',{}),v=view();v.self.board={battle:card('テラパゴスex','tp','tp')};const pool=[card('メガレックウザex','rq','r1'),card('メガレックウザex','rq','r2'),card('ファイアローex','tf','tf'),card('ヒビキのホウオウex','ho','ho')].map(c=>({...c,ok:true}));v.deck=pool.map(c=>({...c,n:1}));const before=JSON.stringify(v),picked=c.pk(v,{title:'山札から「ポケモンex」を3枚まで選ぶ',kind:'deck',pool,n:3,min:0});assert.equal(picked.filter(u=>/^r/.test(u)).length,1);assert(picked.includes('tf'));assert.equal(JSON.stringify(v),before);}
 console.log('PASS rivals: Cyano selects complementary roles without mutating the observation');
-{const d='ai/decks/ai_zoroark.js',sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');assert.equal(sha(path.join(ROOT,d)),sha(path.join(ROOT,'sim/baselines/v6',d)));}
-console.log('PASS rivals: opponent Zoroark remains byte-identical to v6');
+{const{Sim}=require('../lib/headless'),{FROZEN}=require('../cli/rivals'),d='decks/ai_zoroark.js',s=new Sim(FROZEN),i=s.aiFiles.indexOf(d);assert.equal(s.aiSources[i],fs.readFileSync(path.join(ROOT,'sim/baselines/v6/ai',d),'utf8'));}
+console.log('PASS rivals: the benchmark opponent is the frozen v6 Zoroark, even after ai/decks/ai_zoroark.js evolves');
 const{wilson,pairedP}=require('../cli/rivals');assert.equal(pairedP(0,0),1);assert(pairedP(10,0)<.01);assert(wilson(500,1000)[0]<.5);assert(wilson(500,1000)[1]>.5);
 console.log('PASS rivals: paired statistics handle ties and uncertainty');
 {const c=R.create('dragapult',{params:{readCopiedThreat:0,smartAttach:0}}),v=view();assert.equal(c.ctx(v).threat('battle',0).act,0);assert.equal(c.attach(v,{ks:['battle','b0'],card:{name:'基本雷エネルギー',t:'ene'}}),'battle');}

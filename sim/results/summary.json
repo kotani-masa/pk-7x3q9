@@ -1,0 +1,601 @@
+{
+ "note": "7.0.2でsim/resultsを整理。各試合の全記録など大きなファイルは削除し、要点をここにまとめた。元ファイルは GitHub の commit 69c56c1（7.0.1）に残っている。",
+ "releases": {
+  "7.0.2": {
+   "summary": "レックウザの手順修正（メガガルーラ起点のドロー、ラティアスの先取り、動けない時のジャッジマン）と、ゾロアークの次世代修正（くさりもちのサイドプラン判定、リーリエ前の展開）",
+   "rayquazaVsFrozenV6Zoroark": {
+    "seed": "4000000-4003999",
+    "gamesPerVersion": 4000,
+    "search": false,
+    "old7_0_1": {
+     "winRate": 0.174
+    },
+    "new7_0_2": {
+     "winRate": 0.217
+    },
+    "pairedDiff": "+4.3pt (95% ±1.0pt)",
+    "errors": 0
+   },
+   "zoroarkGenerationVs7_0_2Opponents": {
+    "seed": "3100000-3101999",
+    "gamesPerOpponent": 2000,
+    "opponentWinRate": {
+     "rayquaza": {
+      "vsV6Zoroark": 0.221,
+      "vsNewZoroark": 0.208
+     },
+     "dragapult": {
+      "vsV6Zoroark": 0.301,
+      "vsNewZoroark": 0.291
+     }
+    },
+    "note": "ゾロアーク側の差は約1pt、統計的にはぎりぎり。悪化はしていない"
+   }
+  },
+  "7.0.1": {
+   "release": "7.0.1",
+   "baseline": "7.0.0",
+   "opponent": "unchanged v6 Zoroark",
+   "search": false,
+   "seed": 2300000,
+   "nPerVersion": 1000,
+   "hashes": {
+    "engine": "1d9a304b872ff27eac063806d5637701e5d0aea8bd4ddc18bf8561c3eb94694d",
+    "zoroark": "4b24821a3e5592d7fc9498fe8434697874571f4045b4358bb34442ba35d374db",
+    "rayquaza": "8c7df3c32af6ec6e6f062c2d63454c9c4d9756b912cacaad1c35ebb545f5dcf8"
+   },
+   "baselineResult": {
+    "wins": 127,
+    "losses": 873,
+    "draws": 0,
+    "timeouts": 0,
+    "errors": 0,
+    "unfinished": 0,
+    "turns": 11786,
+    "winRate": 0.127,
+    "interval95": [
+     0.10777968175436589,
+     0.14907518459108146
+    ],
+    "meanTurns": 11.786
+   },
+   "currentResult": {
+    "wins": 157,
+    "losses": 843,
+    "draws": 0,
+    "timeouts": 0,
+    "errors": 0,
+    "unfinished": 0,
+    "turns": 11492,
+    "winRate": 0.157,
+    "interval95": [
+     0.1357689609765772,
+     0.18085629145368676
+    ],
+    "meanTurns": 11.492
+   },
+   "paired": {
+    "gained": 89,
+    "lost": 59,
+    "p": 0.016841422756845137
+   }
+  },
+  "7.0.0": {
+   "final": {
+    "opponent": "frozen v6 Zoroark",
+    "zoroarkSHA256": "4b24821a3e5592d7fc9498fe8434697874571f4045b4358bb34442ba35d374db",
+    "seed": 1000000,
+    "gamesPerVersionPerDeck": 2000,
+    "search": false,
+    "decklistsUnchanged": true,
+    "candidateAIHashes": {
+     "ai/params/params_rayquaza.js": "74720c89c47db0cecaaaf7e909d9e1ac320d21b7f30a550de713328f2b9b48b0",
+     "ai/params/params_dragapult.js": "b57500cd1a066f8d52e063775c7c517aaba0b7b08acaa07240f10e8b69b61e88",
+     "ai/params/params_zoroark.js": "246330655d741642cbc3e83629809095b8af437cf21083ca26d7593c93829058",
+     "ai/models/value_model.js": "4f8e7d2eeeefc85d043e8d24a12d95541d267a77fff569f2e544df9704a57572",
+     "ai/core/ai_core.js": "d0c9678dc1110d892779dec652cd12f20525823ec21a76ad3e531c8a341a2756",
+     "ai/data/ai_refs.js": "561ad1ad125dbb61dc663d9561dee49e702f2ae0bdad546db11701f8a40a4ff8",
+     "ai/legacy/legacy_cpu.js": "47c151fbd135e631eb63c31b66cd2c69db0409621245fa86d2a78fa7177d74c2",
+     "ai/decks/ai_dragapult.js": "27d1fe1c82c91f5c3826b3cb1f87dd87e522c77cf1f5b1f22a5e483e8330868d",
+     "ai/decks/ai_zoroark.js": "4b24821a3e5592d7fc9498fe8434697874571f4045b4358bb34442ba35d374db",
+     "ai/decks/ai_rayquaza.js": "1d369960e52a8826b3f4a0db24ae3bd3e3859a22dfa78ed83fc02d66addbc389"
+    },
+    "engineSHA256": "1d9a304b872ff27eac063806d5637701e5d0aea8bd4ddc18bf8561c3eb94694d",
+    "baselineManifestSHA256": "303a7f2fa6d31f14f5ea0e6cebaeefcd545cb5cf79645bbff679dc6732f3164c",
+    "results": [
+     {
+      "type": "dragapult",
+      "baseline": {
+       "wins": 581,
+       "losses": 1419,
+       "draws": 0,
+       "timeouts": 0,
+       "errors": 0,
+       "unfinished": 0,
+       "turns": 25783,
+       "winRate": 0.2905,
+       "interval95": [
+        0.27101953511781973,
+        0.3107837371567951
+       ],
+       "meanTurns": 12.8915
+      },
+      "candidate": {
+       "wins": 602,
+       "losses": 1398,
+       "draws": 0,
+       "timeouts": 0,
+       "errors": 0,
+       "unfinished": 0,
+       "turns": 26001,
+       "winRate": 0.301,
+       "interval95": [
+        0.281294068209306,
+        0.3214689445956981
+       ],
+       "meanTurns": 13.0005
+      },
+      "paired": {
+       "gained": 189,
+       "lost": 168,
+       "exactTwoSidedP": 0.28980880011280297
+      },
+      "improved": true
+     },
+     {
+      "type": "rayquaza",
+      "baseline": {
+       "wins": 226,
+       "losses": 1774,
+       "draws": 0,
+       "timeouts": 0,
+       "errors": 0,
+       "unfinished": 0,
+       "turns": 22760,
+       "winRate": 0.113,
+       "interval95": [
+        0.0998600994801706,
+        0.12762374954262642
+       ],
+       "meanTurns": 11.38
+      },
+      "candidate": {
+       "wins": 296,
+       "losses": 1704,
+       "draws": 0,
+       "timeouts": 0,
+       "errors": 0,
+       "unfinished": 0,
+       "turns": 22920,
+       "winRate": 0.148,
+       "interval95": [
+        0.1331121697650413,
+        0.16423748102571978
+       ],
+       "meanTurns": 11.46
+      },
+      "paired": {
+       "gained": 161,
+       "lost": 91,
+       "exactTwoSidedP": 1.2253155463379228e-05
+      },
+      "improved": true
+     }
+    ]
+   },
+   "round1": {
+    "phase": "initial candidate selection; seed 700000 later retired for final validation",
+    "trainSeed": 100000,
+    "trainGames": 60,
+    "validationSeed": 200000,
+    "validationGames": 120,
+    "consoleSummary": "dragapult candidate 0: 14/60\ndragapult candidate 1: 23/60\ndragapult candidate 2: 17/60\ndragapult candidate 3: 18/60\ndragapult candidate 4: 19/60\ndragapult candidate 5: 16/60\ndragapult validation 1: 38/120\ndragapult validation 4: 38/120\ndragapult validation 3: 41/120\nrayquaza candidate 0: 13/60\nrayquaza candidate 1: 13/60\nrayquaza candidate 2: 9/60\nrayquaza candidate 3: 12/60\nrayquaza candidate 4: 14/60\nrayquaza candidate 5: 8/60\nrayquaza validation 4: 24/120\nrayquaza validation 0: 26/120\nrayquaza validation 1: 25/120\n",
+    "dragapult": {
+     "selected": 3,
+     "paramsSHA256": "b4a26728765297bc368ebbc7b45d8068a3c86e7e5c69c95b5dbf8abb4b95637c",
+     "paramsReconstructedAndVerified": true,
+     "params": {
+      "first": 1,
+      "sEvo": 88,
+      "sBench": 74.41,
+      "benchCap": 5,
+      "sAbil": 69.5,
+      "aBase": 36.08,
+      "aEnableNow": 36.75,
+      "aEnableSoon": 17.14,
+      "aProg": 10,
+      "aBattle": 10.36,
+      "aDoomed": 30,
+      "aLillie": 65.81,
+      "sRetreat": 68.84,
+      "rEnergy": 15,
+      "rMargin": 35.5,
+      "sBoss": 99.49,
+      "sJudge": 49.6,
+      "judgeMine": 2,
+      "judgeOpp": 5,
+      "sLillie": 85.94,
+      "lillieHand": 14.36,
+      "sHyper": 75.54,
+      "sRed": 82,
+      "cyanoMin": 20,
+      "pReady": 1,
+      "pRisk": 69.32,
+      "pHp": 20,
+      "sPoffin": 81.52,
+      "sPad": 68.03,
+      "sEvoDk": 90,
+      "sEvoDp": 95,
+      "sEvoSm": 53.76,
+      "sEvoYn": 57.53,
+      "sEvoNn": 48,
+      "sBenchDr": 78.17,
+      "dreepyTarget": 3,
+      "sBenchDusk": 61.49,
+      "duskTarget": 2,
+      "sBenchBudew": 64.37,
+      "sBenchMuni": 55.78,
+      "sDrakloak": 92,
+      "sCurse": 92.5,
+      "curseNet": 178.52,
+      "curseLoss": 100,
+      "sAdren": 42.79,
+      "sDudu": 47.08,
+      "sHammer": 47.56,
+      "sStamp": 77.46,
+      "sAka": 70.66,
+      "sCandy": 96,
+      "sTanka": 38.71,
+      "sLock": 124.11,
+      "spreadW": 1.34,
+      "sJam": 52.68,
+      "sRuins": 43.31,
+      "setupBudew": 65.78,
+      "sHikari": 78.78,
+      "sMay": 86.06,
+      "budewSpare": 0,
+      "aGoal": 0,
+      "aOver": 3,
+      "aFloor": 4,
+      "aLine": 28,
+      "aScale": 30,
+      "aRetreat": 30,
+      "aWaste": 0
+     }
+    },
+    "rayquaza": {
+     "adoptedCandidate": 0,
+     "trainingSeed": 100000,
+     "trainingGames": 60,
+     "trainingWins": 13,
+     "validationSeed": 200000,
+     "validationGames": 120,
+     "validationWins": 26,
+     "params": {
+      "first": 1,
+      "sEvo": 88,
+      "sBench": 65,
+      "benchCap": 5,
+      "sAbil": 70,
+      "aBase": 45,
+      "aEnableNow": 45,
+      "aEnableSoon": 25,
+      "aProg": 9,
+      "aBattle": 6,
+      "aDoomed": 30,
+      "aLillie": 60,
+      "sRetreat": 64,
+      "rEnergy": 20,
+      "rMargin": 40,
+      "sBoss": 96,
+      "sJudge": 55,
+      "judgeMine": 2,
+      "judgeOpp": 5,
+      "sLillie": 90,
+      "lillieHand": 12,
+      "sHyper": 60,
+      "sRed": 82,
+      "cyanoMin": 30,
+      "pReady": 1,
+      "pRisk": 70,
+      "pHp": 20,
+      "sCyano": 84,
+      "cyanoMaxHand": 6,
+      "sLantern": 68,
+      "sSwitch": 90,
+      "sTrumpet": 78,
+      "sAka": 78,
+      "sRQBench": 92,
+      "sMWBench": 85,
+      "sHOBench": 84,
+      "sTPBench": 75,
+      "sKGBench": 60,
+      "sLTBench": 55,
+      "sRQBenchD": 70,
+      "sPC": 88,
+      "sGGBench": 55,
+      "sSugri": 92,
+      "sCipher": 22,
+      "sLantern2": 55,
+      "sAZ": 50,
+      "sTF": 96,
+      "sHOab": 88,
+      "sZero": 80,
+      "sCape": 50,
+      "sKG": 92,
+      "sFezBench": 90,
+      "latiasPenalty": 60,
+      "sRisky": 0,
+      "hoFire": 2,
+      "aGoal": 0,
+      "aOver": 3,
+      "aFloor": 4,
+      "aLine": 28,
+      "aScale": 30,
+      "aRetreat": 30,
+      "aWaste": 0
+     },
+     "selectionNote": "Default parameter candidate retained; improvement is in source policy and infrastructure. Extra round-2 Rayquaza exploration was not adopted."
+    }
+   },
+   "preliminary800000": {
+    "phase": "second preliminary independent evaluation, later retired",
+    "seed": 800000,
+    "n": 1000,
+    "fullCandidateGameArraysRetained": false,
+    "reason": "Superseded during a concurrent diagnostic run; retain this summary instead of reconstructing missing per-game data.",
+    "results": [
+     {
+      "type": "dragapult",
+      "baselineWins": 286,
+      "candidateWins": 310,
+      "gained": 146,
+      "lost": 122
+     },
+     {
+      "type": "rayquaza",
+      "baselineWins": 89,
+      "candidateWins": 135,
+      "gained": 84,
+      "lost": 38
+     }
+    ]
+   },
+   "rayquazaSelection": {
+    "adoptedCandidate": 0,
+    "trainingSeed": 100000,
+    "trainingGames": 60,
+    "trainingWins": 13,
+    "validationSeed": 200000,
+    "validationGames": 120,
+    "validationWins": 26,
+    "params": {
+     "first": 1,
+     "sEvo": 88,
+     "sBench": 65,
+     "benchCap": 5,
+     "sAbil": 70,
+     "aBase": 45,
+     "aEnableNow": 45,
+     "aEnableSoon": 25,
+     "aProg": 9,
+     "aBattle": 6,
+     "aDoomed": 30,
+     "aLillie": 60,
+     "sRetreat": 64,
+     "rEnergy": 20,
+     "rMargin": 40,
+     "sBoss": 96,
+     "sJudge": 55,
+     "judgeMine": 2,
+     "judgeOpp": 5,
+     "sLillie": 90,
+     "lillieHand": 12,
+     "sHyper": 60,
+     "sRed": 82,
+     "cyanoMin": 30,
+     "pReady": 1,
+     "pRisk": 70,
+     "pHp": 20,
+     "sCyano": 84,
+     "cyanoMaxHand": 6,
+     "sLantern": 68,
+     "sSwitch": 90,
+     "sTrumpet": 78,
+     "sAka": 78,
+     "sRQBench": 92,
+     "sMWBench": 85,
+     "sHOBench": 84,
+     "sTPBench": 75,
+     "sKGBench": 60,
+     "sLTBench": 55,
+     "sRQBenchD": 70,
+     "sPC": 88,
+     "sGGBench": 55,
+     "sSugri": 92,
+     "sCipher": 22,
+     "sLantern2": 55,
+     "sAZ": 50,
+     "sTF": 96,
+     "sHOab": 88,
+     "sZero": 80,
+     "sCape": 50,
+     "sKG": 92,
+     "sFezBench": 90,
+     "latiasPenalty": 60,
+     "sRisky": 0,
+     "hoFire": 2,
+     "aGoal": 0,
+     "aOver": 3,
+     "aFloor": 4,
+     "aLine": 28,
+     "aScale": 30,
+     "aRetreat": 30,
+     "aWaste": 0
+    },
+    "selectionNote": "Default parameter candidate retained; improvement is in source policy and infrastructure. Extra round-2 Rayquaza exploration was not adopted."
+   }
+  },
+  "6.0.0_and_earlier_zoroark": {
+   "zoroark": {
+    "seed": 20000,
+    "gamesPerOpponent": 100,
+    "search": false,
+    "results": [
+     {
+      "opponent": "dragapult",
+      "wins": 61,
+      "losses": 39,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 12.96,
+      "winRate": 0.61
+     },
+     {
+      "opponent": "rayquaza",
+      "wins": 90,
+      "losses": 10,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 10.79,
+      "winRate": 0.9
+     }
+    ]
+   },
+   "zoroark_2000": {
+    "seed": 40000,
+    "gamesPerOpponent": 1000,
+    "search": false,
+    "results": [
+     {
+      "opponent": "dragapult",
+      "wins": 668,
+      "losses": 332,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 13.315,
+      "winRate": 0.668,
+      "confidence95": [
+       0.6382,
+       0.6965
+      ]
+     },
+     {
+      "opponent": "rayquaza",
+      "wins": 875,
+      "losses": 125,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.753,
+      "winRate": 0.875,
+      "confidence95": [
+       0.8531,
+       0.8941
+      ]
+     }
+    ]
+   },
+   "zoroark_v4_2000": {
+    "seed": 40000,
+    "gamesPerOpponent": 1000,
+    "search": false,
+    "results": [
+     {
+      "opponent": "dragapult",
+      "wins": 668,
+      "losses": 332,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 13.013,
+      "winRate": 0.668
+     },
+     {
+      "opponent": "rayquaza",
+      "wins": 908,
+      "losses": 92,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.62,
+      "winRate": 0.908
+     }
+    ],
+    "policy": "zoroark-policy-3",
+    "build": "6ed185dca03a7a7c"
+   },
+   "zoroark_v5_2000": {
+    "seed": 40000,
+    "gamesPerOpponent": 1000,
+    "search": false,
+    "results": [
+     {
+      "opponent": "dragapult",
+      "wins": 709,
+      "losses": 291,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 12.836,
+      "winRate": 0.709
+     },
+     {
+      "opponent": "rayquaza",
+      "wins": 908,
+      "losses": 92,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.584,
+      "winRate": 0.908
+     }
+    ],
+    "policy": "zoroark-policy-4",
+    "build": "83f215b377071c33"
+   },
+   "zoroark_v6_2000": {
+    "seed": 40000,
+    "gamesPerOpponent": 1000,
+    "search": false,
+    "results": [
+     {
+      "opponent": "dragapult",
+      "wins": 709,
+      "losses": 291,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 12.836,
+      "winRate": 0.709
+     },
+     {
+      "opponent": "rayquaza",
+      "wins": 908,
+      "losses": 92,
+      "draws": 0,
+      "timeouts": 0,
+      "unfinished": 0,
+      "errors": 0,
+      "meanTurns": 11.584,
+      "winRate": 0.908
+     }
+    ],
+    "policy": "zoroark-policy-5",
+    "build": "98a9517e725c5ab1"
+   }
+  }
+ }
+}

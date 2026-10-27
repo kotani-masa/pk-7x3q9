@@ -54,7 +54,9 @@ class Sim {
     const legacy = fs.readFileSync(path.join(AIDIR, 'legacy/legacy_cpu.js'), 'utf8');
     this.engine = new vm.Script(buildInfo + '\n' + diagnostics + '\nrender=function(){};\n' + main + '\n' + legacy + '\n' + DRIVER, { filename: 'engine.js' });
     this.aiFiles = (opts.aiFiles || ['core/ai_core.js', 'decks/ai_dragapult.js', 'decks/ai_rayquaza.js', 'decks/ai_zoroark.js', 'params/params_zoroark.js', 'params/params_dragapult.js', 'params/params_rayquaza.js', 'models/value_model.js', 'data/ai_refs.js']).filter(f => fs.existsSync(path.join(AIDIR, f)));
-    this.aiSources = this.aiFiles.map(f => fs.readFileSync(path.join(AIDIR, f), 'utf8'));
+    // aiOverride: {'decks/ai_zoroark.js': 絶対パス} で一部のAIだけ別の版（凍結した世代など）に差し替える
+    const OV = opts.aiOverride || {};
+    this.aiSources = this.aiFiles.map(f => fs.readFileSync(OV[f] || path.join(AIDIR, f), 'utf8'));
   }
   /* AIコンテキスト：盤面のグローバル(P,G,...)が存在しない空の世界で、AIコードだけを実行する */
   makeAI(seed) {

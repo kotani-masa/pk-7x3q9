@@ -19,6 +19,7 @@
     sRQBenchD: 70, sPC: 88, sGGBench: 55, sSugri: 92, sCipher: 22, sLantern2: 55, sAZ: 50, sTF: 96,
     // 補充・加速の設定をコメントから分離する（未定義による行動消失を防ぐ）。
     sHOab: 88, sZero: 80, sCape: 50, sKG: 92, sFezBench: 90, latiasPenalty: 60, sRisky: 0, hoFire: 2, aGoal: 0, aOver: 3, aFloor: 4, aLine: 28, aScale: 30, aRetreat: 30, aWaste: 0,
+    kgLead: 40, kgPivot: 70, ltAhead: 95, judgeStuck: 70,   // ラティアスがいる時のメガガルーラ起点のドロー
   };
   const space = {
     first: [0, 1], sBench: [40, 85], benchCap: [3, 5], sAbil: [50, 90], aBase: [25, 70], aEnableNow: [20, 75], aEnableSoon: [5, 50], aBattle: [0, 25], sRetreat: [40, 90], rMargin: [10, 120], sBoss: [80, 110],
@@ -26,6 +27,10 @@
     sHOBench: [50, 95], sRQBenchD: [20, 100], sGGBench: [20, 90], sSugri: [50, 100], sTPBench: [40, 90], sKGBench: [30, 85], sLTBench: [20, 80], sTF: [50, 95], sHOab: [60, 100], sZero: [40, 95], sCape: [10, 80], pRisk: [20, 140], latiasPenalty: [20, 120], cyanoMin: [15, 60], sRisky: [0, 40],
   };
 
+  /* 前が重く（にげるエネルギーが必要）、攻撃役ではない：今は控えが育っていなくても、いずれ入れ替えが必要になる */
+  function heavyFront(cx){const a=cx.myB.battle;if(!a||ip(cx,LT))return false;const d=cx.D(a)||{};return (d.rc||0)>=2&&a.eu.length<d.rc&&!(cx.T!==1&&cx.myBest('battle').d>0);}
+  /* 手札からラティアスに届くか（ラティアス本体・使えるハイパーボール・使えるシアノ） */
+  function ltReach(cx){if(ih(cx,LT))return true;if(cx.lg.goods&&cx.hand.some(h=>nrm(h.name)==='ハイパーボール')&&cx.hand.length>=3)return true;return !!(cx.lg.sup&&cx.hand.some(h=>nrm(h.name)==='シアノ'));}
   function needsPivot(cx){const a=cx.myB.battle;return !!a&&!ip(cx,LT)&&(cx.D(a)?.rc||0)>0&&cx.bench().some(k=>cx.myBest(k).d>0);}
   function frontThreat(cx,k){const board=cx.myB;try{cx.myB={...board,battle:board[k]};return cx.threat('battle').any;}finally{cx.myB=board;}}
   function rampageRoute(cx){const total=U.sumEu(cx.myB),fire=cx.hand.filter(c=>etype(c.name)==='炎').length,availableHO=cx.keys().some(k=>nrm(cx.myB[k].name)===HO&&!cx.fl.abU.includes(cx.myB[k].u))||cx.has(HO)&&cx.lg?.room>0,ho=availableHO?Math.min(2,fire):0,aka=cx.lg?.sup&&cx.has('アカマツ')?1:0,manual=!cx.fl.eat&&(cx.eneHand.length||aka)?1:0;return ip(cx,RQ)>0&&cx.opB.battle&&50*(total+ho+manual+aka)>=cx.rem(cx.opB.battle)&&(ho>0||aka>0);}
@@ -102,6 +107,7 @@
       switch (n) {
         case 'ボスの指令': if(rampageRoute(cx))return 0;return undefined;
         case 'シアノ': { const ex = [RQ, KG, TF, TP, HO, MW, LT, FZ].reduce((s, x) => s + cx.expDeck(x), 0); return me.deckN > 6 && ex >= 1 ? (hs <= P.cyanoMaxHand ? P.sCyano : 35) * (0.6 + 0.4 * np) : 0; }
+        case 'ジャッジマン': { if (me.deckN <= 6) return 0; if (needsPivot(cx) && !ltReach(cx)) return P.judgeStuck; return undefined; }   // 前が動けず、ラティアスにも届かない：手札を入れ替えて探す
         case 'エネルギーつけかえ': { const w = switchPlan(cx); if (!w) return 0; cx.C.note.sw = w; return w.sc >= 100 ? P.sSwitch : 25; }
         case 'ガラスのラッパ': { const tr = cx.v.self.trash.filter(t => U.BE.test(t.name)).length; return tera(cx) && cx.bench().length && tr ? P.sTrumpet + Math.min(2, tr) * 4 : 0; }
         case 'アカマツ': if(rampageRoute(cx)&&me.deckN>4)return 140;return me.deckN > 6 && hs <= 5 && (cx.expDeck('基本炎エネルギー') + cx.expDeck('基本雷エネルギー')) >= 1 ? P.sAka : 0;
@@ -142,9 +148,12 @@
         if(nrm(p.name)===RQ&&nrm(cx.myB.battle.name)===TF&&now>0&&next<cx.rem(cx.opB.battle))gain-=frontThreat(cx,k)>=cx.rem(p)?180:40;
         if(next>=cx.rem(cx.opB.battle)&&now<cx.rem(cx.opB.battle))gain+=300;
         if(!best||gain>best.gain)best={k,gain};}
-      if(best&&best.gain>=cx.P.rMargin){cx.C.note.retreatTo=best.k;return cx.P.sRetreat+best.gain/10;}return 0;},
+      if(best&&best.gain>=cx.P.rMargin){cx.C.note.retreatTo=best.k;return cx.P.sRetreat+best.gain/10;}
+      // 攻撃できる控えがいない番：にげるが無料なら、メガガルーラexを前に出して「おつかいダッシュ」で2枚引く（ラティアスで毎番入れ替えられる）
+      if(!now&&cx.lg.retreat.cost===0&&cx.P.kgPivot>0&&cx.me.deckN>6&&nrm(cx.myB.battle.name)!==KG){const kg=cx.lg.retreat.ks.find(k=>nrm(cx.myB[k].name)===KG);if(kg){cx.C.note.retreatTo=kg;return cx.P.kgPivot;}}
+      return 0;},
     benchForce(cx,c){return nrm(c.name)===LT&&needsPivot(cx);},
-    promoteAdj(cx, k, p) { const n = nrm(p.name); return n === KG ? 8 : n === TF ? 10 : n === TP ? Math.min(30, cx.bench().length * 6) : n === LT ? -10 : 0; },
+    promoteAdj(cx, k, p) { const n = nrm(p.name); if (n === KG && ip(cx, LT) && cx.me.deckN > 6) return cx.P.kgLead; return n === KG ? 8 : n === TF ? 10 : n === TP ? Math.min(30, cx.bench().length * 6) : n === LT ? -10 : 0; },
     want(cx, c) {
       const n = nrm(c.name);
       if (c.t === 'ene') { const t = etype(n); if (t === '雷') return eneCount(cx, '雷') === 0 ? 100 : eneCount(cx, '雷') === 1 ? 72 : 45; if (t === '炎') return eneCount(cx, '炎') < 3 ? 62 : 42;
@@ -152,7 +161,7 @@
       const np = needPiece(cx);
       switch (n) {
         case RQ: return have(cx, RQ) ? 55 : 100; case KG: return have(cx,KG)?45:110; case TF: return have(cx,RQ)+have(cx,KG)>0 && !have(cx, TF) ? 125 : 45; case TP: return have(cx, TP) ? 40 : 66;
-        case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case GG: return (cx.op ? cx.op.prizeN : 6) <= 4 ? 55 : 25; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx,LT)?15:needsPivot(cx)?150:46; case FZ: return 25;
+        case PC: return pcPlan(cx, 1) > 0 ? 70 : 20; case GG: return (cx.op ? cx.op.prizeN : 6) <= 4 ? 55 : 25; case HO: return have(cx, HO) ? 38 : 76; case MW: return cx.fl.sup ? 15 : have(cx, MW) ? 20 : 50; case LT: return have(cx,LT)?15:needsPivot(cx)?150:heavyFront(cx)?cx.P.ltAhead:46; case FZ: return 25;
         case 'シアノ': return cx.fl.sup ? 40 : 88; case 'ボスの指令': return 74 + (cx.gust() && cx.gust().ko ? 20 : 0); case 'アカマツ': return 58; case 'ジャッジマン': return 45;
         case 'エネルギーつけかえ': return 62; case 'ガラスのラッパ': return tera(cx) ? 60 : 30; case 'ぼうけんのランタン': return 50; case 'ゼロの大空洞': return tera(cx) ? 58 : 25;
         case 'スペシャルレッドカード': return 36; case 'ハイパーボール': return 44; case 'ヒーローマント': return 30;

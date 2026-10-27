@@ -1,33 +1,36 @@
-# ポケカエミュレータ ＋ Nのゾロアークex AI
+# ポケカエミュレータ ＋ CPU AI
 
-配布版 **7.0.1**：レックウザの停止・加速・入れ替え手順を修正しました。変更点は `docs/RAYQUAZA_7.0.1.md`、番号の基準は `docs/VERSIONING.md`。前世代の構築記録は `docs/AI_HANDOFF.md` に残しています。
-
-本体は添付の最新版 `index (2)(1).html` を使用しています。
+配布版 **7.0.2**（番号は `VERSION`）。変更点は `docs/CHANGELOG.md` を参照してください。
 
 ## CPUと対戦する
 
-フォルダを展開し、`index.html` を開きます。CPU戦で相手にNのゾロアークexデッキを選ぶと専用AIが動きます。`ai` フォルダは本体と同じ場所に置いてください。
+フォルダを展開し、`index.html` を開きます。`ai` フォルダは `index.html` と同じ場所に置いてください。CPU側のデッキに応じて専用AIが自動で選ばれます。
+
+| CPUのデッキ | AI |
+|---|---|
+| Nのゾロアークex | `ai/decks/ai_zoroark.js` |
+| ドラパルトex | `ai/decks/ai_dragapult.js` |
+| メガレックウザex | `ai/decks/ai_rayquaza.js` |
+| それ以外 | 従来CPU（`ai/legacy/`） |
 
 ## フォルダの役割
 
 | 場所 | 内容 |
 |---|---|
-| `index.html` | エミュレータ本体 |
-| `ai/` | 対戦中に読み込むAI。サブフォルダ別の説明は `ai/README.md` |
-| `debug/` | 1試合分の再現用記録とソース指紋 |
-| `sim/` | 開発用の自動対戦・テスト・学習ツール。CPU戦だけなら実行不要 |
-| `docs/` | ゾロアークAIの説明、従来のAI設計資料、Windows向け説明 |
+| `index.html` ほか直下のファイル | エミュレータ本体とアイコン類 |
+| `ai/` | 対戦中に読み込むAI。詳しくは `ai/README.md` |
+| `debug/` | 対戦の記録機能とソース指紋 |
+| `docs/` | 変更履歴、開発・検証の手引き、AIの設計資料。索引は `docs/README.md` |
+| `sim/` | 開発用の自動対戦・テスト・調整ツール。CPU戦だけなら不要。詳しくは `sim/README.md` |
 
 ## AIを検証する
 
-Node.jsで、このフォルダから実行します。追加パッケージのインストールは不要です。
+Node.jsで、このフォルダから実行します（追加パッケージ不要）。
 
 ```bash
 node sim/run.js test
-node sim/run.js eval 1000 40000
-node sim/run.js optimize --only zoroark --rounds 1 --gens 4 --pop 6 --games 20
+node sim/run.js help
 ```
 
-コマンド一覧は `node sim/run.js help`、詳しい使い方は `sim/README.md`、AIの対応範囲と検証結果は `docs/ZOROARK.md` を参照してください。
-
-CPU対戦の記録は、バトルログの「解析用ログを保存」から取得できます。次の試合開始時に前の記録が消えます。記録の復元とAI比較は `docs/MATCH_LOGS.md` を参照してください。
+使い方の詳細、相互強化の進め方、対戦記録の再現は `docs/DEVELOPMENT.md` にまとめています。
+CPU対戦の記録は、バトルログの「解析用ログを保存」から取得できます（次の試合を始めると前の記録は消えます）。

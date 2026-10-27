@@ -60,6 +60,16 @@ class Policy{
  if(!chain&&retreat)best+=45;
  best-=prize(active)*8;best+=(active.hp-active.dm)/100;return best;};
  return ks.slice().sort((a,b)=>score(b)-score(a))[0];}
+ // くさりもちの+40が、サイドを取り切るまでに倒す相手のきぜつ線になるか（なければ捨ててよい）
+ // 相手：場のポケモン＋相手のデッキタイプで分かっている主力（今後出てくる）。打点：ランページ250（借り元が残っていれば）＋アドレナブレイン＋手札のからておう
+ mochiNeed(){const line=values(this.b).filter(c=>c.name===Z||c.name===B).length+this.h.filter(c=>c.name===Z||c.name===B).length;if(!line)return 0;
+ const held=values(this.b).filter(c=>c.name===Z&&this.tool(c,'くさりもち')).length;if(held>=Math.min(2,line))return 0;
+ const avail=n=>this.n(n)||this.h.some(c=>c.name===n)||this.remaining(n)>0;if(!avail(P))return 0;   // どくにできなければ+40はのらない
+ const base=avail(E)?250:avail(R)?170:0;if(!base)return 0;const adrena=this.n(M)?30:0,karate=this.hand('からておうの稽古')?40:0;
+ const FUT={rayquaza:[['ファイアローex',280],['メガレックウザex',280],['メガガルーラex',300]],dragapult:[['ドラパルトex',320]]}[this.v.oppType]||[];
+ const ts=values(this.ob).map(t=>({name:t.name,rem:t.hp-t.dm,ex:/ex$/.test(t.name)})).concat(FUT.map(([name,hp])=>({name,rem:hp,ex:true})));
+ let need=0;for(const t of ts){const d0=base+adrena+(t.ex?karate:0);if(t.rem>d0&&t.rem<=d0+40)need=Math.max(need,prize({name:t.name}));}
+ return need?60+40*need:0;}
  needDraw(){return !this.h.some(c=>['リーリエの決心','シアノ','ジャッジマン'].includes(c.name));}
  want(c,extra=[]){const n=c.name, count=x=>this.n(x)+extra.filter(y=>y.name===x).length, line=this.countLine()+extra.filter(y=>[Z,B].includes(y.name)).length;
  if(n===B&&!this.canBench(c))return -30;
@@ -90,6 +100,7 @@ class Policy{
  if(dark(c)){const trash=this.s.trash.filter(dark).length;if(!trash&&this.hand('Nのポイントアップ')&&values(this.b).some(x=>x.name===B||x.name===Z))val=-60;else if(!this.v.fl.eat&&same===1)val+=65;}
  if(c.t==='sta'&&same===1&&this.stadiumKeep?.has(c.u))val+=180;
  if(c.name==='リーリエの決心'&&same===1)val+=35;
+ if(c.name==='くさりもち'&&same===1)val+=this.mochiNeed();
  if(c.name==='ボスの指令'){
  const otherBoss=this.remaining('ボスの指令')+Math.max(0,same-1);
  val+=same===1?(otherBoss===0?140:75):15;
@@ -197,6 +208,8 @@ class Policy{
  const active=this.b.battle;if(active?.na===v.turn&&lg.retreat&&lg.abil.some(a=>a.n==='しはいのくさり')){const pivot=lg.retreat.ks.find(k=>this.meta(this.b[k]).type==='悪'&&this.b[k].name!==P);if(pivot)add({t:'retreat'},780,'ランページの使用制限を解除',{pivot});}
  if(active?.name!=='シャリタツ'&&this.needDraw()&&lg.sup&&lg.retreat?.cost===0){const pivot=lg.retreat.ks.find(k=>this.b[k].name==='シャリタツ');if(pivot&&!best?.ko)add({t:'retreat'},720,'シャリタツで展開を補う',{pivot});}
  enact(best,best?.ko?855:180);
+ // リーリエの決心は手札を山札に戻す。先に場へ出せるポケモン・手張り・どうぐは使ってから引き直す
+ const lil=actions.filter(x=>x.a.t==='play'&&this.h.find(c=>c.u===x.a.u&&base(c.name)==='リーリエの決心'));if(lil.length){const ls=Math.max(...lil.map(x=>x.s));for(const x of actions)if(x.a.t==='play'&&x.a.k&&x.s<ls&&x.s>600)x.s=ls+1;}
  actions.sort((a,b)=>b.s-a.s);const chosen=actions.find(x=>!this.seen.has(key+'|'+JSON.stringify(x.a)));
  if(!chosen)return{t:'end'};this.seen.add(key+'|'+JSON.stringify(chosen.a));if(this.seen.size>3000)this.seen=new Set([...this.seen].slice(-1000));if(chosen.a.t==='play'&&this.h.find(c=>c.u===chosen.a.u)?.t==='sup')this.knownAbsent=null;this.plan=chosen.plan||null;this.last=chosen;this.trace.push({turn:v.turn,action:chosen.a,reason:chosen.why});if(this.trace.length>200)this.trace.shift();return chosen.a;
  }

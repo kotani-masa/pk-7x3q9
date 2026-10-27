@@ -1,93 +1,101 @@
 {
   "schema": 1,
-  "release": "7.0.1",
-  "previousRelease": "7.0.0",
-  "legacyPreviousLabel": "v7",
+  "release": "7.0.2",
+  "previousRelease": "7.0.1",
   "versionFile": "VERSION",
-  "versionPolicy": "docs/VERSIONING.md",
-  "changeType": "patch: fixes to existing Rayquaza policy; no new deck or incompatible log format",
-  "sourceNotes": "docs/RAYQUAZA_7.0.1.md",
-  "previousDevelopmentRecord": [
-    "docs/AI_HANDOFF.md",
-    "docs/ai_handoff_7.0.0.json"
+  "versionPolicy": "docs/DEVELOPMENT.md#3-バージョン",
+  "changeType": "patch: policy fixes for Rayquaza, next-generation Zoroark fixes, benchmark loads frozen v6 Zoroark explicitly, repository cleanup",
+  "notes": "docs/CHANGELOG.md (7.0.2)",
+  "history": "Earlier handoff files (AI_HANDOFF.md, RAYQUAZA_7.0.1.md, ai_handoff_7.0.0.json) were merged into docs/CHANGELOG.md; originals are in GitHub commit 69c56c1.",
+  "changedFiles": [
+    "ai/decks/ai_rayquaza.js",
+    "ai/decks/ai_zoroark.js",
+    "sim/lib/headless.js (aiOverride)",
+    "sim/cli/rivals.js (always uses frozen v6 Zoroark)",
+    "sim/tests/test_rivals.js",
+    "sim/tests/test_zoroark.js",
+    "sim/cli/showlog.js"
   ],
-  "changedPolicy": "ai/decks/ai_rayquaza.js",
   "unchanged": [
     "index.html",
-    "ai/decks/ai_zoroark.js",
+    "ai/core/ai_core.js",
     "ai/decks/ai_dragapult.js",
-    "ai/params/params_rayquaza.js",
-    "ai/params/params_dragapult.js",
+    "ai/params/*",
     "decklists"
   ],
   "teacherLogs": [
     {
-      "name": "match-mvqydt1t-2.pokeca.json",
+      "name": "match-mvqtsgul-1 / match-mvquu2rf-3",
+      "cpu": "zoroark",
+      "manual": "dragapult (user's Dusknoir build, differs from sim/decks/dragapult.json)",
+      "use": "Boss+Phantom Dive on Pecharunt, Cursed Bomb on Zekrom/Munkidori"
+    },
+    {
+      "name": "match-mvqu6koo-2 / match-mvqydt1t-2",
       "cpu": "zoroark",
       "manual": "rayquaza",
-      "use": "Ho-Oh/Akamatsu/transfer 300 damage route and final gust target"
+      "use": "Talonflame early, Storm Emerald at 6 energy (300) for one-hit KOs; Zoroark trade discarded Mochi needed for 290 KO; Pokepad Zorua shuffled away by Lillie"
     },
     {
-      "name": "match-mvqxzisd-3.pokeca.json",
+      "name": "match-mvqxzisd-3 / match-mvqxubyt-2",
       "cpu": "rayquaza",
       "manual": "zoroark",
-      "use": "stranded active and missed three-card Hyper Ball"
-    },
-    {
-      "name": "match-mvqxubyt-2.pokeca.json",
-      "cpu": "rayquaza",
-      "manual": "zoroark",
-      "use": "split attachments leave Mega unable to attack before giving up three prizes"
+      "use": "stranded active, no Latias, unused Kangaskhan draw"
     }
   ],
-  "changes": [
-    "Prioritize a Latias pivot when the active blocks a ready attacker.",
-    "Allow Hyper Ball with exactly two discardable cards.",
-    "Avoid redundant Terapagos and premature stadium use.",
-    "Value Talonflame search while retreating.",
-    "Reserve and sequence Ho-Oh acceleration, Akamatsu, manual energy, and transfer.",
-    "Pick distinct Akamatsu energy names from the complete legal pool.",
-    "Delay a premature Boss that would consume the supporter needed for a larger knockout.",
-    "Avoid exposing a nonlethal Mega to a knockout while Talonflame can keep attacking.",
-    "Evaluate incoming damage as if the promoted candidate were active, not still on the bench."
-  ],
-  "evaluation": {
-    "baseline": "sim/baselines/7.0.0/ai",
-    "opponent": "unchanged v6 Zoroark",
-    "file": "sim/results/rayquaza_7.0.1_final.json",
-    "seedRange": [
-      2300000,
-      2300999
+  "changes": {
+    "rayquaza": [
+      "Retreat into Mega Kangaskhan to draw 2 when nothing can attack and retreat is free (kgPivot); promote it first when Latias is in play (kgLead).",
+      "Value Latias before the bench attacker is ready when the active is a heavy non-attacker (ltAhead).",
+      "Use Judge when the active is stranded and no Latias/Hyper Ball/Cyano route exists (judgeStuck)."
     ],
-    "gamesPerVersion": 1000,
-    "search": false,
-    "summary": {
-      "baselineWins": 127,
-      "currentWins": 157,
-      "nPerVersion": 1000,
-      "paired": {
-        "gained": 89,
-        "lost": 59,
-        "p": 0.016841422756845137
-      },
-      "errors": 0,
-      "unfinished": 0
-    }
+    "zoroark": [
+      "Keep Mochi only when +40 is the knockout line for a planned target (board or known incoming attacker of the opponent deck type); otherwise it may be a Trade cost (mochiNeed).",
+      "Play the cards already planned this turn (bench, energy, tool) before Lillie's Determination shuffles the hand."
+    ],
+    "rejected": [
+      "Not benching extra Meowth ex; gating Cyano by missing roles (no measurable gain in 2,000 games)."
+    ]
   },
-  "tests": "node sim/run.js test",
-  "reproduce": "node sim/cli/eval_rayquaza_patch.js 1000 2300000 rayquaza_7.0.1_final.json",
-  "build": "762d0d37d23bda19",
-  "limits": [
-    "Regression cases reconstruct a single decision branch, not a whole human match.",
-    "A fixed-opponent benchmark does not establish human-level or general deck strength.",
-    "Resource and opponent-response evaluations remain heuristic."
+  "evaluation": {
+    "search": false,
+    "seatsAlternate": true,
+    "maxTurn": 80,
+    "rayquazaVsFrozenV6": {
+      "seedRange": [
+        4000000,
+        4003999
+      ],
+      "gamesPerVersion": 4000,
+      "winRate7_0_1": 0.174,
+      "winRate7_0_2": 0.217,
+      "pairedDiff95": "+4.3pt ±1.0pt"
+    },
+    "zoroarkGeneration": {
+      "seedRange": [
+        3100000,
+        3101999
+      ],
+      "gamesPerOpponent": 2000,
+      "opponentWinRate": {
+        "rayquaza": [
+          0.221,
+          0.208
+        ],
+        "dragapult": [
+          0.301,
+          0.291
+        ]
+      },
+      "note": "[vs v6 Zoroark, vs 7.0.2 Zoroark]; ~1pt improvement, not conclusive"
+    },
+    "errors": 0,
+    "file": "sim/results/summary.json"
+  },
+  "nextSteps": [
+    "Dragapult remains near 30% vs Zoroark; the user's actual Dragapult list (Dusknoir/Rare Candy) is not the sim list — consider adding it as an evaluation deck.",
+    "Rayquaza losses still come from energy starvation and giving up 3-prize Megas; prize-aware exposure is the next target.",
+    "Next generation: freeze the 7.0.2 opponents and improve Zoroark against them; keep v6 as an anchor."
   ],
-  "validation": {
-    "testSuite": "passed",
-    "regressionEngineCases": 2,
-    "restoredUploadedBranches": 3,
-    "informationCalls": 112348,
-    "deckOrderLeaks": 0,
-    "hiddenStateInvariancePassed": 22
-  }
+  "tests": "node sim/run.js test; node sim/run.js verify-info; node sim/run.js verify-hidden"
 }
