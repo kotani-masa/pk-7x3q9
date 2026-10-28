@@ -320,7 +320,7 @@
 
   /* ---------- 選択プロンプト（山札サーチ・対象選択など） ---------- */
   const PKR = [[/トラッシュする手札を2枚/, 'discard2'], [/山札からポケモンを1枚選択/, 'searchPoke'], [/「ポケモンex」を3枚/, 'cyano'], [/タイプの異なる/, 'akaPair'], [/手札に加える1枚を選ぶ（残りを/, 'akaKeep'],
-    [/山札から2枚選ぶ/, 'cipher'], [/山札の上4枚/, 'top4Ene'], [/山札からサポートを1枚/, 'searchSup'], [/好きなカードを2枚/, 'any2'], [/手札の基本炎エネルギー/, 'handFire'], [/山札から基本エネルギーを2枚まで/, 'lantern'],
+    [/山札から2枚選ぶ/, 'cipher'], [/山札の上4枚/, 'top4Ene'], [/山札からサポートを1枚/, 'searchSup'], [/好きなカードを2枚/, 'any2'], [/手札の基本炎エネルギー/, 'handFire'], [/山札から基本(?:雷|炎)エネルギーを1枚/, 'lantern'], [/山札から基本エネルギーを2枚まで/, 'lantern'],
     [/山札の上2枚/, 'top2'], [/ヨマワルを3枚まで/, 'revive'], [/HP70以下/, 'poffin'], [/ルールを持つポケモンを除く/, 'pad'], [/進化させる2進化/, 'candyEvo'], [/トラッシュからポケモンまたは基本エネルギー/, 'tanka'],
     [/山札から「(たね|1進化|2進化)ポケモン」/, 'hikari'], [/山札から進化ポケモン/, 'toukoEvo'], [/山札からエネルギーを1枚/, 'toukoEne'], [/トラッシュするエネルギーを1個選ぶ/, 'hammerEne'], [/トラッシュから基本エネルギーを2枚まで/, 'mayEne'],
     [/トラッシュするエネルギーを選択（/, 'retreatPay'], [/基本エネルギーを1個選択/, 'moveEne'], [/トラッシュから基本エネルギーを1枚選択/, 'trumpetEne'], [/山札にもどすエネルギー/, 'ret3'], [/手札にもどすエネルギー/, 'ret1']];
@@ -340,7 +340,7 @@
     top4Ene: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),
     searchSup: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),
     any2: (cx, q) => topBy(pool(q), c => st_want(cx, c), 2).map(c => c.u),
-    lantern: (cx, q) => topBy(pool(q), c => st_want(cx, c), 2).map(c => c.u),
+    lantern: (cx, q) => topBy(pool(q), c => st_want(cx, c), q.n).map(c => c.u),
     tanka: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),
     retreatPay: (cx, q) => { const need = cx.lg && cx.lg.retreat ? cx.lg.retreat.cost : 1; const s = topBy(pool(q), c => -st_want(cx, c), 9), o = []; let u = 0; for (const c of s) { if (u >= need) break; o.push(c.u); u += /^ネオ/.test(c.name) ? 1 : 1; } return o; },
     trumpetEne: (cx, q) => topBy(pool(q), c => st_want(cx, c), 1).map(c => c.u),

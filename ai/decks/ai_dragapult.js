@@ -108,7 +108,7 @@
       const n = nrm(c.name), P = cx.P, hs = cx.hand.length - 1, me = cx.me, op = cx.op, nd = need(cx), nb = cx.bench().length;
       switch (n) {
         case 'なかよしポフィン': { const r = Math.min(2, cx.lg.room); const ex = ['ドラメシヤ', 'ヨマワル', 'ノコッチ'].reduce((s, x) => s + cx.expDeck(x), 0); return r && nb < P.benchCap && ex >= 0.5 ? P.sPoffin - 6 * nb : 0; }
-        case 'ハイパーボール': return hs >= 3 ? P.sHyper * (0.4 + 0.6 * nd) - (hs <= 3 ? 15 : 0) : 0;
+        case 'ハイパーボール': return hs >= 2 ? P.sHyper * (0.4 + 0.6 * nd) - (hs <= 3 ? 15 : 0) : 0;
         case 'ポケパッド': return me.deckN > 3 ? P.sPad * (0.4 + 0.6 * nd) : 0;
         case 'ふしぎなアメ': { if (cx.T <= 2) return 0; const dp = ih(cx, DP) && cx.keys().some(k => nrm(cx.myB[k].name) === DR && cx.myB[k].pt !== cx.T && cx.myB[k].ev !== cx.T);
           const yn = ih(cx, YN) && cx.keys().some(k => nrm(cx.myB[k].name) === YM && cx.myB[k].pt !== cx.T && cx.myB[k].ev !== cx.T); return dp ? P.sCandy : yn ? 60 : 0; }
@@ -152,8 +152,8 @@
         if (/^ネオ/.test(n)) return 40; return 50 + (cntT(t) < (t === '炎' ? cntT('超') : cntT('炎')) ? 15 : 0) - Math.min(20, cx.eneHand.length * 6); }
       const nd = need(cx);
       switch (n) {
-        case DP: return (ip(cx, DK) || ip(cx, DR) || ih(cx, 'ふしぎなアメ')) && !ih(cx, DP) ? 100 : 55 - ih(cx, DP) * 40;
-        case DK: return ip(cx, DR) && !ih(cx, DK) && !ip(cx, DK) ? 92 : 40 - ih(cx, DK) * 20;
+        case DP: return !ih(cx,DP)&&(ip(cx,DK)||ip(cx,DR)&&ih(cx,'ふしぎなアメ'))?120:ip(cx,DR)&&!ip(cx,DK)&&!ih(cx,DK)?60:55-ih(cx,DP)*40;
+        case DK: return ip(cx,DR)&&!ih(cx,DK)?115:40-ih(cx,DK)*20;
         case DR: return have(cx, DR) + ip(cx, DK) + ip(cx, DP) < 2 ? 85 : 25;
         case YM: return have(cx, YM) + ip(cx, SM) + ip(cx, YN) < 2 ? 55 : 18;
         case SM: return ip(cx, YM) && !ih(cx, SM) ? 45 : 15; case YN: return (ip(cx, SM) || ih(cx, 'ふしぎなアメ')) && !ih(cx, YN) ? 55 : 18;
