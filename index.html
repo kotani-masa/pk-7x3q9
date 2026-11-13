@@ -896,7 +896,7 @@ const regOf=c=>{if(!c)return'';const k=nk(String(c.name).replace(/\(ACE SPEC\)$/
 const KSTA=['戒めの祠','サンダーマウンテンプリズムスター','サンダーマウンテン プリズムスター','ゼロの大空洞','ジャミングタワー','危ない廃墟','活力の森','伝説の溶岩洞','ロケット団の監視塔','Nの城','シンオウ神殿','サイレントラボ','パラレルシティ','ポケストップ','崩れたスタジアム','テーブルシティ','結晶の洞窟','頂への雪道','ロストシティ','みずの塔','ボウルタウン'],TG={pke:'ポケモン',tr:'グッズ',sup:'サポート',sta:'スタジアム',tool:'どうぐ',ene:'エネルギー'};
 function unimpl(c){const n=c.name.replace(/\(ACE SPEC\)$/,'');
  if(c.t==='pke')return!mi(c);if(c.t==='tr'||c.t==='sup')return!(FX[c.name]||FX[n]);if(c.t==='sta')return!KSTA.includes(n);
- if(c.t==='tool')return!(/^ヒーローマント/.test(c.name)||['くさりもち','かるいし','森の封印石','ちからのハチマキ','こだわりハチマキ','エスケープボード','勇気のおまもり','こだわりベルト','災いの箱','のろいのおふだ','リベンジパンチ','ふうせん','ゴージャスマント'].includes(n)||/^ワザマシン\s*エヴォリューション/.test(n));if(c.t==='ene')return!(/^基本(.|フェアリー)エネルギー/.test(c.name)||/^ネオアッパー/.test(c.name)||/^ダブルドラゴンエネルギー/.test(c.name)||/^ユニットエネルギー雷超鋼/.test(c.name)||/^(テレパス超|カウンター|キャプチャー|ビースト|ダブル無色)エネルギー/.test(c.name)||/^ユニットエネルギー闘悪/.test(c.name)||/^(いちげき|れんげき|ダブルターボ|フュージョン|リバーサル|ジェット|ギフト|Vガード)エネルギー/.test(c.name));return false}
+ if(c.t==='tool')return!(/^ヒーローマント/.test(c.name)||['くさりもち','かるいし','森の封印石','ちからのハチマキ','こだわりハチマキ','エスケープボード','勇気のおまもり','こだわりベルト','災いの箱','のろいのおふだ','リベンジパンチ','ふうせん','ゴージャスマント','ねがいのバトン'].includes(n)||/^ワザマシン\s*エヴォリューション/.test(n));if(c.t==='ene')return!(/^基本(.|フェアリー)エネルギー/.test(c.name)||/^ネオアッパー/.test(c.name)||/^ダブルドラゴンエネルギー/.test(c.name)||/^ユニットエネルギー雷超鋼/.test(c.name)||/^(テレパス超|カウンター|キャプチャー|ビースト|ダブル無色)エネルギー/.test(c.name)||/^ユニットエネルギー闘悪/.test(c.name)||/^(いちげき|れんげき|ダブルターボ|フュージョン|リバーサル|ジェット|ギフト|Vガード)エネルギー/.test(c.name));return false}
 function showMissing(who=[0,1]){const L=[];who.forEach(i=>{const p=P[i];if(!p||!p.cards.length)return;const m=p.cards.filter(unimpl);
   if(m.length)L.push(`【P${i+1}】\n`+m.map(c=>`・${c.name.replace(/\s+/g,' ')} ×${c.n}（${TG[c.t]||c.t}）`).join('\n'))});
  return new Promise(res=>{if(!L.length)return res();menu(null,[['閉じる（対戦に戻る）',()=>res()]],`性能・効果のデータがないカードが含まれています。\n\n${L.join('\n\n')}\n\nこれらは自動では処理されません（手動で処理してください）。`,1)})}
@@ -2155,6 +2155,18 @@ Object.assign(FX,{
 CAT['クロススイッチャー']='フュージョン';
 Object.assign(REG,{'パオジアンex':'H','セビエ#0':'G','セビエ#1':'G','セグレイブ':'G','ビッパ':'F','ビーダル':'F','キャンセルコロン':'F','クロススイッチャー':'E'});
 Object.assign(CARDREG,{'43235':'G','43231':'G','43232':'G','43234':'G','42382':'F','40984':'F','41249':'F','40052':'E'});
+/* ===== 調整用：カイオーガ（M6a）・セビエ／セゴール／セグレイブ（sv4a）・ねがいのバトン（SM8b）。効果文はカード画像から ===== */
+VARS['セビエ'].push('HP70｜もってくる／たたく');Object.assign(VDEF,{'45019':2});
+mon('セビエ#2',{hp:70,type:'水',rc:2,weak:'鋼',at:[{n:'もってくる',dt:'',cost:['水'],run:async x=>{draw1(x.p);x.msg.push('山札を1枚引いた')}},{n:'たたく',dt:'20',cost:[...'水無'],run:async x=>{hit(x,'battle',20)}}]});
+mon('セゴール',{hp:90,type:'水',rc:2,weak:'鋼',st:'1進化',at:[{n:'するどいひれ',dt:'40',cost:[...'水無'],run:async x=>{hit(x,'battle',40)}},{n:'フロストスマッシュ',dt:'80',cost:[...'水水無'],run:async x=>{hit(x,'battle',80)}}]});
+mon('カイオーガ',{hp:140,type:'水',rc:4,weak:'雷',at:[{n:'ハイドロポンプ',dt:'60＋',cost:[...'無無無無'],run:async x=>{const pl=x.p.piles.battle,top=lastOf(pl),n=ens(pl).filter(y=>unitsOf(y,top).some(u=>u==='*'||String(u).includes('水'))).length;if(n)x.msg.push(`水エネルギー${n}個`);hit(x,'battle',60+30*n)}}]});
+Object.assign(REG,{'カイオーガ':'J','セビエ#2':'G','セゴール':'G','ねがいのバトン':'A'});
+Object.assign(CARDREG,{'50625':'J','45019':'G','45020':'G','45021':'G','35585':'A'});
+/* ねがいのバトン：バトル場で相手のワザのダメージを受けてきぜつしたとき、基本エネルギーを3枚まで自分のベンチポケモン1匹につけ替える（トラッシュに置く前に処理） */
+async function wishBaton(q,i,pl){const es=ens(pl).filter(y=>/^基本/.test(y.name)),bk=OWN(q).filter(z=>z!=='battle');if(!es.length||!bk.length)return;
+ const w0=PKW;PKW=i;let s;try{s=es.length?await pk('ねがいのバトン：つけ替える基本エネルギーを3枚まで選ぶ',es,Math.min(3,es.length),0):null}finally{PKW=w0}if(!s||!s.length)return;
+ const k=await ask(null,bk,q,'ねがいのバトン：エネルギーをつけるベンチポケモンを選択',1,undefined,i);if(!k)return;
+ act(()=>{s.forEach(y=>{const j=pl.indexOf(y);if(j>=0)pl.splice(j,1);const d=q.piles[k];d.splice(d.length-1,0,y)})});log(`ねがいのバトン：基本エネルギー${s.length}枚を${lastOf(q.piles[k]).name}につけ替えた`)}
 /* ---- 効果でエネルギーをつける：手札をどけて、つけるエネルギーを手札の位置に並べ、盤面のポケモンへドラッグしてつける ----
    ks＝つけられる場所（配列、または (カード,これまでの組)=>配列）。o.min＝最低何枚つけるか、o.distinct＝1匹に1枚まで、o.same＝全部同じポケモンに */
 let ATT=null,ATTBACK=0;
@@ -2196,7 +2208,7 @@ function judge(){if(G.over||G.defer)return 0;const a=winCond(0),b=winCond(1);if(
  const t=G.win<0?'両者が同時に勝利条件を満たしたため、両者敗北（引き分け）':`P${G.win+1}の勝利！（${(G.win?b:a).join('・')}）`;log(t);banner(G.win<0?'両者敗北（引き分け）':`P${G.win+1}の勝利！`);queueResult();return 1}
 async function doKO(i,k,np){const q=P[i],t=lastOf(q.piles[k]);if(!t)return;const m=P[1-i];let n=prize(t)+(k==='battle'&&G.akw===i&&!t.ko&&G.altg&&G.altg[1-i]===2?1:0);if(k==='battle'&&kissOn(m)){const h=await coin();if(h)n++;log(`ワンダーキッス：${h?'オモテ。サイドを1枚多くとる':'ウラ'}`)}
   const atkd=G.akw===i&&!t.ko,curse=atkd&&hasTool(q.piles[k],'のろいのおふだ')&&(mi(t)||{}).type==='超',revp=atkd&&hasTool(q.piles[k],'リベンジパンチ'),atkr=lastOf(m.piles.battle);if(atkd){q.akoT=G.turn;if(hasTool(q.piles[k],'ゴージャスマント')&&!isRule(t))n++}if(t.noPz&&t.noPz===G.turn){n=0;log('コープスリバイバー：サイドはとれない')}
-  const gift=G.akw===i&&!t.ko&&hasE(q.piles[k],/^ギフトエネルギー/);act(()=>{const pl=q.piles[k].splice(0);pl.forEach(y=>{y.ko=0});if(stadName()==='ロストシティ')pl.forEach(y=>{if(y.t==='pke'){y.dm=0;(q.lost=q.lost||[]).push(y)}else q.trash.push(y)});else q.trash.push(...pl);q.koTurn=G.turn});
+  const gift=G.akw===i&&!t.ko&&hasE(q.piles[k],/^ギフトエネルギー/);if(atkd&&k==='battle'&&hasTool(q.piles[k],'ねがいのバトン'))await wishBaton(q,i,q.piles[k]);act(()=>{const pl=q.piles[k].splice(0);pl.forEach(y=>{y.ko=0});if(stadName()==='ロストシティ')pl.forEach(y=>{if(y.t==='pke'){y.dm=0;(q.lost=q.lost||[]).push(y)}else q.trash.push(y)});else q.trash.push(...pl);q.koTurn=G.turn});
   {const got=await pickSide(1-i,Math.min(n,m.side.length));act(()=>{got.forEach(y=>{const j=m.side.indexOf(y);if(j>=0)m.side.splice(j,1);y.up=0;m.hand.push(y)});if(gift)drawTo(q,7)})}if(gift)log(`ギフトエネルギー：P${i+1}は手札が7枚になるように引いた`);
   log(`${t.name}がきぜつ。P${2-i}がサイドを${n}枚とりました（残り${m.side.length}枚）`);
   if(revp&&atkr&&OWN(m).some(z=>lastOf(m.piles[z])===atkr)){atkr.dm=(atkr.dm||0)+40;log(`リベンジパンチ：${atkr.name}にダメカン4個`)}
@@ -3040,7 +3052,9 @@ const handSort=(p,cs)=>cs.slice().sort(cardCmp);
 const POOL=[{id:'42722',name:'ジャッジマン',t:'sup',img:'https://www.pokemon-card.com/assets/images/card_images/large/SVAM/042722_T_JIXYAJJIMAN.jpg'},
  {id:'pool:ヒカリ',name:'ヒカリ',t:'sup'},{id:'pool:トウコ',name:'トウコ',t:'sup'},{id:'pool:ふしぎなアメ',name:'ふしぎなアメ',t:'tr'},
  {id:'pool:ヨノワール',name:'ヨノワール',t:'pke'},{id:'pool:サマヨール',name:'サマヨール',t:'pke'},{id:'pool:ヨマワル',name:'ヨマワル',t:'pke'},{id:'pool:ジャミングタワー',name:'ジャミングタワー',t:'sta'},
- {id:'35194',name:'ゼラオラGX',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM7a/035194_P_ZERAORAGX.jpg',full:'ゼラオラGX(SM7a 033/060)'},{id:'35329',name:'ライコウ',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM8/035329_P_RAIKOU.jpg',full:'ライコウ(SM8 037/095)'},{id:'35375',name:'ロストミキサー',t:'tr',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM8/035375_T_ROSUTOMIKISA.jpg',full:'ロストミキサー'}];
+ {id:'35194',name:'ゼラオラGX',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM7a/035194_P_ZERAORAGX.jpg',full:'ゼラオラGX(SM7a 033/060)'},{id:'35329',name:'ライコウ',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM8/035329_P_RAIKOU.jpg',full:'ライコウ(SM8 037/095)'},{id:'35375',name:'ロストミキサー',t:'tr',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM8/035375_T_ROSUTOMIKISA.jpg',full:'ロストミキサー'},
+ {id:'50625',name:'カイオーガ',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/M6a/050625_P_KAIOGA.jpg',full:'カイオーガ(M6a 013/103)'},{id:'35585',name:'ねがいのバトン',t:'tool',img:'https://www.pokemon-card.com/assets/images/card_images/large/SM8b/035585_T_NEGAINOBATON.jpg',full:'ねがいのバトン'},
+ {id:'45019',name:'セビエ',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SV4a/045019_P_SEBIE.jpg',full:'セビエ(SV4a 233/190)'},{id:'45020',name:'セゴール',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SV4a/045020_P_SEGORU.jpg',full:'セゴール(SV4a 234/190)'},{id:'45021',name:'セグレイブ',t:'pke',img:'https://www.pokemon-card.com/assets/images/card_images/large/SV4a/045021_P_SEGUREIBU.jpg',full:'セグレイブ(SV4a 235/190)'}];
 let ED=null;
 /* 調整用カードなど、画像・IDが入っていないカードを、保存済みデッキ（内蔵＋端末に保存したもの）の同名カードから補完する */
 const noData=c=>!c.img||/^pool:/.test(c.id);
